@@ -23,6 +23,9 @@
 *.d
 *.o
 *.spv
+*.blend
+*.exr
+*.tres
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
