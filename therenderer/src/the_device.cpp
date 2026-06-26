@@ -1,4 +1,4 @@
-#include "../include/the_device.hpp"
+#include "../headers/the_device.hpp"
 
 // std headers
 #include <cstring>
@@ -75,9 +75,9 @@ void TheDevice::createInstance() {
 
   VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-  appInfo.pApplicationName = "LittleVulkanEngine App";
+  appInfo.pApplicationName = "thengine app";
   appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-  appInfo.pEngineName = "No Engine";
+  appInfo.pEngineName = "thengine";
   appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
   appInfo.apiVersion = VK_API_VERSION_1_4;
 
@@ -105,7 +105,7 @@ void TheDevice::createInstance() {
     throw std::runtime_error("failed to create instance!");
   }
 
-  hasGflwRequiredInstanceExtensions();
+  hasSDLRequiredInstanceExtensions();
 }
 
 //MSAA max sample count, limited to 8 samples
@@ -299,12 +299,13 @@ bool TheDevice::checkValidationLayerSupport() {
   return true;
 }
 
+//TODO: Move towards SDL
 std::vector<const char *> TheDevice::getRequiredExtensions() {
-  uint32_t glfwExtensionCount = 0;
-  const char **glfwExtensions;
-  glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+  uint32_t sdlExtensionCount = 0;
+  const char *const *sdlExtensions;
+  sdlExtensions = SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
 
-  std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+  std::vector<const char *> extensions(sdlExtensions, sdlExtensions + sdlExtensionCount);
 
   if (enableValidationLayers) {
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
@@ -313,7 +314,7 @@ std::vector<const char *> TheDevice::getRequiredExtensions() {
   return extensions;
 }
 
-void TheDevice::hasGflwRequiredInstanceExtensions() {
+void TheDevice::hasSDLRequiredInstanceExtensions() {
   uint32_t extensionCount = 0;
   vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
   std::vector<VkExtensionProperties> extensions(extensionCount);
@@ -331,7 +332,7 @@ void TheDevice::hasGflwRequiredInstanceExtensions() {
   for (const auto &required : requiredExtensions) {
     std::cout << "\t" << required << std::endl;
     if (available.find(required) == available.end()) {
-      throw std::runtime_error("Missing required glfw extension");
+      throw std::runtime_error("Missing required SDL3 extension");
     }
   }
 }

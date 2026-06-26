@@ -54,11 +54,11 @@ namespace the
       void createSyncObjects();
       void createSwapChain();
  
-      std::pair<uint32_t, VkImage&> createDepthImage();
-      std::pair<uint32_t, VkImage&> createColorImage();
-      std::pair<uint32_t, VkFramebuffer&> createFrameBuffer();
-      std::pair<uint32_t, VkRenderPass&> createRenderPass();
-      std::pair<uint32_t, VkImageView&> createImageView(bool depth);
+      uint32_t createDepthImage();
+      uint32_t createColorImage();
+      uint32_t createFrameBuffer();
+      uint32_t createRenderPass();
+      uint32_t createImageView(bool depth);
 
       VkFormat swapChainImageFormat;
       VkFormat swapChainDepthFormat;

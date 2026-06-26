@@ -1,8 +1,6 @@
 #pragma once
 
-//#include "the_window.hpp"
-
-#include <vulkan/vulkan.h>
+#include "the_window.hpp"
 
 // std lib headers
 #include <string>
@@ -103,7 +101,7 @@ class TheDevice {
   bool checkValidationLayerSupport();
   QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
   void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
-  void hasGflwRequiredInstanceExtensions();
+  void hasSDLRequiredInstanceExtensions();
   bool checkDeviceExtensionSupport(VkPhysicalDevice device);
   SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 
