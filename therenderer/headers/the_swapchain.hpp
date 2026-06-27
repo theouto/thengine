@@ -21,6 +21,18 @@ namespace the
       TheSwapChain(const TheSwapChain &) = delete;
       TheSwapChain &operator=(const TheSwapChain&) = delete;
 
+      /*
+      I will create the resources as needed and then simply return the index of that resource, which will then
+      be used to retreive the related resources as needed. Still not sure as to whether or not I want to do it
+      this way or if I want to return a pair with the index and the resource.
+      */
+
+      uint32_t createDepthImage();
+      uint32_t createColorImage();
+      uint32_t createFrameBuffer();
+      uint32_t createRenderPass();
+      uint32_t createImageView();
+
       uint32_t width() { return swapChainExtent.width; }
       uint32_t height() { return swapChainExtent.height; }
 
@@ -53,12 +65,6 @@ namespace the
       void init();
       void createSyncObjects();
       void createSwapChain();
- 
-      uint32_t createDepthImage();
-      uint32_t createColorImage();
-      uint32_t createFrameBuffer();
-      uint32_t createRenderPass();
-      uint32_t createImageView(bool depth);
 
       VkFormat swapChainImageFormat;
       VkFormat swapChainDepthFormat;
