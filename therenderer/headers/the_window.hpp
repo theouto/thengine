@@ -18,6 +18,7 @@ namespace the
       VkExtent2D getExtent() {return {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};}
       SDL_Window* getSDLWindow() const {return window;}
       void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
+      bool eventWatcher();
 
     private:
       void initWindow();
