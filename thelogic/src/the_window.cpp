@@ -1,7 +1,10 @@
 #include "../headers/the_window.hpp"
+
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_video.h>
 #include <SDL3_image/SDL_image.h>
+
+#include "../../thirdparty/imgui/imgui_impl_sdl3.cpp"
 
 #include <stdexcept>
 
@@ -24,6 +27,7 @@ namespace the
 	  window = SDL_CreateWindow(windowName.c_str(), width, height, 
                                 SDL_WINDOW_RESIZABLE | SDL_WINDOW_VULKAN);
 
+      //make the path nice
       SDL_Surface* image = IMG_Load("textures/NEEERDDDD.png");
 	  SDL_SetWindowIcon(window, image);
 	}
@@ -49,6 +53,8 @@ namespace the
         {
 		  return false;
         }
+
+        ImGui_ImplSDL3_ProcessEvent(&event);
       }
       return true;
     }

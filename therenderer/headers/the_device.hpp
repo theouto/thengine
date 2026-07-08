@@ -1,6 +1,6 @@
 #pragma once
 
-#include "the_window.hpp"
+#include "../../thelogic/headers/the_window.hpp"
 
 // std lib headers
 #include <string>

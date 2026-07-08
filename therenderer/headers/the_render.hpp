@@ -3,7 +3,6 @@
 #include "the_camera.hpp"
 #include "the_device.hpp"
 #include "the_swapchain.hpp"
-#include "the_window.hpp"
 
 namespace the
 {

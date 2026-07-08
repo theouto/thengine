@@ -1,8 +1,8 @@
 #pragma once
 
-#include "the_game_object.hpp"
+#include "../../thelogic/headers/the_game_object.hpp"
 #include "the_textures.hpp"
-#include "the_device.hpp"
+#include "../../therenderer/headers/the_device.hpp"
 
 #include <cstdint>
 #include <unordered_map>

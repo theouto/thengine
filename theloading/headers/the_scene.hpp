@@ -35,22 +35,10 @@ namespace the
                                 const char* path);
 
       TheMaterials& handler() {return *materialHandler;}
-      //TheDescriptorSetLayout& mattLayout(){return *matLayout;}
 
     private:
 
       TheDevice& theDevice;
-
-      /*
-      std::unique_ptr<TheDescriptorSetLayout> matLayout = TheDescriptorSetLayout::Builder(theDevice)
-            .addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT) //albedo
-            .addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT) //specular
-            .addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT) //normal
-            .addBinding(4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT) //roughness
-            .addBinding(5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT) //AO
-            .addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT) //metalness
-            .build();
-      */
 
       std::string line, model, material, name;
       float intensity, radius;
