@@ -72,6 +72,8 @@ namespace the
       //I should maybe move the swapchainextent to also be a vector, in case I want to render certain pipelines at
       //lower resolutions more easily
       VkExtent2D swapChainExtent;
+
+      //just multiply as needed
       VkExtent2D shadowExtent = {1024, 1024};
 
       /*

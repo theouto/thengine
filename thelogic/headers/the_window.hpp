@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include<SDL3/SDL_vulkan.h>
+#include <SDL3/SDL_vulkan.h>
 #include <vulkan/vulkan.h>
 
 #include <string>
@@ -18,7 +18,7 @@ namespace the
       VkExtent2D getExtent() {return {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};}
       SDL_Window* getSDLWindow() const {return window;}
       void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
-      bool eventWatcher();
+      void resize();
 
     private:
       void initWindow();

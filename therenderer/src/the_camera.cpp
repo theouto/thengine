@@ -1,4 +1,4 @@
-#include "../include/the_camera.hpp"
+#include "../headers/the_camera.hpp"
 
 #include <cassert>
 #include <limits>

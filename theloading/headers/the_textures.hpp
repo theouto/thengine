@@ -2,10 +2,10 @@
 
 #include <utility>
 
-#include "../therenderer/headers/the_device.hpp"
-#include "lve_descriptors.hpp"
-#include "lve_buffer.hpp"
-#include "lve_window.hpp"
+#include "../../therenderer/headers/the_device.hpp"
+#include "../../therenderer/headers/the_descriptors.hpp"
+#include "../../therenderer/headers/the_buffer.hpp"
+#include "../../thelogic/headers/the_window.hpp"
 
 namespace the
 {
