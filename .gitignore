@@ -26,6 +26,7 @@
 *.blend
 *.exr
 *.tres
+*.ini
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
