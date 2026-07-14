@@ -4,7 +4,7 @@
 #include "../../therenderer/headers/the_buffer.hpp"
 #include "../../theloading/headers/the_textures.hpp"
 #include "../headers/the_model.hpp"
-#include "../include/lve_utils.hpp"
+#include "the_utils.hpp"
 
 
 
