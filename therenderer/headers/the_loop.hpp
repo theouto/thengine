@@ -17,13 +17,16 @@ namespace the
   class TheLoop
   {
     public:
+      static constexpr int defWidth = 1920;
+      static constexpr int defHeight = 1080;
+
       TheLoop();
       ~TheLoop(){};
 
       void render();
 
     private:
-      TheDevice& theDevice;
-      TheWindow& window;
+      TheWindow theWindow{defWidth, defHeight, "thengine"};
+      TheDevice theDevice{theWindow};
   };
 };

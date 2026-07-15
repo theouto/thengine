@@ -33,4 +33,15 @@ namespace the
             .build();
 
   }
+
+  VkDescriptorImageInfo TheResources::descriptorImageInfoHelper(TheDevice& device, VkImageView imageView)
+  {
+    VkSampler sampler;
+    TheTextures::createTextureSampler(device, sampler);
+    VkDescriptorImageInfo descriptorInfo{};
+    descriptorInfo.imageLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
+    descriptorInfo.imageView = imageView;
+    descriptorInfo.sampler = sampler;
+    return descriptorInfo;
+  }
 };
