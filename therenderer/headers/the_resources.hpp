@@ -14,6 +14,7 @@ namespace the
     private:
       TheDevice& theDevice;
 
+      std::unique_ptr<TheDescriptorPool> imguiPool = nullptr;
       std::unique_ptr<TheDescriptorPool> descriptorPool = nullptr;
       std::unique_ptr<TheDescriptorPool> shadowPool = nullptr;
       std::unique_ptr<TheDescriptorSetLayout> shadowSetLayout = nullptr;

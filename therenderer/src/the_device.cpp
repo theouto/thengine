@@ -5,6 +5,7 @@
 #include <iostream>
 #include <set>
 #include <unordered_set>
+#include <vulkan/vulkan_core.h>
 
 namespace the {
 
@@ -75,9 +76,9 @@ void TheDevice::createInstance() {
 
   VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-  appInfo.pApplicationName = "thengine app";
+  appInfo.pApplicationName = "LittleVulkanEngine App";
   appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-  appInfo.pEngineName = "thengine";
+  appInfo.pEngineName = "No Engine";
   appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
   appInfo.apiVersion = VK_API_VERSION_1_4;
 
@@ -105,7 +106,7 @@ void TheDevice::createInstance() {
     throw std::runtime_error("failed to create instance!");
   }
 
-  hasSDLRequiredInstanceExtensions();
+  hasGflwRequiredInstanceExtensions();
 }
 
 //MSAA max sample count, limited to 8 samples
@@ -166,28 +167,23 @@ void TheDevice::createLogicalDevice() {
     queueCreateInfos.push_back(queueCreateInfo);
   }
 
-  //Used for bindless descriptors
-  //I want to avoid texture atlases :3
-  VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexing = {};
-  descriptorIndexing.runtimeDescriptorArray = true;
-  descriptorIndexing.descriptorBindingPartiallyBound = true;
-  descriptorIndexing.shaderStorageBufferArrayNonUniformIndexing = true;
-  descriptorIndexing.shaderSampledImageArrayNonUniformIndexing = true;
-  descriptorIndexing.shaderStorageImageArrayNonUniformIndexing = true;
-  descriptorIndexing.descriptorBindingStorageBufferUpdateAfterBind = true;
-  descriptorIndexing.descriptorBindingSampledImageUpdateAfterBind = true;
-  descriptorIndexing.descriptorBindingStorageImageUpdateAfterBind = true;
-  descriptorIndexing.pNext = nullptr;
+  VkPhysicalDeviceVulkan12Features deviceFeatures12{};
+  deviceFeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+  deviceFeatures12.runtimeDescriptorArray = true;
+  deviceFeatures12.descriptorBindingPartiallyBound = true;
+  deviceFeatures12.shaderStorageBufferArrayNonUniformIndexing = true;
+  deviceFeatures12.shaderSampledImageArrayNonUniformIndexing = true;
+  deviceFeatures12.shaderStorageImageArrayNonUniformIndexing = true;
+  deviceFeatures12.descriptorBindingStorageBufferUpdateAfterBind = true;
+  deviceFeatures12.descriptorBindingSampledImageUpdateAfterBind = true;
+  deviceFeatures12.descriptorBindingStorageImageUpdateAfterBind = true;
+  deviceFeatures12.pNext = VK_NULL_HANDLE;
 
   VkPhysicalDeviceFeatures2 deviceFeatures2{};
   deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-  deviceFeatures2.pNext = &descriptorIndexing;
+  deviceFeatures2.pNext = &deviceFeatures12;
 
   vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
-
-  VkPhysicalDeviceFeatures deviceFeatures = {};
-  deviceFeatures.samplerAnisotropy = VK_TRUE;
-  //deviceFeatures.shaderStorageImageWriteWithoutFormat = VK_TRUE;
 
   VkDeviceCreateInfo createInfo = {};
   createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -195,20 +191,12 @@ void TheDevice::createLogicalDevice() {
   createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
   createInfo.pQueueCreateInfos = queueCreateInfos.data();
 
-  createInfo.pEnabledFeatures = &deviceFeatures;
+  createInfo.pEnabledFeatures = VK_NULL_HANDLE;
   createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
   createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
   createInfo.pNext = &deviceFeatures2;
-
-  // might not really be necessary anymore because device specific validation layers
-  // have been deprecated
-  if (enableValidationLayers) {
-    createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-    createInfo.ppEnabledLayerNames = validationLayers.data();
-  } else {
-    createInfo.enabledLayerCount = 0;
-  }
+  createInfo.enabledLayerCount = 0;
 
   if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device_) != VK_SUCCESS) {
     throw std::runtime_error("failed to create logical device!");
@@ -299,13 +287,12 @@ bool TheDevice::checkValidationLayerSupport() {
   return true;
 }
 
-//TODO: Move towards SDL
 std::vector<const char *> TheDevice::getRequiredExtensions() {
-  uint32_t sdlExtensionCount = 0;
-  const char *const *sdlExtensions;
-  sdlExtensions = SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
+  uint32_t glfwExtensionCount = 0;
+  const char* const *glfwExtensions;
+  glfwExtensions = SDL_Vulkan_GetInstanceExtensions(&glfwExtensionCount);
 
-  std::vector<const char *> extensions(sdlExtensions, sdlExtensions + sdlExtensionCount);
+  std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
   if (enableValidationLayers) {
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
@@ -314,7 +301,7 @@ std::vector<const char *> TheDevice::getRequiredExtensions() {
   return extensions;
 }
 
-void TheDevice::hasSDLRequiredInstanceExtensions() {
+void TheDevice::hasGflwRequiredInstanceExtensions() {
   uint32_t extensionCount = 0;
   vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
   std::vector<VkExtensionProperties> extensions(extensionCount);
@@ -332,7 +319,7 @@ void TheDevice::hasSDLRequiredInstanceExtensions() {
   for (const auto &required : requiredExtensions) {
     std::cout << "\t" << required << std::endl;
     if (available.find(required) == available.end()) {
-      throw std::runtime_error("Missing required SDL3 extension");
+      throw std::runtime_error("Missing required glfw extension");
     }
   }
 }

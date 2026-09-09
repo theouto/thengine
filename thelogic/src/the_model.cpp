@@ -1,13 +1,16 @@
 #include "../headers/the_model.hpp"
+#include "../headers/lve_utils.hpp"
+#include <vulkan/vulkan_core.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 #define TINYOBJLOADER_IMPLEMENTATION
-#include <tiny_obj_loader.h>
+#include "../../thirdparty/tinyobjloader/tiny_obj_loader.h"
 
 #include <cassert>
 #include <cstring>
 #include <unordered_map>
+#include <iostream>
 
 namespace std
 {
@@ -17,7 +20,7 @@ namespace std
 		size_t operator()(the::TheModel::Vertex const &vertex) const
 		{
 			size_t seed = 0;
-			the::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
+			lve::hashCombine(seed, vertex.position, vertex.normal, vertex.uv);
 			return seed;
 		}
 	};
@@ -37,6 +40,7 @@ namespace the
 	{
 		Builder builder{};
 		builder.loadModel(filepath);
+        auto lala = XXH32(filepath.c_str(), filepath.length(), 0);
 		return std::make_unique<TheModel>(device, builder);
 	}
 
@@ -94,29 +98,90 @@ namespace the
 		theDevice.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
 	}
 
+    void TheModel::createInstanceBuffer()
+    {
+      VkDeviceSize bufferSize = sizeof(InstanceData) * instanceData.size();
+	  uint32_t instanceSize = sizeof(InstanceData);
+      uint32_t instanceCount = instanceData.size();
+
+	  TheBuffer stagingBuffer
+	  {
+		theDevice, instanceSize, instanceCount,
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+	    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+	  };
+
+	  stagingBuffer.map();
+	  stagingBuffer.writeToBuffer((void*)instanceData.data());
+
+	  instanceBuffer = std::make_unique<TheBuffer>(theDevice, instanceSize, instanceData.size(),
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+	  	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+
+      theDevice.copyBuffer(stagingBuffer.getBuffer(), instanceBuffer->getBuffer(), bufferSize);
+      assert(instanceBuffer->map() == VK_SUCCESS && "unable to map instanceBuffer");
+    }
+
+    void TheModel::updateBuffer()
+    {
+      if (instanceBuffer != nullptr) instanceBuffer->unmap();
+      createInstanceBuffer();
+    }
+
 	void TheModel::draw(VkCommandBuffer commandBuffer)
 	{
 		if (hasIndexBuffer)
 		{
-			vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
-		}
+			vkCmdDrawIndexed(commandBuffer, indexCount, instanceData.size(), 0, 0, 0);
+        }
 		else
 		{
-			vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
-		}		
+			vkCmdDraw(commandBuffer, vertexCount, instanceData.size(), 0, 0);
+		}
 	}
 
 	void TheModel::bind(VkCommandBuffer commandBuffer)
 	{
-		VkBuffer buffers[] = { vertexBuffer->getBuffer() };
-		VkDeviceSize offsets[] = { 0 };
+		VkBuffer buffers[] = { vertexBuffer->getBuffer()};
+		VkDeviceSize offsets[] = { 0};
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
-
+        buffers[0] = instanceBuffer->getBuffer();
+        vkCmdBindVertexBuffers(commandBuffer, 1, 1, buffers, offsets);
 		if (hasIndexBuffer) 
 		{
 			vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		}
 	}
+
+    uint32_t TheModel::addInstanceData(glm::mat4 modelMatrix, glm::mat3 normalMatrix, std::vector<uint32_t> material, std::vector<float> materialModifiers)
+    {
+      InstanceData toAdd
+      {
+        modelMatrix[0],
+        modelMatrix[1],
+        modelMatrix[2],
+        modelMatrix[3],
+        normalMatrix[0],
+        normalMatrix[1],
+        normalMatrix[2]
+      };
+
+      for (int i = 0; i < 6; i++) 
+      {
+        if (i < 3) {toAdd.RIDone[i] = material[i];} else {toAdd.RIDtwo[i-3] = material[i];}
+        if (i < 4) {toAdd.modifiers[i] = materialModifiers[i];}
+      }
+
+      uint32_t index = instanceData.size();
+      instanceData.push_back(toAdd);
+      return index; //just in case
+    }
+
+    void TheModel::updateInstances()
+    {
+      instanceBuffer->writeToBuffer(instanceData.data());
+      instanceBuffer->flush();
+    }
 
 	std::vector<VkVertexInputBindingDescription> TheModel::Vertex::getBindingDescriptions()
 	{
@@ -131,14 +196,41 @@ namespace the
 	{
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 
-		attributeDescriptions.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position) });
-		attributeDescriptions.push_back({ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color) });
-		attributeDescriptions.push_back({ 2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal) });
-		attributeDescriptions.push_back({ 3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv) });
+		attributeDescriptions.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position)});
+		attributeDescriptions.push_back({ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal)});
+		attributeDescriptions.push_back({ 2, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv)});
 
 		return attributeDescriptions;
-	} 
+	}
 
+    std::vector<VkVertexInputBindingDescription> TheModel::InstanceData::getBindingDescriptions()
+	{
+		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
+		bindingDescriptions[0].binding = 1;
+		bindingDescriptions[0].stride = sizeof(InstanceData);
+		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
+		return bindingDescriptions;
+	}
+
+	std::vector<VkVertexInputAttributeDescription> TheModel::InstanceData::getAttributeDescriptions()
+	{
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
+
+		attributeDescriptions.push_back({ 3, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(InstanceData, modelMatrixI)});
+		attributeDescriptions.push_back({ 4, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(InstanceData, modelMatrixII)});
+        attributeDescriptions.push_back({ 5, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(InstanceData, modelMatrixIII)});
+        attributeDescriptions.push_back({ 6, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(InstanceData, modelMatrixIV)});
+
+        attributeDescriptions.push_back({ 7, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(InstanceData, normalMatrixI)});
+        attributeDescriptions.push_back({ 8, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(InstanceData, normalMatrixII)});
+        attributeDescriptions.push_back({ 9, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(InstanceData, normalMatrixIII)});
+
+        attributeDescriptions.push_back({ 10, 1, VK_FORMAT_R32G32B32_SINT, offsetof(InstanceData, RIDone)});
+        attributeDescriptions.push_back({ 11, 1, VK_FORMAT_R32G32B32_SINT, offsetof(InstanceData, RIDtwo)});
+		attributeDescriptions.push_back({ 12, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(InstanceData, modifiers)});
+
+		return attributeDescriptions;
+	}
 	void TheModel::Builder::loadModel(const std::string& filepath)
 	{
 		tinyobj::attrib_t attrib;
@@ -169,10 +261,10 @@ namespace the
 					attrib.vertices[3 * index.vertex_index + 1],
 					attrib.vertices[3 * index.vertex_index + 2], };
 
-					vertex.color = {
-					attrib.colors[3 * index.vertex_index + 0],
-					attrib.colors[3 * index.vertex_index + 1],
-					attrib.colors[3 * index.vertex_index + 2], };
+					//vertex.color = {
+					//attrib.colors[3 * index.vertex_index + 0],
+					//attrib.colors[3 * index.vertex_index + 1],
+					//attrib.colors[3 * index.vertex_index + 2], };
 				}
 
 				if (index.normal_index >= 0)

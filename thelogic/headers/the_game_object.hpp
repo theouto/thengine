@@ -1,6 +1,7 @@
 #pragma once
 
 #include "the_model.hpp"
+#include "../../theloading/headers/the_textures.hpp"
 
 // libs
 #include <glm/gtc/matrix_transform.hpp>
@@ -12,9 +13,9 @@
 namespace the {
 
     struct TransformComponent {
-        glm::vec3 translation{};
+        glm::vec3 translation{0.f, 0.f, 0.f};
         glm::vec3 scale{ 1.f, 1.f, 1.f };
-        glm::vec3 rotation{};
+        glm::vec3 rotation{0.f, 0.f, 0.f};
 
         // Matrix corrsponds to Translate * Ry * Rx * Rz * Scale
         // Rotations correspond to Tait-bryan angles of Y(1), X(2), Z(3)
@@ -47,6 +48,7 @@ namespace the {
         TheGameObject& operator=(const TheGameObject&) = delete;
         TheGameObject(TheGameObject&&) = default;
         TheGameObject& operator=(TheGameObject&&) = default;
+        void update();
 
         id_t getId() { return id; }
 
@@ -56,12 +58,19 @@ namespace the {
         TransformComponent transform{};
 
         void createDescriptorSets();
+		//VkDescriptorSetLayout descriptorSetLayout;
         VkDescriptorSet descriptorSet{};
+
         std::string name = "";
         std::string matName = "";
         std::string modelName = "";
-        uint32_t hash;
+  
+        XXH32_hash_t materialHash;
+        XXH32_hash_t instanceHash;
         int RID = 0;
+
+        uint32_t instanceIndex;
+
         uint32_t textures[6];
         float modifiers[4];
         std::unique_ptr<PointLightComponent> pointLight = nullptr;

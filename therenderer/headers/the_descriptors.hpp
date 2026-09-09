@@ -20,22 +20,23 @@ namespace the {
                 uint32_t binding,
                 VkDescriptorType descriptorType,
                 VkShaderStageFlags stageFlags,
-                uint32_t count = 1);
+                uint32_t count = 1,
+                VkDescriptorBindingFlags flags = 0);
 
-            Builder& addBindingFlag(
-                     VkDescriptorBindingFlags bindingFlags,
-                     uint32_t count = 1);
+            Builder& addDescriptorFlags(VkDescriptorSetLayoutCreateFlagBits bindingFlags);
 
             std::unique_ptr<TheDescriptorSetLayout> build() const;
 
         private:
             TheDevice& theDevice;
             std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings{};
-            std::vector<VkDescriptorBindingFlags> bindingFlags{};
+            std::unordered_map<uint32_t, VkDescriptorBindingFlags> bindingFlags{};
+            VkDescriptorSetLayoutCreateFlagBits descriptorFlags{};
         };
 
         TheDescriptorSetLayout(
-            TheDevice& theDevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
+            TheDevice& theDevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings,
+            VkDescriptorSetLayoutCreateFlagBits descriptorFlags, std::unordered_map<uint32_t, VkDescriptorBindingFlags> bindingFlags);
         ~TheDescriptorSetLayout(){}
         TheDescriptorSetLayout(const TheDescriptorSetLayout&) = delete;
         TheDescriptorSetLayout& operator=(const TheDescriptorSetLayout&) = delete;
@@ -47,7 +48,8 @@ namespace the {
         TheDevice& theDevice;
         VkDescriptorSetLayout descriptorSetLayout;
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings;
-        std::vector<VkDescriptorBindingFlags> bindingFlags;
+        std::unordered_map<uint32_t, VkDescriptorBindingFlags> bindingFlags;
+        VkDescriptorSetLayoutCreateFlagBits descriptorFlags;
 
         friend class TheDescriptorWriter;
     };

@@ -5,6 +5,7 @@
 // std lib headers
 #include <string>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 namespace the {
 
@@ -101,7 +102,7 @@ class TheDevice {
   bool checkValidationLayerSupport();
   QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
   void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
-  void hasSDLRequiredInstanceExtensions();
+  void hasGflwRequiredInstanceExtensions();
   bool checkDeviceExtensionSupport(VkPhysicalDevice device);
   SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 
@@ -113,7 +114,7 @@ class TheDevice {
   
   VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
   VkDevice device_;
-  VkSurfaceKHR surface_;
+  VkSurfaceKHR surface_{VK_NULL_HANDLE};
   VkQueue graphicsQueue_;
   VkQueue presentQueue_;
 
