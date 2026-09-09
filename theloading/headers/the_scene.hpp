@@ -2,10 +2,11 @@
 
 #include <vector>
 
-#include "the_renderer.hpp"
-#include "the_descriptors.hpp"
-#include "the_game_object.hpp"
-#include "the_device.hpp"
+#include "../../therenderer/headers/the_resources.hpp"
+#include "../../therenderer/headers/the_render.hpp"
+#include "../../therenderer/headers/the_descriptors.hpp"
+#include "../../thelogic/headers/the_game_object.hpp"
+#include "../../therenderer/headers/the_device.hpp"
 #include "the_materials.hpp"
 
 namespace the
@@ -14,7 +15,7 @@ namespace the
   {
     public:
 
-      TheScene(TheDevice &device, TheGameObject::Map& objects, TheRenderer& renderer);
+      TheScene(TheDevice &device, TheGameObject::Map& objects, TheRender& renderer);
 
       void load(std::string file, TheDescriptorPool& pool);
       void saveScene();
@@ -49,6 +50,6 @@ namespace the
       std::unique_ptr<TheMaterials> materialHandler;
       std::vector<TheGameObject> objArr;
       TheGameObject::Map& gameObjects;
-      TheRenderer& theRenderer;
+      TheRender& theRenderer;
     };
 }

@@ -109,12 +109,6 @@ namespace the
 
         void flush() {instanceBuffer->flush();}
 
-        /* I don't use these for anything...
-        glm::mat4 getModelMatrix(uint32_t index){return glm::mat4{instanceData[index].modelMatrixI,
-                                                                  instance};}
-        glm::mat3 getNormalMatrix(uint32_t index){return instanceData[index].normalMatrix;}
-        */
-
         uint32_t getInstanceCount() {return instanceData.size();}
 
 		void bind(VkCommandBuffer);
