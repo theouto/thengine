@@ -175,7 +175,6 @@ namespace the
 
 	void ThePipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo)
 	{
-
 		configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		configInfo.inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
@@ -245,8 +244,14 @@ namespace the
 		configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStateEnables.data();
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 
+
+        //eventually I have to clean this up, but this is currently not too big an issue as I know what data comes in and out
 		configInfo.bindingDescriptions = TheModel::Vertex::getBindingDescriptions();
+        configInfo.bindingDescriptions.push_back(TheModel::InstanceData::getBindingDescriptions()[0]);
+
 		configInfo.attributeDescriptions = TheModel::Vertex::getAttributeDescriptions();
+        auto dummy = TheModel::InstanceData::getAttributeDescriptions();
+        for (int i = 0; i < dummy.size(); i++) configInfo.attributeDescriptions.push_back(dummy[i]);
 	}
 
     void ThePipeline::defaultPipelineShadowInfo(PipelineConfigInfo &configInfo)
@@ -272,7 +277,11 @@ namespace the
         configInfo.subpass = 0;
 
         configInfo.bindingDescriptions = TheModel::Vertex::getBindingDescriptions();
-        configInfo.attributeDescriptions = TheModel::Vertex::getAttributeDescriptions();
+        configInfo.bindingDescriptions.push_back(TheModel::InstanceData::getBindingDescriptions()[0]);
+
+		configInfo.attributeDescriptions = TheModel::Vertex::getAttributeDescriptions();
+        auto dummy = TheModel::InstanceData::getAttributeDescriptions();
+        for (int i = 0; i < dummy.size(); i++) configInfo.attributeDescriptions.push_back(dummy[i]);
     }
 
 	void ThePipeline::enableAlphaBlending(PipelineConfigInfo& configInfo)
