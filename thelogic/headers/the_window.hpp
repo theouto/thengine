@@ -15,10 +15,14 @@ namespace the
       TheWindow(int w, int h, std::string name);
       ~TheWindow();
 
-      VkExtent2D getExtent() {return {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};}
-      SDL_Window* getSDLWindow() const {return window;}
-      void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
-      void resize();
+      bool shouldClose() { return false; }
+	  VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
+	  bool wasWindowResized() { return framebufferResized; };
+	  void resetWindowResizedFlag() { framebufferResized = false; };
+      void resize() {framebufferResized = true; SDL_GetWindowSize(window, &width, &height);}
+	  SDL_Window *getSDLwindow() const { return window; }
+
+	  void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 
     private:
       void initWindow();

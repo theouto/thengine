@@ -12,7 +12,7 @@ namespace the
   class TheRender
   {
     public:
-      TheRender(TheWindow& window, TheDevice& device);
+      TheRender(TheDevice& device, TheWindow& window);
       ~TheRender();
 
       TheRender(const TheRender&) = delete;
@@ -30,17 +30,22 @@ namespace the
 		return currentFrameIndex;
 	  }
 
+      VkCommandBuffer beginFrame();
+	  void endFrame();
+	  void beginSwapChainRenderPass(VkCommandBuffer commandBuffer, uint32_t bufferIndex);
+	  void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
+
       VkRenderPass getFramePass(uint32_t index) {return theSwapChain->getRenderPass(index);}
       VkDescriptorImageInfo getImageInfo(uint32_t index) {return TheResources::descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(index));}
 
     private:
 
-      void createResources();
+      void generateDescriptors();
 	  void createCommandBuffers();
 	  void freeCommandBuffers();
 	  void recreateSwapChain();
+      void recreateBuffers();
 
-      bool skip = false;
 	  TheWindow& theWindow;
       TheDevice& theDevice;
       std::vector<VkDescriptorBufferInfo> uboInfo;
