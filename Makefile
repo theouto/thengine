@@ -4,7 +4,7 @@ TARGET_EXEC := final_program
 BUILD_DIR := ./build
 SRC_DIRS := ./therenderer ./thelogic ./theloading ./thirdparty
 
-CFLAGS = -std=c++20 -O3
+CFLAGS = -std=c20 -O3
 LDFLAGS = -lSDL3 -lSDL3_image -lvulkan -ldl -lpthread -lwayland -lXxf86vm -lXrandr -lXi 
 
 # Find all the C and C++ files we want to compile

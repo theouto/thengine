@@ -5,6 +5,7 @@
 #include "the_descriptors.hpp"
 #include "the_buffer.hpp"
 #include "the_device.hpp"
+#include <memory>
 
 namespace the
 {
@@ -16,15 +17,27 @@ namespace the
       static VkDescriptorImageInfo descriptorImageInfoHelper(TheDevice& device, VkImageView imageView);
 
     private:
+      void generateDescriptors();
+      void updateDescriptors();
+
       TheDevice& theDevice;
 
       VkDescriptorSet bindlessSet;
       VkDescriptorSet shadowSet;
-      std::unique_ptr<TheDescriptorPool> imguiPool = nullptr;
-      std::unique_ptr<TheDescriptorPool> descriptorPool = nullptr;
-      std::unique_ptr<TheDescriptorPool> shadowPool = nullptr;
-      std::unique_ptr<TheDescriptorSetLayout> shadowSetLayout = nullptr;
-      std::unique_ptr<TheDescriptorSetLayout> colorBufferSetLayout = nullptr;
-      std::unique_ptr<TheDescriptorSetLayout> bindlessSetLayout = nullptr;
+
+      std::vector<std::unique_ptr<TheDescriptorPool>> pools;
+                                                      //0 -> globalPool
+                                                      //1 -> texturePool
+                                                      //2 -> imageBufferPool
+                                                      //3 -> imguiPool
+
+      std::vector<std::unique_ptr<TheDescriptorSetLayout>> layouts;
+                                                      //0 -> globalPool
+                                                      //1 -> texturePool
+                                                      //2 -> imageBufferPool
+
+      std::vector<std::vector<VkDescriptorSet>> presentedImages;
+                                                      //0 -> finalImage
+                                                      //1 ->
   };
 }
