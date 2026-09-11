@@ -54,6 +54,8 @@ namespace the
       float getImageAspectRatio(uint32_t index){return static_cast<float>(extents[index].width)/static_cast<float>(extents[index].height);}
 
       VkFormat findDepthFormat();
+      VkFormat getSwapChainDepthFormat(){return swapChainDepthFormat;}
+      VkFormat getSwapChainImageFormat(){return swapChainImageFormat;}
 
       VkResult acquireNextImage(uint32_t *imageIndex);
       VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
@@ -68,6 +70,13 @@ namespace the
       void init();
       void createSyncObjects();
       void createSwapChain();
+
+      // Helper functions
+      VkSurfaceFormatKHR chooseSwapSurfaceFormat(
+          const std::vector<VkSurfaceFormatKHR> &availableFormats);
+      VkPresentModeKHR chooseSwapPresentMode(
+          const std::vector<VkPresentModeKHR> &availablePresentModes);
+      VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
 
       /*
       I will create the resources as needed and then simply return the index of that resource, which will then
@@ -94,6 +103,8 @@ namespace the
       I am also taking the time to comment my code, because I do want this project to be better than the previous one.
       */
 
+      std::vector<VkImage> placeholderImages;
+
       std::unordered_map<uint32_t, VkFramebuffer> framebuffers;
       std::unordered_map<uint32_t, VkImage> depthImages;
       std::unordered_map<uint32_t, VkDeviceMemory> depthImageMemorys;
@@ -104,6 +115,9 @@ namespace the
       std::unordered_map<uint32_t, VkExtent2D> extents;
 
       std::unordered_map<uint32_t, bool> synced;
+
+      VkExtent2D swapChainExtent;
+      VkExtent2D windowExtent;
 
       uint32_t currentIndex = 0;
       TheDevice& device;
