@@ -129,10 +129,10 @@ namespace the
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = theSwapChain->getRenderPass(bufferIndex);
-    renderPassInfo.framebuffer = nullptr;//TODO: theSwapChain->getFrameBuffer(bufferIndex, currentImageIndex);
+    renderPassInfo.framebuffer = theSwapChain->getFrameBuffer(bufferIndex + currentImageIndex);
 
     renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = VkExtent2D{100, 100};//TODO: theSwapChain->getSwapChainExtent(bufferIndex);
+    renderPassInfo.renderArea.extent = theSwapChain->getImageExtent(bufferIndex);
 
     std::array<VkClearValue, 2> clearValues{};
     clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
@@ -145,11 +145,11 @@ namespace the
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = 1;//TODO: static_cast<float>(theSwapChain->getSwapChainExtent(bufferIndex).width);
-    viewport.height = 1;//TODO: static_cast<float>(theSwapChain->getSwapChainExtent(bufferIndex).height);
+    viewport.width = static_cast<float>(theSwapChain->getImageExtent(bufferIndex).width);
+    viewport.height = static_cast<float>(theSwapChain->getImageExtent(bufferIndex).height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
-    VkRect2D scissor{{0, 0}, VkExtent2D{1,1}};//TODO: theSwapChain->getSwapChainExtent(bufferIndex)};
+    VkRect2D scissor{{0, 0}, theSwapChain->getImageExtent(bufferIndex)};
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
   }

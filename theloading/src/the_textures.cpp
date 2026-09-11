@@ -198,6 +198,7 @@ namespace the
 		imageInfo.usage = usage;
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT; //changed
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        imageInfo.flags = VkImageCreateFlags{VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT};
 
 		if (vkCreateImage(theDevice.device(), &imageInfo, nullptr, &image) != VK_SUCCESS) 
 		{
@@ -293,12 +294,12 @@ namespace the
 		return imageView;
 	}
 
-	void LveTextures::createTextureImageView()
+	void TheTextures::createTextureImageView()
 	{
 		textureImageView = createImageView(textureImage, textureFormat);
 	}
 
-	void LveTextures::createTextureSampler()
+	void TheTextures::createTextureSampler()
 	{
 		VkSamplerCreateInfo samplerInfo{};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -310,7 +311,7 @@ namespace the
 		samplerInfo.anisotropyEnable = VK_TRUE;
 		
 		VkPhysicalDeviceProperties properties{};
-		lveDevice.property(properties);
+		theDevice.property(properties);
 
 		samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
 		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
@@ -327,7 +328,7 @@ namespace the
 		}
     }
 
-    void LveTextures::createTextureSampler(TheDevice& device, VkSampler& sampler)
+    void TheTextures::createTextureSampler(TheDevice& device, VkSampler& sampler)
     {
         VkSamplerCreateInfo samplerInfo{};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;

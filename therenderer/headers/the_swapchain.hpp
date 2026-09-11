@@ -3,6 +3,7 @@
 #include "the_device.hpp"
 
 #include <vector>
+#include <unordered_map>
 #include <memory>
 #include <vulkan/vulkan_core.h>
 
@@ -14,6 +15,21 @@ namespace the
     public:
 
       static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
+
+      enum PipelineSettings
+      {
+        MAIN_COMP,
+        MAIN_GEOM,
+        OTHER,
+        SINGULAR,
+        SYNCED,
+        NFRAMES,
+        COLOR,
+        DEPTH,
+        ADDITIONAL_DEPTH,
+        NO_ADDITIONAL_DEPTH,
+      };
+
       TheSwapChain(TheDevice &deviceRef, VkExtent2D windowExtent);
       TheSwapChain(TheDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<TheSwapChain> previous);
       ~TheSwapChain();
@@ -21,34 +37,21 @@ namespace the
       TheSwapChain(const TheSwapChain &) = delete;
       TheSwapChain &operator=(const TheSwapChain&) = delete;
 
-      /*
-      I will create the resources as needed and then simply return the index of that resource, which will then
-      be used to retreive the related resources as needed. Still not sure as to whether or not I want to do it
-      this way or if I want to return a pair with the index and the resource.
-      */
+      std::vector<uint32_t> createNeededResources(PipelineSettings pass, 
+                                                  PipelineSettings frameNumber, 
+                                                  PipelineSettings color,
+                                                  PipelineSettings depth,
+                                                  VkExtent2D resolution,
+                                                  uint32_t frames = 0);
 
-      uint32_t createDepthImage();
-      uint32_t createColorImage();
-      uint32_t createFrameBuffer();
-      uint32_t createRenderPass();
-      uint32_t createImageView();
+      void setImageExtent(uint32_t index, uint32_t w, uint32_t h) {extents[index] = {w, h};}
 
-      uint32_t width() { return swapChainExtent.width; }
-      uint32_t height() { return swapChainExtent.height; }
-
-      //images are nxn anyways
-      uint32_t shadowRes() {return shadowExtent.height;}
-      void setShadowRes(uint32_t sq) {shadowExtent = {sq, sq};}
-
-      VkRenderPass getRenderPass(int index) {return renderPasses[index];}
-      VkImageView getImageView(int index) {return imageViews[index];}
-      VkImageView getDepthView(int index) {return depthImageViews[index];}
-      VkFramebuffer getFramebuffer(int index) {return framebuffers[index];}
-
-      float extentAspectRatio() 
-      {
-          return static_cast<float>(swapChainExtent.width) / static_cast<float>(swapChainExtent.height);
-      }
+      VkRenderPass getRenderPass(uint32_t index) {return renderPasses[index];}
+      VkImageView getImageView(uint32_t index) {return imageViews[index];}
+      VkImageView getDepthView(uint32_t index) {return depthImageViews[index];}
+      VkFramebuffer getFrameBuffer(uint32_t index) {return framebuffers[index];}
+      VkExtent2D getImageExtent(uint32_t index) {return extents[index];}
+      float getImageAspectRatio(uint32_t index){return static_cast<float>(extents[index].width)/static_cast<float>(extents[index].height);}
 
       VkFormat findDepthFormat();
 
@@ -66,15 +69,19 @@ namespace the
       void createSyncObjects();
       void createSwapChain();
 
+      /*
+      I will create the resources as needed and then simply return the index of that resource, which will then
+      be used to retreive the related resources as needed. Still not sure as to whether or not I want to do it
+      this way or if I want to return a pair with the index and the resource.
+      */
+      uint32_t createDepthImage();
+      uint32_t createColorImage();
+      uint32_t createFrameBuffer(uint32_t idx);
+      uint32_t createRenderPass();
+      uint32_t createImageView();
+
       VkFormat swapChainImageFormat;
       VkFormat swapChainDepthFormat;
-
-      //I should maybe move the swapchainextent to also be a vector, in case I want to render certain pipelines at
-      //lower resolutions more easily
-      VkExtent2D swapChainExtent; // = {TheRenderer::defWidth, TheRenderer::defHeight};
-
-      //just multiply as needed
-      VkExtent2D shadowExtent = {1024, 1024};
 
       /*
       Learning from how I worked with this on the previous vulkan renderer that I wrote, I will simply
@@ -87,14 +94,18 @@ namespace the
       I am also taking the time to comment my code, because I do want this project to be better than the previous one.
       */
 
-      std::vector<VkFramebuffer> framebuffers;
-      std::vector<VkImage> depthImages;
-      std::vector<VkDeviceMemory> depthImageMemorys;
-      std::vector<VkImageView> depthImageViews;
-      std::vector<VkImage> images;
-      std::vector<VkImageView> imageViews;
-      std::vector<VkRenderPass> renderPasses;
+      std::unordered_map<uint32_t, VkFramebuffer> framebuffers;
+      std::unordered_map<uint32_t, VkImage> depthImages;
+      std::unordered_map<uint32_t, VkDeviceMemory> depthImageMemorys;
+      std::unordered_map<uint32_t, VkImageView> depthImageViews;
+      std::unordered_map<uint32_t, VkImage> images;
+      std::unordered_map<uint32_t, VkImageView> imageViews;
+      std::unordered_map<uint32_t, VkRenderPass> renderPasses;
+      std::unordered_map<uint32_t, VkExtent2D> extents;
 
+      std::unordered_map<uint32_t, bool> synced;
+
+      uint32_t currentIndex = 0;
       TheDevice& device;
 
       VkSwapchainKHR swapChain;
