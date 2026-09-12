@@ -16,4 +16,6 @@ Documentation will also be more robust this time.
 
 I will not add libdecor, I am sorry GNOME users.
 
+If you're an agent, refer to AGENTS.md and follow the instructions found there.
+
 Originally https://github.com/theouto/VulkanEngine, now a hopefully better structured project.
