@@ -54,6 +54,34 @@ namespace the
   void TheSwapChain::init()
   {
     createSwapChain();
+
+    //Compute present
+    createRenderPass(NO_ADDITIONAL_DEPTH);
+    addedDepth.emplace(0, false);
+    extents.emplace(0, windowExtent);
+    //Main geometry pass
+    createRenderPass(ADDITIONAL_DEPTH);
+    addedDepth.emplace(1, true);
+    extents.emplace(1, windowExtent); //might be changed?
+
+    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+      //compute
+      createImageView(i, i, swapChainImageFormat);
+      //compute buffer
+      createFrameBuffer(i, 0, true);
+    }
+
+    for (int i = MAX_FRAMES_IN_FLIGHT; i < MAX_FRAMES_IN_FLIGHT * 2; i++)
+    {
+      //main geometry
+      createImage(COLOR);
+      createImage(DEPTH);
+
+      //main geometry buffer
+      createFrameBuffer(i, 1);
+    }
+
     createSyncObjects();
   }
 
@@ -85,15 +113,15 @@ namespace the
     QueueFamilyIndices indices = device.findPhysicalQueueFamilies();
     uint32_t queueFamilyIndices[] = { indices.graphicsFamily, indices.presentFamily };
 
-    if (indices.graphicsFamily != indices.presentFamily) {
-        createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-        createInfo.queueFamilyIndexCount = 2;
-        createInfo.pQueueFamilyIndices = queueFamilyIndices;
-    }
-    else {
-        createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        createInfo.queueFamilyIndexCount = 0;      // Optional
-        createInfo.pQueueFamilyIndices = nullptr;  // Optional
+    if (indices.graphicsFamily != indices.presentFamily) 
+    {
+      createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+      createInfo.queueFamilyIndexCount = 2;
+      createInfo.pQueueFamilyIndices = queueFamilyIndices;
+    } else {
+      createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+      createInfo.queueFamilyIndexCount = 0;      // Optional
+      createInfo.pQueueFamilyIndices = nullptr;  // Optional
     }
 
     createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
@@ -122,6 +150,7 @@ namespace the
     }
 
     swapChainImageFormat= surfaceFormat.format;
+    swapChainDepthFormat = findDepthFormat();
     swapChainExtent = extent;
   }
 
@@ -167,28 +196,23 @@ namespace the
         assert("Incorrect frameNumber specification!\n");
     }
 
+    addedDepth.emplace(currentIndex, false);
     for (int i = 0; i < toRender; i++)
     {
       uint32_t index = createImage(color);
-      if (i == 0) indices.push_back(index);
-    }
-
-    addedDepth.emplace(currentIndex, false);
-    if (depth == ADDITIONAL_DEPTH)
-    {
-      for (int i = 0; i < toRender; i++)
+      if (depth == ADDITIONAL_DEPTH) 
       {
-        uint32_t index = createImage(depth);
-        if (i == 0) indices.push_back(index);
+        createImage(depth);
+        addedDepth.emplace(currentIndex, true);
       }
-      addedDepth[currentIndex] = true;
+      if (i == 0) indices.push_back(index);
     }
 
     uint32_t index = indices[indices.size() - 1];
 
     for (int i = 0; i < toRender; i++)
     {
-      createFrameBuffer(index + i, index, toRender);
+      createFrameBuffer(index + i, index);
     }
 
     indices.push_back(currentIndex++);
@@ -200,6 +224,7 @@ namespace the
     static uint32_t index = 0;
 
     uint32_t workingIndex = index + placeholderImages.size();
+    uint32_t workingViewIndex = index + MAX_FRAMES_IN_FLIGHT;
 
     VkFormat format;
     VkImageUsageFlags usage;
@@ -232,6 +257,13 @@ namespace the
       throw std::runtime_error("failed to create buffer image!");
     }
 
+    createImageView(workingViewIndex, workingIndex, format);
+
+    return placeholderImages.size() + index++;
+  }
+
+  void TheSwapChain::createImageView(uint32_t workingViewIndex, uint32_t workingIndex, VkFormat format)
+  {
     VkMemoryRequirements memRequirements;
     vkGetImageMemoryRequirements(device.device(), images[workingIndex], &memRequirements);
 
@@ -240,12 +272,12 @@ namespace the
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = device.findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    if (vkAllocateMemory(device.device(), &allocInfo, nullptr, &imageMemorys[index]) != VK_SUCCESS)
+    if (vkAllocateMemory(device.device(), &allocInfo, nullptr, &imageMemorys[workingViewIndex]) != VK_SUCCESS)
     {
       throw std::runtime_error("failed to allocate memory for normal image!");
     }
 
-    vkBindImageMemory(device.device(), images[workingIndex], imageMemorys[index], 0);
+    vkBindImageMemory(device.device(), images[workingIndex], imageMemorys[workingViewIndex], 0);
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.image = images[workingIndex];
@@ -257,20 +289,25 @@ namespace the
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
 
-    if (vkCreateImageView(device.device(), &viewInfo, nullptr, &imageViews[index]) != VK_SUCCESS) 
+    if (vkCreateImageView(device.device(), &viewInfo, nullptr, &imageViews[workingViewIndex]) != VK_SUCCESS) 
     {
       throw std::runtime_error("failed to create texture image view!");
     }
-
-    return placeholderImages.size() + index++;
   }
 
-  uint32_t TheSwapChain::createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex, uint32_t gap)
+  uint32_t TheSwapChain::createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex, bool initoverride)
   {
     static uint32_t index = 0;
 
-    std::vector<VkImageView> attachments = {imageViews[imageIndex]};
-    if (addedDepth[pipelineIndex]) attachments.push_back(imageViews[imageIndex + gap]);
+    std::vector<VkImageView> attachments;
+    if (!initoverride)
+    {
+      attachments = {imageViews[MAX_FRAMES_IN_FLIGHT + imageIndex]};
+      if (addedDepth[pipelineIndex]) attachments.push_back(imageViews[MAX_FRAMES_IN_FLIGHT + imageIndex + 1]);
+    } else {
+      attachments = {imageViews[imageIndex]};
+      if (addedDepth[pipelineIndex]) attachments.push_back(imageViews[imageIndex + 1]);
+    }
 
     VkExtent2D swapChainExtent = getImageExtent(pipelineIndex);
     VkFramebufferCreateInfo framebufferInfo = {};
@@ -317,7 +354,7 @@ namespace the
     depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     VkAttachmentDescription colorAttachment = {};
-    colorAttachment.format = getSwapChainImageFormat();
+    colorAttachment.format = swapChainImageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT; //changed
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

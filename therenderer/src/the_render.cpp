@@ -44,7 +44,7 @@ namespace the
     } else {
       std::shared_ptr<TheSwapChain> oldSwapChain = std::move(theSwapChain);
       theSwapChain = std::make_unique<TheSwapChain>(theDevice, extent, oldSwapChain);
-      recreateSwapChain();
+      generateDescriptors();
 
       if (!oldSwapChain->compareSwapFormats(*theSwapChain.get())) {
         throw std::runtime_error("Swap chain image(or depth) format has changed!");
