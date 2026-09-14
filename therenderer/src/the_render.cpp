@@ -129,7 +129,7 @@ namespace the
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = theSwapChain->getRenderPass(bufferIndex);
-    renderPassInfo.framebuffer = theSwapChain->getFrameBuffer(bufferIndex + currentImageIndex);
+    renderPassInfo.framebuffer = theSwapChain->getFrameBuffer(bufferIndex + currentImageIndex * theSwapChain->isSynced(bufferIndex));
 
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = theSwapChain->getImageExtent(bufferIndex);

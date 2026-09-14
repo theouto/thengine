@@ -48,7 +48,6 @@ namespace the
 
       VkRenderPass getRenderPass(uint32_t index) {return renderPasses[index];}
       VkImageView getImageView(uint32_t index) {return imageViews[index];}
-      VkImageView getDepthView(uint32_t index) {return depthImageViews[index];}
       VkFramebuffer getFrameBuffer(uint32_t index) {return framebuffers[index];}
       VkExtent2D getImageExtent(uint32_t index) {return extents[index];}
       float getImageAspectRatio(uint32_t index){return static_cast<float>(extents[index].width)/static_cast<float>(extents[index].height);}
@@ -56,6 +55,8 @@ namespace the
       VkFormat findDepthFormat();
       VkFormat getSwapChainDepthFormat(){return swapChainDepthFormat;}
       VkFormat getSwapChainImageFormat(){return swapChainImageFormat;}
+
+      bool isSynced(uint32_t index){return synced[index];}
 
       VkResult acquireNextImage(uint32_t *imageIndex);
       VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
@@ -83,10 +84,9 @@ namespace the
       be used to retreive the related resources as needed. Still not sure as to whether or not I want to do it
       this way or if I want to return a pair with the index and the resource.
       */
-      uint32_t createDepthImage();
-      uint32_t createColorImage();
-      uint32_t createFrameBuffer(uint32_t idx);
-      uint32_t createRenderPass();
+      uint32_t createImage(PipelineSettings setting);
+      uint32_t createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex, uint32_t gap = 0);
+      uint32_t createRenderPass(PipelineSettings depth);
       uint32_t createImageView();
 
       VkFormat swapChainImageFormat;
@@ -106,15 +106,14 @@ namespace the
       std::vector<VkImage> placeholderImages;
 
       std::unordered_map<uint32_t, VkFramebuffer> framebuffers;
-      std::unordered_map<uint32_t, VkImage> depthImages;
-      std::unordered_map<uint32_t, VkDeviceMemory> depthImageMemorys;
-      std::unordered_map<uint32_t, VkImageView> depthImageViews;
+      std::unordered_map<uint32_t, VkDeviceMemory> imageMemorys;
       std::unordered_map<uint32_t, VkImage> images;
       std::unordered_map<uint32_t, VkImageView> imageViews;
       std::unordered_map<uint32_t, VkRenderPass> renderPasses;
       std::unordered_map<uint32_t, VkExtent2D> extents;
 
       std::unordered_map<uint32_t, bool> synced;
+      std::unordered_map<uint32_t, bool> addedDepth;
 
       VkExtent2D swapChainExtent;
       VkExtent2D windowExtent;
