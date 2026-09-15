@@ -73,6 +73,18 @@ namespace the
       createFrameBuffer(i, 0, true);
     }
 
+    /*
+    for (int i = MAX_FRAMES_IN_FLIGHT; i < MAX_FRAMES_IN_FLIGHT * 2; i++)
+    {
+      //main geometry
+      createImage(COLOR);
+      createImage(DEPTH);
+
+      //main geometry buffer
+      createFrameBuffer(i, 1);
+    }
+    */
+
     createSyncObjects();
   }
 
@@ -154,7 +166,7 @@ namespace the
   {
     std::vector<uint32_t> indices(0);
 
-    assert(color == DEPTH && depth == ADDITIONAL_DEPTH && "Both pipeline settings set to depth! Likely not needed!\n");
+    assert(!(color == DEPTH && depth == ADDITIONAL_DEPTH) && "Both pipeline settings set to depth! Likely not needed!\n");
 
     switch (pass)
     {

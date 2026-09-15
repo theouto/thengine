@@ -28,7 +28,6 @@ namespace the
     }
 
     init->build(theResources->sets[2]);
-    std::cout << "test\n";
   }
 
   void TheRender::recreateBuffers()

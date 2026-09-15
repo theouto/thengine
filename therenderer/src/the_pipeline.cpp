@@ -137,7 +137,7 @@ namespace the
         shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
         shaderStage.module = computeModule;
-        shaderStage.pName = "compute";
+        shaderStage.pName = "main";
         shaderStage.flags = 0;
         shaderStage.pNext = nullptr;
         shaderStage.pSpecializationInfo = nullptr;

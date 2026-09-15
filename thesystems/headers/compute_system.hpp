@@ -20,7 +20,7 @@ namespace the
 	  ComputeSystem& operator=(const ComputeSystem&) = delete;
 
 	  void render(FrameInfo &frameInfo);
-      uint32_t getBufferIndex() {return resources[0];}
+      uint32_t getBufferIndex() {return 0;}
 	private:
 	  void createPipeLineLayout(std::vector<VkDescriptorSetLayout> &globalSetLayout, VkShaderStageFlagBits stages);
 	  void createPipeline(VkRenderPass renderPass, std::string shaderPaths);

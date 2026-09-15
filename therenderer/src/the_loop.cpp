@@ -36,9 +36,8 @@ namespace the
         };
         frameInfo.frameIndex = theRenderer.getFrameIndex();
 
-        theRenderer.beginSwapChainRenderPass(commandBuffer, compute.getBufferIndex());
+        std::cout << compute.getBufferIndex() << '\n';
         compute.render(frameInfo);
-        theRenderer.endSwapChainRenderPass(commandBuffer);
         theRenderer.endFrame();
       }
     }
