@@ -1,4 +1,4 @@
-#include "../include/the_scene.hpp"
+#include "../headers/the_scene.hpp"
 
 #include <cstdio>
 #include <fstream>
@@ -11,7 +11,7 @@
 namespace the
 {
 
-  TheScene::TheScene(TheDevice &device, TheGameObject::Map& objects, TheRenderer& renderer)
+  TheScene::TheScene(TheDevice &device, TheGameObject::Map& objects, TheRender& renderer)
   : theDevice{device}, gameObjects{objects}, theRenderer{renderer}
   {
     materialHandler = std::make_unique<TheMaterials>(theDevice);
@@ -123,8 +123,8 @@ namespace the
     object.model = theModel;
     object.matName = material;
     object.modelName = model;
-    std::vector<uint32_t> arr = materialHandler->retrieveBindless(material, *theRenderer.bindlessSetLayout,
-                        *theRenderer.descriptorPool, theRenderer.getBindlessLayout(),
+    std::vector<uint32_t> arr = materialHandler->retrieveBindless(material, *theRenderer.theResources->layouts[1],
+                        *theRenderer.theResources->pools[1], theRenderer.theResources->sets[1],
                                     object);
     for (int i = 0; i < arr.size(); i++) {object.textures[i] = arr[i];}
     object.transform.translation = translation;

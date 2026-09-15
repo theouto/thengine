@@ -2,7 +2,6 @@
 
 #include "the_window.hpp"
 #include "the_model.hpp"
-#include "../../thirdparty/imgui/imgui_impl_sdl3.cpp"
 
 #include <memory>
 #include <vector>

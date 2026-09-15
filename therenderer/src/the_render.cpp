@@ -1,4 +1,5 @@
 #include "../headers/the_render.hpp"
+#include <cstdlib>
 #include <vulkan/vulkan_core.h>
 
 namespace the
@@ -10,6 +11,8 @@ namespace the
     createCommandBuffers();
     initBaseImageBuffers();
   }
+
+  TheRender::~TheRender(){freeCommandBuffers();}
 
   void TheRender::initBaseImageBuffers()
   {

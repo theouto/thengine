@@ -51,6 +51,8 @@ namespace the
       std::shared_ptr<TheDescriptorSetLayout> getSetLayout(uint32_t index){return theResources->layouts[index];}
       VkDescriptorSet& getSet(uint32_t index){return theResources->sets[index];}
 
+      std::unique_ptr<TheResources> theResources;
+
     private:
 
 	  void createCommandBuffers();
@@ -64,7 +66,6 @@ namespace the
       std::vector<VkDescriptorBufferInfo> uboInfo;
       std::vector<std::shared_ptr<TheTextures>> textures;
 
-      std::unique_ptr<TheResources> theResources;
       std::unique_ptr<TheSwapChain> theSwapChain;
 	  std::vector<VkCommandBuffer> commandBuffers;
 

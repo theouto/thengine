@@ -2,10 +2,10 @@
 TARGET_EXEC := final_program
 
 BUILD_DIR := ./build
-SRC_DIRS := ./therenderer ./thelogic ./theloading ./thirdparty
+SRC_DIRS := ./themain ./therenderer ./thelogic ./theloading ./thirdparty ./thesystems
 
-CFLAGS = -std=c20 -O3
-LDFLAGS = -lSDL3 -lSDL3_image -lvulkan -ldl -lpthread -lwayland -lXxf86vm -lXrandr -lXi 
+CFLAGS = -std=c23 -O3
+LDFLAGS = -lSDL3 -lSDL3_image -lvulkan 
 
 # Find all the C and C++ files we want to compile
 # Note the single quotes around the * expressions. The shell will incorrectly expand these otherwise, but we want to send the * directly to the find command.

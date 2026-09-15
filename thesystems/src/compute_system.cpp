@@ -20,6 +20,8 @@ namespace the
 	createPipeline(renderPass, shaderPath);
   }
 
+  ComputeSystem::~ComputeSystem() {vkDestroyPipelineLayout(theDevice.device(), pipelineLayout, nullptr);}
+
   void ComputeSystem::createPipeLineLayout(std::vector<VkDescriptorSetLayout>& globalSetLayout, VkShaderStageFlagBits stages)
   {
     VkPushConstantRange pushConstantRange{};
@@ -64,11 +66,11 @@ namespace the
     vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout,
                        VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(ComputeData), &data);
 
-    vkCmdBeginPerTileExecutionQCOM(frameInfo.commandBuffer, nullptr);
+    //vkCmdBeginPerTileExecutionQCOM(frameInfo.commandBuffer, nullptr);
 
     vkCmdDispatch(frameInfo.commandBuffer, std::ceil(frameInfo.width / 24.0),
                   std::ceil(frameInfo.height / 24.0), 1);
 
-    vkCmdEndPerTileExecutionQCOM(frameInfo.commandBuffer, nullptr);
+    //vkCmdEndPerTileExecutionQCOM(frameInfo.commandBuffer, nullptr);
   }
 }

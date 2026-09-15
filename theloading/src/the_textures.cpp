@@ -1,6 +1,8 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 #include "../headers/the_textures.hpp"
 
-#include <stb_image.h>
+#include "../../thirdparty/stb_image/stb_image.h"
 #include <iostream>
 
 #include <iostream>

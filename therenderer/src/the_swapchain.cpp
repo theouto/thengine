@@ -282,7 +282,8 @@ namespace the
     viewInfo.image = images[workingIndex];
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.format = format;
-    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    if (format == swapChainDepthFormat) viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    else viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     viewInfo.subresourceRange.baseMipLevel = 0;
     viewInfo.subresourceRange.levelCount = 1;
     viewInfo.subresourceRange.baseArrayLayer = 0;
@@ -335,9 +336,12 @@ namespace the
     static uint32_t index = 0;
 
     VkAttachmentDescription depthAttachment{};
-
+    VkAttachmentReference depthAttachmentRef{};
+    bool useDepth = false;
     if (depth == ADDITIONAL_DEPTH)
     {
+      useDepth = true;
+
       depthAttachment.format = swapChainDepthFormat;
       depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT; //changed
       depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -346,11 +350,10 @@ namespace the
       depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
       depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
       depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    }
 
-    VkAttachmentReference depthAttachmentRef{};
-    depthAttachmentRef.attachment = 1;
-    depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+      depthAttachmentRef.attachment = 1;
+      depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    }
 
     VkAttachmentDescription colorAttachment = {};
     colorAttachment.format = swapChainImageFormat;
@@ -370,7 +373,7 @@ namespace the
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
-    subpass.pDepthStencilAttachment = &depthAttachmentRef;
+    if (depth == ADDITIONAL_DEPTH) subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
     VkSubpassDependency dependency = {};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -537,5 +540,25 @@ namespace the
       { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
       VK_IMAGE_TILING_OPTIMAL,
       VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+  }
+
+  VkResult TheSwapChain::acquireNextImage(uint32_t* imageIndex) 
+  {
+    vkWaitForFences(
+      device.device(),
+      1,
+      &inFlightFences[currentFrame],
+      VK_TRUE,
+      std::numeric_limits<uint64_t>::max());
+
+    VkResult result = vkAcquireNextImageKHR(
+      device.device(),
+      swapChain,
+      std::numeric_limits<uint64_t>::max(),
+      imageAvailableSemaphores[currentFrame],  // must be a not signaled semaphore
+      VK_NULL_HANDLE,
+      imageIndex);
+
+    return result;
   }
 }

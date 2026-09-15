@@ -18,7 +18,7 @@ namespace the
 		  return false;
         }
 
-        ImGui_ImplSDL3_ProcessEvent(&event);
+        //ImGui_ImplSDL3_ProcessEvent(&event);
       }
       return true;
   }
