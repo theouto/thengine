@@ -10,11 +10,14 @@ namespace the
   };
 
   ComputeSystem::ComputeSystem(TheDevice& device, VkRenderPass renderPass,
-                             std::vector<std::string> shaderPaths, VkShaderStageFlagBits stages,
-                             std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet>& sets) : theDevice{device} , sets{sets}
+                             std::string shaderPath, VkShaderStageFlagBits stages,
+                             VkDescriptorSetLayout globalSetLayout, VkDescriptorSet sets,
+                             std::vector<uint32_t> resources) : theDevice{device}
   {
-    createPipeLineLayout(globalSetLayout, stages);
-	createPipeline(renderPass, shaderPaths);
+    this->sets = std::vector<VkDescriptorSet>{sets};
+    std::vector<VkDescriptorSetLayout> sacrifice = {globalSetLayout};
+    createPipeLineLayout(sacrifice, stages);
+	createPipeline(renderPass, shaderPath);
   }
 
   void ComputeSystem::createPipeLineLayout(std::vector<VkDescriptorSetLayout>& globalSetLayout, VkShaderStageFlagBits stages)
@@ -37,7 +40,7 @@ namespace the
 	}
   }
 
-  void ComputeSystem::createPipeline(VkRenderPass renderPass, std::vector<std::string> shaderPaths)
+  void ComputeSystem::createPipeline(VkRenderPass renderPass, std::string shaderPaths)
   {
     assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 

@@ -20,13 +20,13 @@ namespace the
 
       std::vector<VkDescriptorSet>& getSets() {return sets;}
 
-      std::vector<std::unique_ptr<TheDescriptorPool>> pools;
+      std::vector<std::shared_ptr<TheDescriptorPool>> pools;
                                                       //0 -> globalPool (usually just general use buffers. i.e: aspect ratio)
                                                       //1 -> texturePool
                                                       //2 -> imageBufferPool (final image, shadowmaps)
                                                       //3 -> imguiPool
 
-      std::vector<std::unique_ptr<TheDescriptorSetLayout>> layouts;
+      std::vector<std::shared_ptr<TheDescriptorSetLayout>> layouts;
                                                       //0 -> global buffer
                                                       //1 -> texture array
                                                       //2 -> image buffer array

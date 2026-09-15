@@ -35,8 +35,21 @@ namespace the
 	  void beginSwapChainRenderPass(VkCommandBuffer commandBuffer, uint32_t bufferIndex);
 	  void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
+      std::vector<uint32_t> getNeededResources(TheSwapChain::PipelineSettings pass, 
+                                               TheSwapChain::PipelineSettings frameNumber, 
+                                               TheSwapChain::PipelineSettings color,
+                                               TheSwapChain::PipelineSettings depth,
+                                               VkExtent2D resolution,
+                                               uint32_t frames = 0)
+      {
+        return theSwapChain->createNeededResources(pass, frameNumber, color, depth, resolution, frames);
+      }
+
       VkRenderPass getFramePass(uint32_t index) {return theSwapChain->getRenderPass(index);}
       VkDescriptorImageInfo getImageInfo(uint32_t index) {return TheResources::descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(index));}
+
+      std::shared_ptr<TheDescriptorSetLayout> getSetLayout(uint32_t index){return theResources->layouts[index];}
+      VkDescriptorSet& getSet(uint32_t index){return theResources->sets[index];}
 
     private:
 

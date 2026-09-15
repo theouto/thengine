@@ -169,10 +169,10 @@ namespace the
     {
       case MAIN_COMP:
         indices.push_back(0);
-        break;
-      case MAIN_GEOM:
-        indices.push_back(1);
-        break;
+        return indices;      
+        case MAIN_GEOM:
+        indices.push_back(2);
+        return indices;
       default:
         indices.push_back(createRenderPass(depth));
     }
@@ -205,7 +205,6 @@ namespace the
         createImage(depth);
         addedDepth.emplace(currentIndex, true);
       }
-      if (i == 0) indices.push_back(index);
     }
 
     uint32_t index = indices[indices.size() - 1];
@@ -215,7 +214,7 @@ namespace the
       createFrameBuffer(index + i, index);
     }
 
-    indices.push_back(currentIndex++);
+    currentIndex++;
     return indices;
   }
 

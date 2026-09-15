@@ -12,6 +12,10 @@
 
 #include "../../theloading/headers/the_scene.hpp"
 
+#include "../../thesystems/headers/compute_system.hpp"
+
+#include <vulkan/vulkan_core.h>
+
 namespace the
 {
   class TheLoop
@@ -29,6 +33,8 @@ namespace the
       void render();
 
     private:
+
+      TheCamera camera{};
       TheWindow theWindow{defWidth, defHeight, "thengine"};
       TheEvents theEvents{theWindow};
       KeyboardMovementController keyboardController{};
@@ -36,6 +42,7 @@ namespace the
       TheRender theRenderer{theDevice, theWindow};
       TheScene sceneManager{theDevice, gameObjects, theRenderer};
 
+      VkCommandBuffer commandBuffer;
       TheGameObject::Map gameObjects;
   };
 };

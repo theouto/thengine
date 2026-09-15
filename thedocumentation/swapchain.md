@@ -7,6 +7,6 @@ images 0-n will be the images reserved for the final compute shader present
 
 The vector will order the index values in this order:
 
-RenderPass -> FrameBuffer -> Image -> VkExtent2D
+RenderPass -> FrameBuffer -> Image
 
 Note that Images may be depth images, and the specific depth image index is for pipelines that require both.
