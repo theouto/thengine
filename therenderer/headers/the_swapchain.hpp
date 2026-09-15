@@ -88,7 +88,7 @@ namespace the
       uint32_t createImage(PipelineSettings setting);
       uint32_t createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex, bool initoverride = false);
       uint32_t createRenderPass(PipelineSettings depth);
-      void createImageView(uint32_t workingViewIndex, uint32_t workingIndex, VkFormat format);
+      void createImageView(uint32_t workingIndex, VkFormat format);
 
       VkFormat swapChainImageFormat;
       VkFormat swapChainDepthFormat;

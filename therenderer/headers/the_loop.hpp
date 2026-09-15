@@ -34,6 +34,9 @@ namespace the
 
     private:
 
+      VkCommandBuffer commandBuffer;
+      TheGameObject::Map gameObjects;
+
       TheCamera camera{};
       TheWindow theWindow{defWidth, defHeight, "thengine"};
       TheEvents theEvents{theWindow};
@@ -41,8 +44,5 @@ namespace the
       TheDevice theDevice{theWindow};
       TheRender theRenderer{theDevice, theWindow};
       TheScene sceneManager{theDevice, gameObjects, theRenderer};
-
-      VkCommandBuffer commandBuffer;
-      TheGameObject::Map gameObjects;
   };
 };

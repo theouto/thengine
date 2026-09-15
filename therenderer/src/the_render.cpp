@@ -1,4 +1,6 @@
 #include "../headers/the_render.hpp"
+
+#include <iostream>
 #include <cstdlib>
 #include <vulkan/vulkan_core.h>
 
@@ -26,6 +28,7 @@ namespace the
     }
 
     init->build(theResources->sets[2]);
+    std::cout << "test\n";
   }
 
   void TheRender::recreateBuffers()

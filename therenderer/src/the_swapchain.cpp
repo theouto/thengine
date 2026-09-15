@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <iostream>
 #include <cassert>
+#include <numbers>
 #include <vulkan/vulkan_core.h>
 
 namespace the
@@ -67,19 +68,9 @@ namespace the
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
       //compute
-      createImageView(i, i, swapChainImageFormat);
+      createImageView(i, swapChainImageFormat);
       //compute buffer
       createFrameBuffer(i, 0, true);
-    }
-
-    for (int i = MAX_FRAMES_IN_FLIGHT; i < MAX_FRAMES_IN_FLIGHT * 2; i++)
-    {
-      //main geometry
-      createImage(COLOR);
-      createImage(DEPTH);
-
-      //main geometry buffer
-      createFrameBuffer(i, 1);
     }
 
     createSyncObjects();
@@ -144,7 +135,7 @@ namespace the
     placeholderImages.resize(imageCount);
     vkGetSwapchainImagesKHR(device.device(), swapChain, &imageCount, placeholderImages.data());
  
-    for (int i = 0; i < imageCount; i++)
+    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
       images[i] = placeholderImages[i];
     }
@@ -222,8 +213,7 @@ namespace the
   {
     static uint32_t index = 0;
 
-    uint32_t workingIndex = index + placeholderImages.size();
-    uint32_t workingViewIndex = index + MAX_FRAMES_IN_FLIGHT;
+    uint32_t workingIndex = index + MAX_FRAMES_IN_FLIGHT;
 
     VkFormat format;
     VkImageUsageFlags usage;
@@ -231,7 +221,7 @@ namespace the
     if (setting == DEPTH || ADDITIONAL_DEPTH)
     {
       format = VkFormat{swapChainDepthFormat};
-      usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+      usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     } else {
       format = VkFormat{swapChainImageFormat};
       usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
@@ -251,32 +241,19 @@ namespace the
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // Explicitly set sharing mode.
     imageInfo.flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
 
-    if (vkCreateImage(device.device(), &imageInfo, nullptr, &images[workingIndex]) != VK_SUCCESS)
-    {
-      throw std::runtime_error("failed to create buffer image!");
-    }
+    device.createImageWithInfo(
+                imageInfo,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                images[workingIndex],
+                imageMemorys[workingIndex]);
 
-    createImageView(workingViewIndex, workingIndex, format);
+    createImageView(workingIndex, format);
 
     return placeholderImages.size() + index++;
   }
 
-  void TheSwapChain::createImageView(uint32_t workingViewIndex, uint32_t workingIndex, VkFormat format)
+  void TheSwapChain::createImageView(uint32_t workingIndex, VkFormat format)
   {
-    VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(device.device(), images[workingIndex], &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = device.findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-    if (vkAllocateMemory(device.device(), &allocInfo, nullptr, &imageMemorys[workingViewIndex]) != VK_SUCCESS)
-    {
-      throw std::runtime_error("failed to allocate memory for normal image!");
-    }
-
-    vkBindImageMemory(device.device(), images[workingIndex], imageMemorys[workingViewIndex], 0);
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.image = images[workingIndex];
@@ -289,7 +266,7 @@ namespace the
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
 
-    if (vkCreateImageView(device.device(), &viewInfo, nullptr, &imageViews[workingViewIndex]) != VK_SUCCESS) 
+    if (vkCreateImageView(device.device(), &viewInfo, nullptr, &imageViews[workingIndex]) != VK_SUCCESS) 
     {
       throw std::runtime_error("failed to create texture image view!");
     }
@@ -302,8 +279,8 @@ namespace the
     std::vector<VkImageView> attachments;
     if (!initoverride)
     {
-      attachments = {imageViews[MAX_FRAMES_IN_FLIGHT + imageIndex]};
-      if (addedDepth[pipelineIndex]) attachments.push_back(imageViews[MAX_FRAMES_IN_FLIGHT + imageIndex + 1]);
+      attachments = {imageViews[imageIndex]};
+      if (addedDepth[pipelineIndex]) attachments.push_back(imageViews[imageIndex + 1]);
     } else {
       attachments = {imageViews[imageIndex]};
       if (addedDepth[pipelineIndex]) attachments.push_back(imageViews[imageIndex + 1]);
@@ -315,8 +292,8 @@ namespace the
     framebufferInfo.renderPass = renderPasses[pipelineIndex];
     framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
     framebufferInfo.pAttachments = attachments.data();
-    framebufferInfo.width = swapChainExtent.width;
-    framebufferInfo.height = swapChainExtent.height;
+    framebufferInfo.width = extents[pipelineIndex].width;
+    framebufferInfo.height = extents[pipelineIndex].height;
     framebufferInfo.layers = 1;
 
     if (vkCreateFramebuffer(
