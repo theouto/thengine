@@ -1,9 +1,6 @@
 #include "../headers/the_render.hpp"
 #include <vulkan/vulkan_core.h>
 
-//the_render will encompass everything that has to do with logic and is found within VulkanEngine/the_renderer.cpp
-//
-//I will try to not make too much of a muck of it this time, keyword being try.
 namespace the
 {
   TheRender::TheRender(TheDevice& device, TheWindow& window) : theDevice{device}, theWindow{window}
@@ -11,28 +8,38 @@ namespace the
     theResources = std::make_unique<TheResources>(theDevice);
     recreateSwapChain();
     createCommandBuffers();
+    initBaseImageBuffers();
+  }
+
+  void TheRender::initBaseImageBuffers()
+  {
+
+    auto init = std::make_unique<TheDescriptorWriter>(*(theResources->layouts[2]), *(theResources->pools[2]));
+
+    for(int i = 0; i < theSwapChain->getImageViewCount(); i++)
+    {
+      auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(i));
+      init->addImage(0, &imageInfo, i);
+    }
+
+    init->build(theResources->sets[2]);
   }
 
   void TheRender::recreateBuffers()
   {
-    int k = 0;
-
-    for (int i = 0; i < theResources->presentedImages.size(); i++)
+    for (int i = 0; i < theSwapChain->getImageViewCount(); i++)
     {
-      for (int j = 0; j < TheSwapChain::MAX_FRAMES_IN_FLIGHT; j++)
-      {
-        auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(i+j));
+      auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(i));
 
-        TheDescriptorWriter(*(theResources->layouts[2]), *(theResources->pools[2]))
-          .addImage(0, &imageInfo, k++)
-          .overwrite(theResources->presentedImages[i][j]);
-      }
+      TheDescriptorWriter(*(theResources->layouts[2]), *(theResources->pools[2]))
+        .addImage(0, &imageInfo, i)
+        .overwrite(theResources->sets[2]);
     }
   }
 
   void TheRender::recreateSwapChain()
   {
-    extent = theWindow.getExtent();  
+    extent = theWindow.getExtent();
     while (extent.width == 0 || extent.height == 0) {
       extent = theWindow.getExtent();
       SDL_WaitEvent(nullptr);
@@ -44,7 +51,7 @@ namespace the
     } else {
       std::shared_ptr<TheSwapChain> oldSwapChain = std::move(theSwapChain);
       theSwapChain = std::make_unique<TheSwapChain>(theDevice, extent, oldSwapChain);
-      generateDescriptors();
+      recreateBuffers();
 
       if (!oldSwapChain->compareSwapFormats(*theSwapChain.get())) {
         throw std::runtime_error("Swap chain image(or depth) format has changed!");

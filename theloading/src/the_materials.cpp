@@ -30,7 +30,7 @@ namespace the
     if (!material.is_open()) {throw std::runtime_error("Failed to open material file!");}
     XXH32_hash_t hash = XXH32(path.c_str(), path.length(), 0);
 
-    object.hash = hash;
+    object.materialHash = hash;
 
     std::string dummy;
     std::vector<float> loader(4);
@@ -140,8 +140,8 @@ namespace the
 
   void TheMaterials::pushValues(uint* RID, float* modified, TheGameObject& object)
   {
-    auto tex = bindlessTextureSet.at(object.hash);
-    auto mod = modifiers.at(object.hash);
+    auto tex = bindlessTextureSet.at(object.materialHash);
+    auto mod = modifiers.at(object.materialHash);
 
     for (int i = 0; i < 6; i++)
     {

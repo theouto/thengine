@@ -60,6 +60,7 @@ namespace the
 
       VkResult acquireNextImage(uint32_t *imageIndex);
       VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
+      int getImageViewCount(){return imageViewCount;}
 
       bool compareSwapFormats(const TheSwapChain& swapChain) const
       {
@@ -108,6 +109,7 @@ namespace the
       std::unordered_map<uint32_t, VkFramebuffer> framebuffers;
       std::unordered_map<uint32_t, VkDeviceMemory> imageMemorys;
       std::unordered_map<uint32_t, VkImage> images;
+      int imageViewCount = 0;
       std::unordered_map<uint32_t, VkImageView> imageViews;
       std::unordered_map<uint32_t, VkRenderPass> renderPasses;
       std::unordered_map<uint32_t, VkExtent2D> extents;

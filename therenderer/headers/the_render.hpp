@@ -40,8 +40,8 @@ namespace the
 
     private:
 
-      void generateDescriptors();
 	  void createCommandBuffers();
+      void initBaseImageBuffers();
 	  void freeCommandBuffers();
 	  void recreateSwapChain();
       void recreateBuffers();

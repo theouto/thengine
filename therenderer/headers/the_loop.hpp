@@ -20,13 +20,22 @@ namespace the
       static constexpr int defWidth = 1920;
       static constexpr int defHeight = 1080;
 
-      TheLoop();
+      TheLoop(){};
       ~TheLoop(){};
+
+      TheLoop(const TheLoop&) = delete;
+      TheLoop& operator=(const TheLoop&) = delete;
 
       void render();
 
     private:
       TheWindow theWindow{defWidth, defHeight, "thengine"};
+      TheEvents theEvents{theWindow};
+      KeyboardMovementController keyboardController{};
       TheDevice theDevice{theWindow};
+      TheRender theRenderer{theDevice, theWindow};
+      TheScene sceneManager{theDevice, gameObjects, theRenderer};
+
+      TheGameObject::Map gameObjects;
   };
 };

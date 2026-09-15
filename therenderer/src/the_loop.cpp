@@ -2,5 +2,13 @@
 
 namespace the
 {
+  void TheLoop::render()
+  {
+    
 
+    while (theEvents.eventHandler())
+    {
+
+    }
+  }
 };

@@ -35,17 +35,17 @@ namespace the
             .build();
 
     layouts[0] = TheDescriptorSetLayout::Builder(theDevice)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_ALL, 1)
             .build();
 
     layouts[1] = TheDescriptorSetLayout::Builder(theDevice)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 20, 
+            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, 20,
                         VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT)
             .addDescriptorFlags(VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT)
             .build();
     
     layouts[2] = TheDescriptorSetLayout::Builder(theDevice)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1000, 
+            .addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, 1000, 
                         VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT)
             .addDescriptorFlags(VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT)
             .build();
@@ -56,7 +56,7 @@ namespace the
     VkSampler sampler;
     TheTextures::createTextureSampler(device, sampler);
     VkDescriptorImageInfo descriptorInfo{};
-    descriptorInfo.imageLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
+    descriptorInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
     descriptorInfo.imageView = imageView;
     descriptorInfo.sampler = sampler;
     return descriptorInfo;

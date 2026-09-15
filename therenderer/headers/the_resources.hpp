@@ -18,10 +18,7 @@ namespace the
       ~TheResources(){};
       static VkDescriptorImageInfo descriptorImageInfoHelper(TheDevice& device, VkImageView imageView);
 
-      void generateDescriptors();
-      void updateDescriptors();
-
-      std::vector<std::vector<VkDescriptorSet>>& getPresentedImages() {return presentedImages;}
+      std::vector<VkDescriptorSet>& getSets() {return sets;}
 
       std::vector<std::unique_ptr<TheDescriptorPool>> pools;
                                                       //0 -> globalPool (usually just general use buffers. i.e: aspect ratio)
@@ -34,8 +31,10 @@ namespace the
                                                       //1 -> texture array
                                                       //2 -> image buffer array
 
-      //anything that is rendered into an imageView/storage
-      std::vector<std::vector<VkDescriptorSet>> presentedImages;
+      std::vector<VkDescriptorSet> sets;
+                                                      //0 -> global buffer
+                                                      //1 -> texture array
+                                                      //2 -> image buffer array
     private:
 
       TheDevice& theDevice;
