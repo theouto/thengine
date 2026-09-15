@@ -23,25 +23,28 @@ namespace the
 
   TheSwapChain::~TheSwapChain()
   {
+    if (swapChain != nullptr) vkDestroySwapchainKHR(device.device(), swapChain, nullptr);
+    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) images.erase(i);
+
     for (auto kv : images)
     {
-      vkDestroyImage(device.device(), kv.second, nullptr);
+      if (kv.second != VK_NULL_HANDLE) vkDestroyImage(device.device(), kv.second, nullptr);
     }
     for (auto kv : imageViews)
     {
-      vkDestroyImageView(device.device(), kv.second, nullptr);
+      if (kv.second != VK_NULL_HANDLE) vkDestroyImageView(device.device(), kv.second, nullptr);
     }
     for (auto kv : imageMemorys)
     {
-      vkFreeMemory(device.device(), kv.second, nullptr);
+      if (kv.second != VK_NULL_HANDLE) vkFreeMemory(device.device(), kv.second, nullptr);
     }
     for (auto kv : renderPasses)
     {
-      vkDestroyRenderPass(device.device(), kv.second, nullptr);
+      if (kv.second != VK_NULL_HANDLE) vkDestroyRenderPass(device.device(), kv.second, nullptr);
     }
     for (auto kv : framebuffers)
     {
-      vkDestroyFramebuffer(device.device(), kv.second, nullptr);
+      if (kv.second != VK_NULL_HANDLE) vkDestroyFramebuffer(device.device(), kv.second, nullptr);
     }
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)

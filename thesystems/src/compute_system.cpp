@@ -58,8 +58,8 @@ namespace the
   void ComputeSystem::render(FrameInfo& frameInfo)
   {
     thePipeline->bindCompute(frameInfo.commandBuffer);
-    vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
-			0, sets.size(), sets.data(), 0, nullptr);
+    vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout,
+	  0, sets.size(), sets.data(), 0, nullptr);
 
     ComputeData data{frameInfo.width, frameInfo.height};
 

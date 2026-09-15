@@ -38,6 +38,8 @@ namespace the
 
         std::cout << compute.getBufferIndex() << '\n';
         compute.render(frameInfo);
+        theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, 0);
+        theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
         theRenderer.endFrame();
       }
     }
