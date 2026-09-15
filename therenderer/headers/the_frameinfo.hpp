@@ -22,21 +22,20 @@ namespace the
 		glm::mat4 view{ 1.f };
 		glm::mat4 inverseView{ 1.f };
         glm::mat4 viewStat{ 1.f };
-		glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f }; //RGB Intensity
-		PointLight pointLights[MAX_LIGHTS];
-		int numLights;
-        int width;
-        int height;
-        int padding;
         glm::mat4 lightSpaceMatrix[4]{1.f, 1.f, 1.f, 1.f};
         glm::vec3 lightPos{-1.f, 2.f, -1.f};
-        float depthValues[4];
+        int numLights;
+        glm::vec4 depthValues;
+		glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f }; //RGB Intensity
+		PointLight pointLights[MAX_LIGHTS]; 
 	};
 
 	struct FrameInfo
 	{
 		int frameIndex;
 		float frameTIme;
+        int width;
+        int height;
 		VkCommandBuffer commandBuffer;
 		TheCamera& camera;
 		VkDescriptorSet globalDescriptorSet;

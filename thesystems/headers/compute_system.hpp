@@ -6,16 +6,16 @@
 
 namespace the
 {
-  class OpaqueSystem
+  class ComputeSystem
   {
     public:
-      OpaqueSystem(TheDevice& device, VkRenderPass renderPass,
+      ComputeSystem(TheDevice& device, VkRenderPass renderPass,
                    std::vector<std::string> shaderPaths, VkShaderStageFlagBits stages,
                    std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet>& sets);
-	  ~OpaqueSystem();
+	  ~ComputeSystem();
 
-	  OpaqueSystem(const OpaqueSystem&) = delete;
-	  OpaqueSystem& operator=(const OpaqueSystem&) = delete;
+	  ComputeSystem(const ComputeSystem&) = delete;
+	  ComputeSystem& operator=(const ComputeSystem&) = delete;
 
 	  void render(FrameInfo &frameInfo);
 	private:

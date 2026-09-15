@@ -14,7 +14,12 @@ namespace the
 	ThePipeline::ThePipeline(TheDevice& device, std::vector<std::string> filePaths,
 		const PipelineConfigInfo& configInfo) : theDevice{device}
 	{
-	  createGraphicsPipeline(filePaths[0], filePaths[1], configInfo);	
+      if (filePaths.size() > 1)
+      {
+        createGraphicsPipeline(filePaths[0], filePaths[1], configInfo);
+      } else {
+        createComputePipeline(filePaths[0], configInfo);
+      }
 	}
 
     ThePipeline::ThePipeline(TheDevice& device, std::string filePath,
@@ -132,7 +137,7 @@ namespace the
         shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
         shaderStage.module = computeModule;
-        shaderStage.pName = "main";
+        shaderStage.pName = "compute";
         shaderStage.flags = 0;
         shaderStage.pNext = nullptr;
         shaderStage.pSpecializationInfo = nullptr;
