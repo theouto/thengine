@@ -5,9 +5,9 @@
 //test shader taken from: https://vkguide.dev/docs/new_chapter_2/vulkan_shader_code/
 
 //size of a workgroup for compute
-layout (local_size_x = 24, local_size_y = 24, rgba8) in;
+layout (local_size_x = 24, local_size_y = 24) in;
 
-layout(set = 0, binding = 0) uniform image2D image[];
+layout(rgba32f, set = 0, binding = 0) uniform image2D image[];
 
 layout(push_constant) uniform Push 
 {
@@ -20,11 +20,11 @@ layout(push_constant) uniform Push
 void main() 
 {
     ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
-	ivec2 size = imageSize(image[push.frameIndex]);
+	ivec2 size = imageSize(image[nonuniformEXT(push.frameIndex)]);
 
     if(texelCoord.x < size.x && texelCoord.y < size.y)
     {
-        vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
+        vec4 color = vec4(0.0, 0.0, 1.0, 1.0);
 
         if(gl_LocalInvocationID.x != 0 && gl_LocalInvocationID.y != 0)
         {
@@ -32,6 +32,6 @@ void main()
             color.y = float(texelCoord.y)/(size.y);
         }
 
-        imageStore(image[push.frameIndex], texelCoord, color);
+        imageStore(image[nonuniformEXT(push.frameIndex)], texelCoord, color);
     }
 }

@@ -32,7 +32,10 @@ namespace the
 		};
 
         void moveInPlaneXZ(float dt, SDL_Window* window,TheGameObject &gameObject, float width, float height);
+        void processRegularKeys(SDL_Window* window);
         bool mousecontrol;
+
+        float mouseX, mouseY;
 
         const bool* keyse = SDL_GetKeyboardState(nullptr);
         KeyMappings keys{};

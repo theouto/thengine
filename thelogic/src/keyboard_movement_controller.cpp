@@ -13,8 +13,6 @@ namespace the
 		if (keyse[keys.lookUp]) rotate.x += 1.f;
 		if (keyse[keys.lookDown]) rotate.x -= 1.f;
 		
-		float mouseX;
-		float mouseY;
         glm::vec3 mousetate{0};
         SDL_MouseButtonFlags mouse = SDL_GetMouseState(&mouseX, &mouseY);
         if (mousecontrol)
@@ -57,13 +55,29 @@ namespace the
 		if (keyse[keys.moveRight]) moveDir += rightDir;
 		if (keyse[keys.moveLeft]) moveDir -= rightDir;
 		if (keyse[keys.moveUp]) moveDir += upDir;
-		if (keyse[keys.moveDown]) moveDir -= upDir;
-
-		if (keyse[keys.close]) SDL_Quit();
+		if (keyse[keys.moveDown]) moveDir -= upDir;	
 
 		if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
 		{
 			gameObject.transform.translation += moveSpeed * dt * glm::normalize(moveDir);
 		}
 	}
+
+  void KeyboardMovementController::processRegularKeys(SDL_Window* window)
+  {
+    if (keyse[keys.close]) SDL_Quit();
+
+    SDL_MouseButtonFlags mouse = SDL_GetMouseState(&mouseX, &mouseY);
+
+    if (SDL_BUTTON_MASK(keys.rClick) & mouse) 
+    {
+      mousecontrol = false;
+      SDL_SetWindowRelativeMouseMode(window, false);
+    }
+    if (SDL_BUTTON_MASK(keys.mClick) & mouse) 
+    {
+      mousecontrol = true;
+      SDL_SetWindowRelativeMouseMode(window, true);
+    }
+  }
 }

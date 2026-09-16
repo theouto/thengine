@@ -33,7 +33,8 @@ namespace the
 	struct FrameInfo
 	{
 		int frameIndex;
-		float frameTIme;
+        int imageIndex;
+		float frameTime;
         int width;
         int height;
 		VkCommandBuffer commandBuffer;

@@ -6,12 +6,21 @@
 #include "the_camera.hpp"
 #include "the_device.hpp"
 #include "the_swapchain.hpp"
+#include <vulkan/vulkan_core.h>
 
 namespace the
 {
   class TheRender
   {
     public:
+
+      struct PipelineMap
+      {
+        std::vector<TheSwapChain::PipelineSettings> settings;
+        VkExtent2D resolution;
+        uint32_t frames;
+      };
+
       TheRender(TheDevice& device, TheWindow& window);
       ~TheRender();
 
@@ -30,6 +39,12 @@ namespace the
 		return currentFrameIndex;
 	  }
 
+      int getImageIndex() const
+      {
+        assert(isFrameStarted && "Cannot get frame index when frame not in progress");
+        return currentImageIndex;
+      }
+
       VkCommandBuffer beginFrame();
 	  void endFrame();
 	  void beginSwapChainRenderPass(VkCommandBuffer commandBuffer, uint32_t bufferIndex);
@@ -40,10 +55,7 @@ namespace the
                                                TheSwapChain::PipelineSettings color,
                                                TheSwapChain::PipelineSettings depth,
                                                VkExtent2D resolution,
-                                               uint32_t frames = 0)
-      {
-        return theSwapChain->createNeededResources(pass, frameNumber, color, depth, resolution, frames);
-      }
+                                               uint32_t frames = 0);
 
       VkRenderPass getFramePass(uint32_t index) {return theSwapChain->getRenderPass(index);}
       VkDescriptorImageInfo getImageInfo(uint32_t index) {return TheResources::descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(index));}
@@ -60,11 +72,14 @@ namespace the
 	  void freeCommandBuffers();
 	  void recreateSwapChain();
       void recreateBuffers();
+      void recreateResources();
 
 	  TheWindow& theWindow;
       TheDevice& theDevice;
       std::vector<VkDescriptorBufferInfo> uboInfo;
       std::vector<std::shared_ptr<TheTextures>> textures;
+
+      std::vector<PipelineMap> pipelines;
 
       std::unique_ptr<TheSwapChain> theSwapChain;
 	  std::vector<VkCommandBuffer> commandBuffers;

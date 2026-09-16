@@ -21,8 +21,8 @@ namespace the
   class TheLoop
   {
     public:
-      static constexpr int defWidth = 1600;
-      static constexpr int defHeight = 900;
+      static constexpr int defWidth = 1920;
+      static constexpr int defHeight = 1080;
 
       TheLoop(){};
       ~TheLoop(){};

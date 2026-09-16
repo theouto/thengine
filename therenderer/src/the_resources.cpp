@@ -26,7 +26,7 @@ namespace the
     pools[2] = TheDescriptorPool::Builder(theDevice)
             .setMaxSets(1)
             .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10000)
-            .setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT)
+            .setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT | VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
             .build();
 
     pools[3] = TheDescriptorPool::Builder(theDevice)

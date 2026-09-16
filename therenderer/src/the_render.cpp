@@ -24,22 +24,56 @@ namespace the
     for(int i = 0; i < theSwapChain->getImageViewCount(); i++)
     {
       auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(i));
-      init->addImage(0, &imageInfo, i);
+      init->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, i);
     }
 
     init->build(theResources->sets[2]);
   }
 
+  void TheRender::recreateResources()
+  {
+    for (auto c : pipelines)
+    {
+      theSwapChain->createNeededResources(c.settings[0], c.settings[1], c.settings[2], c.settings[3],  theWindow.getExtent(), c.frames);
+    }
+  }
+
   void TheRender::recreateBuffers()
   {
+    recreateResources();
+
     for (int i = 0; i < theSwapChain->getImageViewCount(); i++)
     {
       auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(i));
 
       TheDescriptorWriter(*(theResources->layouts[2]), *(theResources->pools[2]))
-        .addImage(0, &imageInfo, i)
+        .addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, i)
         .overwrite(theResources->sets[2]);
     }
+  }
+
+  std::vector<uint32_t> TheRender::getNeededResources(TheSwapChain::PipelineSettings pass, 
+                                               TheSwapChain::PipelineSettings frameNumber, 
+                                               TheSwapChain::PipelineSettings color,
+                                               TheSwapChain::PipelineSettings depth,
+                                               VkExtent2D resolution,
+                                               uint32_t frames)
+  {
+    auto returnee = theSwapChain->createNeededResources(pass, frameNumber, color, depth, theWindow.getExtent(), frames);
+
+    if (frameNumber == TheSwapChain::SYNCED) frames = TheSwapChain::MAX_FRAMES_IN_FLIGHT;
+    pipelines.push_back({{pass, frameNumber, color, depth}, theWindow.getExtent(), frames});
+
+    for (int i = 0; i < frames; i++)
+    {
+      auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(returnee[0] + i));
+
+      TheDescriptorWriter(*(theResources->layouts[2]), *(theResources->pools[2]))
+        .addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, returnee[0] + i)
+        .overwrite(theResources->sets[2]);
+    }
+
+    return returnee;
   }
 
   void TheRender::recreateSwapChain()

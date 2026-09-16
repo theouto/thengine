@@ -230,7 +230,7 @@ namespace the {
     }
 
     TheDescriptorWriter& TheDescriptorWriter::addImage(
-        uint32_t binding, VkDescriptorImageInfo* imageInfo, uint32_t index) {
+        uint32_t binding, VkDescriptorImageInfo* imageInfo, VkDescriptorType type, uint32_t index) {
         assert(setLayout.bindings.count(binding) == 1 && "Layout does not contain specified binding");
 
         auto& bindingDescription = setLayout.bindings[binding];
@@ -240,7 +240,7 @@ namespace the {
         //    "Binding single descriptor info, but binding expects multiple"); 
 
         VkWriteDescriptorSet write{};
-        write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        write.descriptorType = type;
         write.dstArrayElement = index;
         write.dstBinding = binding;
         write.pImageInfo = imageInfo;

@@ -133,7 +133,7 @@ namespace the
       auto texInfo = tex[i]->getDescriptorInfo();
 
       TheDescriptorWriter(descLayout, descPool)
-                .addImage(0, &texInfo, currArr - (tex.size() - i - 1))
+                .addImage(0, &texInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, currArr - (tex.size() - i - 1))
                 .overwrite(bindlessSet);
     }
   }

@@ -63,16 +63,12 @@ namespace the
     vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout,
 	  0, sets.size(), sets.data(), 0, nullptr);
 
-    ComputeData data{frameInfo.frameIndex, frameInfo.width, frameInfo.height};
+    ComputeData data{frameInfo.imageIndex, frameInfo.width, frameInfo.height};
 
     vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout,
                        VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(ComputeData), &data);
 
-    //vkCmdBeginPerTileExecutionQCOM(frameInfo.commandBuffer, nullptr);
-
     vkCmdDispatch(frameInfo.commandBuffer, std::ceil(frameInfo.width / 24.0),
                   std::ceil(frameInfo.height / 24.0), 1);
-
-    //vkCmdEndPerTileExecutionQCOM(frameInfo.commandBuffer, nullptr);
   }
 }

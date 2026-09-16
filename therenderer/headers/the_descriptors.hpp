@@ -107,7 +107,7 @@ namespace the {
 
         TheDescriptorWriter& writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
         TheDescriptorWriter& writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo);
-        TheDescriptorWriter& addImage(uint32_t binding, VkDescriptorImageInfo* imageInfo, uint32_t index);
+        TheDescriptorWriter& addImage(uint32_t binding, VkDescriptorImageInfo* imageInfo, VkDescriptorType type, uint32_t index);
 
         bool build(VkDescriptorSet& set);
         void overwrite(VkDescriptorSet& set);

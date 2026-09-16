@@ -63,20 +63,17 @@ namespace the
   void TheSwapChain::init()
   {
     createSwapChain();
-
-    //Compute present
     createRenderPass(NO_ADDITIONAL_DEPTH);
     addedDepth.emplace(0, false);
     synced.emplace(0, true);
     extents.emplace(0, windowExtent);
-
     for (int i = 0; i < placeholderImages.size(); i++)
     {
       createImageView(i, swapChainImageFormat);
       createFrameBuffer(i, 0);
     }
-
     createSyncObjects();
+    currentIndex++;
   }
 
   void TheSwapChain::createSwapChain()
@@ -160,17 +157,8 @@ namespace the
 
     assert(!(color == DEPTH && depth == ADDITIONAL_DEPTH) && "Both pipeline settings set to depth! Likely not needed!\n");
 
-    switch (pass)
-    {
-      case MAIN_COMP:
-        indices.push_back(0);
-        return indices;      
-        case MAIN_GEOM:
-        indices.push_back(2);
-        return indices;
-      default:
-        indices.push_back(createRenderPass(depth));
-    }
+    indices.push_back(createRenderPass(depth));
+    extents.emplace(currentIndex, resolution);
 
     uint32_t toRender;
 
@@ -200,13 +188,7 @@ namespace the
         createImage(depth);
         addedDepth.emplace(currentIndex, true);
       }
-    }
-
-    uint32_t index = indices[indices.size() - 1];
-
-    for (int i = 0; i < toRender; i++)
-    {
-      createFrameBuffer(index + i, index);
+      createFrameBuffer(currentIndex + i, currentIndex);
     }
 
     currentIndex++;
