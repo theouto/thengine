@@ -7,7 +7,7 @@ namespace the
 {
   void TheLoop::render()
   {
-    auto resources = theRenderer.getNeededResources(TheSwapChain::MAIN_COMP, TheSwapChain::SYNCED, 
+    std::vector<uint32_t> resources = theRenderer.getNeededResources(TheSwapChain::MAIN_COMP, TheSwapChain::SYNCED, 
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH, 
                                             VkExtent2D{1920, 1080});
 
@@ -34,11 +34,11 @@ namespace the
           gameObjects,
           sceneManager.handler()
         };
+
         frameInfo.frameIndex = theRenderer.getFrameIndex();
 
-        std::cout << compute.getBufferIndex() << '\n';
         compute.render(frameInfo);
-        theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, 0);
+        theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, compute.getBufferIndex());
         theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
         theRenderer.endFrame();
       }

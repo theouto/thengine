@@ -86,7 +86,7 @@ namespace the
       this way or if I want to return a pair with the index and the resource.
       */
       uint32_t createImage(PipelineSettings setting);
-      uint32_t createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex, bool initoverride = false);
+      uint32_t createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex);
       uint32_t createRenderPass(PipelineSettings depth);
       void createImageView(uint32_t workingIndex, VkFormat format);
 
@@ -106,16 +106,21 @@ namespace the
 
       std::vector<VkImage> placeholderImages;
 
+      
       std::unordered_map<uint32_t, VkFramebuffer> framebuffers;
       std::unordered_map<uint32_t, VkDeviceMemory> imageMemorys;
       std::unordered_map<uint32_t, VkImage> images;
-      int imageViewCount = 0;
       std::unordered_map<uint32_t, VkImageView> imageViews;
       std::unordered_map<uint32_t, VkRenderPass> renderPasses;
       std::unordered_map<uint32_t, VkExtent2D> extents;
 
       std::unordered_map<uint32_t, bool> synced;
       std::unordered_map<uint32_t, bool> addedDepth;
+
+      int framebufferCount = 0;
+      int imageCount = 0;
+      int imageViewCount = 0;
+      int renderPassCount = 0;
 
       VkExtent2D swapChainExtent;
       VkExtent2D windowExtent;

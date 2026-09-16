@@ -5,14 +5,16 @@ namespace the
 {
   struct ComputeData
   {
+    int frameIndex;
     int width;
     int height;
+    int padding;
   };
 
   ComputeSystem::ComputeSystem(TheDevice& device, VkRenderPass renderPass,
                              std::string shaderPath, VkShaderStageFlagBits stages,
                              VkDescriptorSetLayout globalSetLayout, VkDescriptorSet sets,
-                             std::vector<uint32_t> resources) : theDevice{device}
+                             std::vector<uint32_t> resources) : theDevice{device}, resources{resources}
   {
     this->sets = std::vector<VkDescriptorSet>{sets};
     std::vector<VkDescriptorSetLayout> sacrifice = {globalSetLayout};
@@ -61,7 +63,7 @@ namespace the
     vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout,
 	  0, sets.size(), sets.data(), 0, nullptr);
 
-    ComputeData data{frameInfo.width, frameInfo.height};
+    ComputeData data{frameInfo.frameIndex, frameInfo.width, frameInfo.height};
 
     vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout,
                        VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(ComputeData), &data);

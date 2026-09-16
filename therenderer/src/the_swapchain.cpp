@@ -14,34 +14,39 @@ namespace the
     init();
   }
 
-  TheSwapChain::TheSwapChain(TheDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<TheSwapChain> previous) : device{deviceRef}, windowExtent{windowExtent}
+  TheSwapChain::TheSwapChain(TheDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<TheSwapChain> previous) : 
+    device{deviceRef}, windowExtent{windowExtent}, oldSwapChain{previous}
   {
     init();
 
-    previous = nullptr;
+    oldSwapChain = nullptr;
   }
 
   TheSwapChain::~TheSwapChain()
   {
+    for (auto kv : imageViews)
+    {
+      if (kv.second != VK_NULL_HANDLE) vkDestroyImageView(device.device(), kv.second, nullptr);
+    }
+
     if (swapChain != nullptr) vkDestroySwapchainKHR(device.device(), swapChain, nullptr);
-    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) images.erase(i);
+    for (int i = 0; i < placeholderImages.size(); i++) images.erase(i);
 
     for (auto kv : images)
     {
       if (kv.second != VK_NULL_HANDLE) vkDestroyImage(device.device(), kv.second, nullptr);
     }
-    for (auto kv : imageViews)
-    {
-      if (kv.second != VK_NULL_HANDLE) vkDestroyImageView(device.device(), kv.second, nullptr);
-    }
+
     for (auto kv : imageMemorys)
     {
       if (kv.second != VK_NULL_HANDLE) vkFreeMemory(device.device(), kv.second, nullptr);
     }
+
     for (auto kv : renderPasses)
     {
       if (kv.second != VK_NULL_HANDLE) vkDestroyRenderPass(device.device(), kv.second, nullptr);
     }
+
     for (auto kv : framebuffers)
     {
       if (kv.second != VK_NULL_HANDLE) vkDestroyFramebuffer(device.device(), kv.second, nullptr);
@@ -62,31 +67,14 @@ namespace the
     //Compute present
     createRenderPass(NO_ADDITIONAL_DEPTH);
     addedDepth.emplace(0, false);
+    synced.emplace(0, true);
     extents.emplace(0, windowExtent);
-    //Main geometry pass
-    createRenderPass(ADDITIONAL_DEPTH);
-    addedDepth.emplace(1, true);
-    extents.emplace(1, windowExtent); //might be changed?
 
-    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    for (int i = 0; i < placeholderImages.size(); i++)
     {
-      //compute
       createImageView(i, swapChainImageFormat);
-      //compute buffer
-      createFrameBuffer(i, 0, true);
+      createFrameBuffer(i, 0);
     }
-
-    /*
-    for (int i = MAX_FRAMES_IN_FLIGHT; i < MAX_FRAMES_IN_FLIGHT * 2; i++)
-    {
-      //main geometry
-      createImage(COLOR);
-      createImage(DEPTH);
-
-      //main geometry buffer
-      createFrameBuffer(i, 1);
-    }
-    */
 
     createSyncObjects();
   }
@@ -138,8 +126,9 @@ namespace the
 
     createInfo.oldSwapchain = oldSwapChain == nullptr ? VK_NULL_HANDLE : oldSwapChain->swapChain;
 
-    if (vkCreateSwapchainKHR(device.device(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create swap chain!");
+    if (vkCreateSwapchainKHR(device.device(), &createInfo, nullptr, &swapChain) != VK_SUCCESS)
+    {
+      throw std::runtime_error("failed to create swap chain!");
     }
 
     // we only specified a minimum number of images in the swap chain, so the implementation is
@@ -150,7 +139,7 @@ namespace the
     placeholderImages.resize(imageCount);
     vkGetSwapchainImagesKHR(device.device(), swapChain, &imageCount, placeholderImages.data());
  
-    for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    for (int i = 0; i < placeholderImages.size(); i++)
     {
       images[i] = placeholderImages[i];
     }
@@ -226,9 +215,7 @@ namespace the
 
   uint32_t TheSwapChain::createImage(PipelineSettings setting)
   {
-    static uint32_t index = 0;
-
-    uint32_t workingIndex = index + MAX_FRAMES_IN_FLIGHT;
+    uint32_t workingIndex = imageCount + placeholderImages.size();
 
     VkFormat format;
     VkImageUsageFlags usage;
@@ -264,7 +251,7 @@ namespace the
 
     createImageView(workingIndex, format);
 
-    return placeholderImages.size() + index++;
+    return MAX_FRAMES_IN_FLIGHT + imageCount++;
   }
 
   void TheSwapChain::createImageView(uint32_t workingIndex, VkFormat format)
@@ -287,19 +274,11 @@ namespace the
     }
   }
 
-  uint32_t TheSwapChain::createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex, bool initoverride)
+  uint32_t TheSwapChain::createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex)
   {
-    static uint32_t index = 0;
-
     std::vector<VkImageView> attachments;
-    if (!initoverride)
-    {
-      attachments = {imageViews[imageIndex]};
-      if (addedDepth[pipelineIndex]) attachments.push_back(imageViews[imageIndex + 1]);
-    } else {
-      attachments = {imageViews[imageIndex]};
-      if (addedDepth[pipelineIndex]) attachments.push_back(imageViews[imageIndex + 1]);
-    }
+    attachments = {imageViews[imageIndex]};
+    if (addedDepth[pipelineIndex]) attachments.push_back(imageViews[imageIndex + 1]);
 
     VkExtent2D swapChainExtent = getImageExtent(pipelineIndex);
     VkFramebufferCreateInfo framebufferInfo = {};
@@ -320,13 +299,11 @@ namespace the
         throw std::runtime_error("failed to create framebuffer!");
     }
 
-    return index++;
+    return framebufferCount++;
   }
 
   uint32_t TheSwapChain::createRenderPass(PipelineSettings depth)
   {
-    static uint32_t index = 0;
-
     VkAttachmentDescription depthAttachment{};
     VkAttachmentReference depthAttachmentRef{};
     bool useDepth = false;
@@ -389,12 +366,12 @@ namespace the
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 
-    if (vkCreateRenderPass(device.device(), &renderPassInfo, nullptr, &renderPasses[index]) != VK_SUCCESS) 
+    if (vkCreateRenderPass(device.device(), &renderPassInfo, nullptr, &renderPasses[renderPassCount]) != VK_SUCCESS) 
     {
        throw std::runtime_error("failed to create render pass!");
     }
 
-    return index++;
+    return renderPassCount++;
   }
 
   VkResult TheSwapChain::submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex)
