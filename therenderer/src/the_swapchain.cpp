@@ -157,7 +157,8 @@ namespace the
 
     assert(!(color == DEPTH && depth == ADDITIONAL_DEPTH) && "Both pipeline settings set to depth! Likely not needed!\n");
 
-    indices.push_back(createRenderPass(depth));
+    indices.push_back(currentIndex);
+    createRenderPass(depth);
     extents.emplace(currentIndex, resolution);
 
     uint32_t toRender;
@@ -202,12 +203,12 @@ namespace the
     VkFormat format;
     VkImageUsageFlags usage;
 
-    if (setting == DEPTH || ADDITIONAL_DEPTH)
+    if (setting == DEPTH || setting == ADDITIONAL_DEPTH)
     {
-      format = VkFormat{swapChainDepthFormat};
+      format = swapChainDepthFormat;
       usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     } else {
-      format = VkFormat{swapChainImageFormat};
+      format = swapChainImageFormat;
       usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
     }
 
@@ -219,7 +220,7 @@ namespace the
     imageInfo.arrayLayers = 1;
     imageInfo.format = format;
     imageInfo.usage = usage;
-    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    imageInfo.tiling = VK_IMAGE_TILING_LINEAR;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // Ensure initial layout is set.
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // Explicitly set sharing mode.

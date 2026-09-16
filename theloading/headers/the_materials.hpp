@@ -42,10 +42,6 @@ namespace the
     std::string name(uint32_t hash){return names.at(hash);}
     std::vector<std::string>& texFiles(uint32_t hash) {return files.at(hash);}
 
-    //this will be removed once the bindless descriptors stop being an experiment, but for nowwwww yeahhhhhhhhh
-    //Update: I lied lol this stays here
-    static std::vector<std::shared_ptr<TheTextures>> write_test(TheDevice& theDevice);
-
     private:
 
     uint32_t currArr = 2;

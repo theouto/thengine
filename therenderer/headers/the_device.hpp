@@ -46,6 +46,7 @@ class TheDevice {
   VkDevice device() { return device_; }
   VkSurfaceKHR surface() { return surface_; }
   VkQueue graphicsQueue() { return graphicsQueue_; }
+  VkQueue computeQueue() {return computeQueue_;}
   VkQueue presentQueue() { return presentQueue_; }
   void property(VkPhysicalDeviceProperties& properties)
   {
@@ -115,6 +116,7 @@ class TheDevice {
   VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
   VkDevice device_;
   VkSurfaceKHR surface_{VK_NULL_HANDLE};
+  VkQueue computeQueue_;
   VkQueue graphicsQueue_;
   VkQueue presentQueue_;
 

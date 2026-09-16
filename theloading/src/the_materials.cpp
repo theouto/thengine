@@ -149,9 +149,4 @@ namespace the
         if (i < 4) {modified[i] = mod[i];}
     }
   }
-
-  std::vector<std::shared_ptr<TheTextures>> TheMaterials::write_test(TheDevice& theDevice)
-  {
-    return {std::make_shared<TheTextures>(theDevice, "textures/NA.png",TheTextures::COLOR), std::make_shared<TheTextures>(theDevice, "textures/NAM.png", TheTextures::COLOR)};
-  }
 }

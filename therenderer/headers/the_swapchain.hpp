@@ -18,8 +18,8 @@ namespace the
 
       enum PipelineSettings
       {
-        MAIN_COMP,
-        MAIN_GEOM,
+        COMP,
+        GEOM,
         OTHER,
         SINGULAR,
         SYNCED,

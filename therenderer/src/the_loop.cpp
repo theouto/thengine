@@ -7,9 +7,9 @@ namespace the
 {
   void TheLoop::render()
   {
-    std::vector<uint32_t> resources = theRenderer.getNeededResources(TheSwapChain::MAIN_COMP, TheSwapChain::SYNCED,
+    std::vector<uint32_t> resources = theRenderer.getNeededResources(TheSwapChain::COMP, TheSwapChain::SYNCED,
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH, 
-                                            VkExtent2D{1920, 1080});
+                                            VkExtent2D{defWidth, defHeight});
 
     ComputeSystem compute{theDevice, theRenderer.getFramePass(0),
                          "therenderer/shaders/compiled/present.comp.spv", VK_SHADER_STAGE_COMPUTE_BIT,
@@ -44,8 +44,10 @@ namespace the
         frameInfo.imageIndex = theRenderer.getImageIndex();
 
         compute.render(frameInfo);
+
         theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, 0);
         theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
+
         theRenderer.endFrame();
       }
     }

@@ -203,6 +203,7 @@ void TheDevice::createLogicalDevice() {
   }
 
   vkGetDeviceQueue(device_, indices.graphicsFamily, 0, &graphicsQueue_);
+  vkGetDeviceQueue(device_, indices.graphicsFamily, 0, &computeQueue_);
   vkGetDeviceQueue(device_, indices.presentFamily, 0, &presentQueue_);
 }
 
