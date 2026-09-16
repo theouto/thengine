@@ -157,7 +157,12 @@ namespace the
 
     assert(!(color == DEPTH && depth == ADDITIONAL_DEPTH) && "Both pipeline settings set to depth! Likely not needed!\n");
 
-    indices.push_back(currentIndex);
+    if (pass == COMP) 
+    {
+      indices.push_back(0);
+      currentIndex++;
+      return indices;
+    }
     createRenderPass(depth);
     extents.emplace(currentIndex, resolution);
 

@@ -1,6 +1,7 @@
 #include "../headers/the_loop.hpp"
 
 #include <iostream>
+#include <chrono>
 #include <vulkan/vulkan_core.h>
 
 namespace the
@@ -16,11 +17,28 @@ namespace the
                          theRenderer.getSetLayout(2)->getDescriptorSetLayout(),
                          theRenderer.getSet(2), resources};
 
+    auto viewerObject = TheGameObject::createGameObject();
+    viewerObject.transform.translation.z = -1.5f;
+
+    sceneManager.load("scenes/light_test.ths", *(theRenderer.theResources->pools[2]));
+    auto currentTime = std::chrono::high_resolution_clock::now();
     std::cout << "rendering🙏: \n";
 
     while (theEvents.eventHandler())
     {
+      auto newTime = std::chrono::high_resolution_clock::now();
+      float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+      currentTime = newTime;
+
       keyboardController.processRegularKeys(theWindow.getSDLwindow());
+      keyboardController.moveInPlaneXZ(frameTime, theWindow.getSDLwindow(), viewerObject,
+                                       theWindow.getExtent().width, theWindow.getExtent().height);
+
+      if (keyboardController.mousecontrol) SDL_WarpMouseInWindow(theWindow.getSDLwindow(),
+                                            (theWindow.getExtent().width/2.0),
+                                            (theWindow.getExtent().height/2.0));
+
+      camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
       if (auto commandBuffer = theRenderer.beginFrame())
 	  {
@@ -28,7 +46,7 @@ namespace the
         {
           0,
           0,
-          0,
+          frameTime,
           0,
           0,
           commandBuffer,
@@ -42,6 +60,8 @@ namespace the
 
         frameInfo.frameIndex = theRenderer.getFrameIndex();
         frameInfo.imageIndex = theRenderer.getImageIndex();
+        frameInfo.width = theWindow.getExtent().width;
+        frameInfo.height = theWindow.getExtent().height;
 
         compute.render(frameInfo);
 

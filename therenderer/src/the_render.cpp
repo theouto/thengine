@@ -24,7 +24,7 @@ namespace the
     for(int i = 0; i < theSwapChain->getImageViewCount(); i++)
     {
       auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(i));
-      init->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, i);
+      init->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, i);
     }
 
     init->build(theResources->sets[2]);
@@ -47,7 +47,7 @@ namespace the
       auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(i));
 
       TheDescriptorWriter(*(theResources->layouts[2]), *(theResources->pools[2]))
-        .addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, i)
+        .addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, i)
         .overwrite(theResources->sets[2]);
     }
   }
