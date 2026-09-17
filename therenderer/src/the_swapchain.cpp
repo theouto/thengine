@@ -30,6 +30,7 @@ namespace the
     }
 
     if (swapChain != nullptr) vkDestroySwapchainKHR(device.device(), swapChain, nullptr);
+
     for (int i = 0; i < placeholderImages.size(); i++) images.erase(i);
 
     for (auto kv : images)
@@ -157,13 +158,7 @@ namespace the
 
     assert(!(color == DEPTH && depth == ADDITIONAL_DEPTH) && "Both pipeline settings set to depth! Likely not needed!\n");
 
-    if (pass == COMP) 
-    {
-      indices.push_back(0);
-      currentIndex++;
-      return indices;
-    }
-    createRenderPass(depth);
+    indices.push_back(createRenderPass(depth));
     extents.emplace(currentIndex, resolution);
 
     uint32_t toRender;
@@ -188,10 +183,10 @@ namespace the
     addedDepth.emplace(currentIndex, false);
     for (int i = 0; i < toRender; i++)
     {
-      uint32_t index = createImage(color);
+      uint32_t index = createImage(color, pass);
       if (depth == ADDITIONAL_DEPTH) 
       {
-        createImage(depth);
+        createImage(depth, pass);
         addedDepth.emplace(currentIndex, true);
       }
       createFrameBuffer(currentIndex + i, currentIndex);
@@ -201,7 +196,7 @@ namespace the
     return indices;
   }
 
-  uint32_t TheSwapChain::createImage(PipelineSettings setting)
+  uint32_t TheSwapChain::createImage(PipelineSettings setting, PipelineSettings moresetting)
   {
     uint32_t workingIndex = imageCount + placeholderImages.size();
 
@@ -212,9 +207,20 @@ namespace the
     {
       format = swapChainDepthFormat;
       usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+
     } else {
+
       format = swapChainImageFormat;
-      usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+      if (moresetting == COMP)
+      {
+        format = VK_FORMAT_R8G8B8A8_UNORM;
+        usage = VK_IMAGE_USAGE_STORAGE_BIT;
+
+      } else {
+        usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+      }
+
+      usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
     }
 
     VkImageCreateInfo imageInfo{};
@@ -225,11 +231,10 @@ namespace the
     imageInfo.arrayLayers = 1;
     imageInfo.format = format;
     imageInfo.usage = usage;
-    imageInfo.tiling = VK_IMAGE_TILING_LINEAR;
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED; // Ensure initial layout is set.
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // Explicitly set sharing mode.
-    imageInfo.flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
 
     device.createImageWithInfo(
                 imageInfo,
@@ -385,6 +390,11 @@ namespace the
     VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
+
+    //if (vkQueueSubmit(device.computeQueue(), 1, &submitInfo, nullptr) != VK_SUCCESS)
+    //{
+    //  throw std::runtime_error("failed to submit draw command buffer!");
+    //}
 
     vkResetFences(device.device(), 1, &inFlightFences[currentFrame]);
     if (vkQueueSubmit(device.graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) 

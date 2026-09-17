@@ -85,7 +85,7 @@ namespace the
       be used to retreive the related resources as needed. Still not sure as to whether or not I want to do it
       this way or if I want to return a pair with the index and the resource.
       */
-      uint32_t createImage(PipelineSettings setting);
+      uint32_t createImage(PipelineSettings setting, PipelineSettings moresetting);
       uint32_t createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex);
       uint32_t createRenderPass(PipelineSettings depth);
       void createImageView(uint32_t workingIndex, VkFormat format);

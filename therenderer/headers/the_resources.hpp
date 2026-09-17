@@ -38,6 +38,7 @@ namespace the
     private:
 
       TheDevice& theDevice;
-
+      std::vector<std::shared_ptr<TheTextures>> baseResources;
+      void initBaseTextures();
   };
 }

@@ -12,7 +12,7 @@ namespace the
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH, 
                                             VkExtent2D{defWidth, defHeight});
 
-    ComputeSystem compute{theDevice, theRenderer.getFramePass(0),
+    ComputeSystem compute{theDevice, theRenderer.getFramePass(resources[0]),
                          "therenderer/shaders/compiled/present.comp.spv", VK_SHADER_STAGE_COMPUTE_BIT,
                          theRenderer.getSetLayout(2)->getDescriptorSetLayout(),
                          theRenderer.getSet(2), resources};
@@ -20,7 +20,7 @@ namespace the
     auto viewerObject = TheGameObject::createGameObject();
     viewerObject.transform.translation.z = -1.5f;
 
-    sceneManager.load("scenes/light_test.ths", *(theRenderer.theResources->pools[2]));
+    sceneManager.load("scenes/light_test.ths", *(theRenderer.theResources->pools[1]));
     auto currentTime = std::chrono::high_resolution_clock::now();
     std::cout << "rendering🙏: \n";
 

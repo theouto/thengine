@@ -25,7 +25,7 @@ namespace the
 
     pools[2] = TheDescriptorPool::Builder(theDevice)
             .setMaxSets(1)
-            .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10000)
+            .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 10000)
             .setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT | VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
             .build();
 
@@ -47,10 +47,12 @@ namespace the
             .build();
 
     layouts[2] = TheDescriptorSetLayout::Builder(theDevice)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, 1000, 
+            .addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, 1000, 
                         VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT)
             .addDescriptorFlags(VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT)
             .build();
+
+    initBaseTextures();
   }
 
   VkDescriptorImageInfo TheResources::descriptorImageInfoHelper(TheDevice& device, VkImageView imageView)
@@ -62,5 +64,18 @@ namespace the
     descriptorInfo.imageView = imageView;
     descriptorInfo.sampler = sampler;
     return descriptorInfo;
+  }
+
+  void TheResources::initBaseTextures()
+  {
+    baseResources = {std::make_shared<TheTextures>(theDevice, "textures/NA.png", TheTextures::COLOR), std::make_shared<TheTextures>(theDevice, "textures/NAM.png", TheTextures::COLOR)};
+
+    auto image1 = baseResources[0]->getDescriptorInfo();
+    auto image2 = baseResources[1]->getDescriptorInfo();
+
+    TheDescriptorWriter(*layouts[1], *pools[1])
+      .addImage(0, &image1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 0)
+      .addImage(0, &image2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
+      .build(sets[1]);
   }
 };

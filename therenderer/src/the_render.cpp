@@ -24,7 +24,7 @@ namespace the
     for(int i = 0; i < theSwapChain->getImageViewCount(); i++)
     {
       auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(i));
-      init->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, i);
+      init->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, i);
     }
 
     init->build(theResources->sets[2]);
@@ -32,8 +32,9 @@ namespace the
 
   void TheRender::recreateResources()
   {
-    for (auto c : pipelines)
+    for (int i = 0; i < pipelines.size(); i++)
     {
+      auto c = pipelines[i];
       theSwapChain->createNeededResources(c.settings[0], c.settings[1], c.settings[2], c.settings[3],  theWindow.getExtent(), c.frames);
     }
   }
@@ -47,9 +48,10 @@ namespace the
       auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(i));
 
       TheDescriptorWriter(*(theResources->layouts[2]), *(theResources->pools[2]))
-        .addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, i)
+        .addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, i)
         .overwrite(theResources->sets[2]);
     }
+
   }
 
   std::vector<uint32_t> TheRender::getNeededResources(TheSwapChain::PipelineSettings pass, 
