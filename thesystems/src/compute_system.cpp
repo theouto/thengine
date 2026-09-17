@@ -12,22 +12,20 @@ namespace the
   };
 
   ComputeSystem::ComputeSystem(TheDevice& device, VkRenderPass renderPass,
-                             std::string shaderPath, VkShaderStageFlagBits stages,
-                             VkDescriptorSetLayout globalSetLayout, VkDescriptorSet sets,
-                             std::vector<uint32_t> resources) : theDevice{device}, resources{resources}
+                             std::string shaderPath, 
+                             std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet> sets,
+                             std::vector<uint32_t> resources) : theDevice{device}, resources{resources}, sets{sets}
   {
-    this->sets = std::vector<VkDescriptorSet>{sets};
-    std::vector<VkDescriptorSetLayout> sacrifice = {globalSetLayout};
-    createPipeLineLayout(sacrifice, stages);
+    createPipeLineLayout(globalSetLayout);
 	createPipeline(renderPass, shaderPath);
   }
 
   ComputeSystem::~ComputeSystem() {vkDestroyPipelineLayout(theDevice.device(), pipelineLayout, nullptr);}
 
-  void ComputeSystem::createPipeLineLayout(std::vector<VkDescriptorSetLayout>& globalSetLayout, VkShaderStageFlagBits stages)
+  void ComputeSystem::createPipeLineLayout(std::vector<VkDescriptorSetLayout>& globalSetLayout)
   {
     VkPushConstantRange pushConstantRange{};
-	pushConstantRange.stageFlags = stages;
+	pushConstantRange.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 	pushConstantRange.offset = 0;
 	pushConstantRange.size = sizeof(ComputeData);
 
@@ -63,7 +61,7 @@ namespace the
     vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout,
 	  0, sets.size(), sets.data(), 0, nullptr);
 
-    ComputeData data{frameInfo.frameIndex, frameInfo.width, frameInfo.height};
+    ComputeData data{frameInfo.imageIndex, frameInfo.width, frameInfo.height};
 
     vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout,
                        VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(ComputeData), &data);

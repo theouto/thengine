@@ -20,6 +20,7 @@ namespace the
       {
         COMP,
         GEOM,
+        PRESENT,
         OTHER,
         SINGULAR,
         SYNCED,
@@ -57,6 +58,7 @@ namespace the
       VkFormat getSwapChainImageFormat(){return swapChainImageFormat;}
 
       bool isSynced(uint32_t index){return synced[index];}
+      int swapChainImageCount() {return placeholderImages.size();}
 
       VkResult acquireNextImage(uint32_t *imageIndex);
       VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
@@ -64,7 +66,7 @@ namespace the
 
       bool compareSwapFormats(const TheSwapChain& swapChain) const
       {
-          return swapChain.swapChainDepthFormat == swapChainDepthFormat && swapChain.swapChainImageFormat == swapChainImageFormat;
+        return swapChain.swapChainDepthFormat == swapChainDepthFormat && swapChain.swapChainImageFormat == swapChainImageFormat;
       }
 
     private:

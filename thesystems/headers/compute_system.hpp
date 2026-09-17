@@ -11,8 +11,8 @@ namespace the
   {
     public:
       ComputeSystem(TheDevice& device, VkRenderPass renderPass,
-                   std::string shaderPath, VkShaderStageFlagBits stages,
-                   VkDescriptorSetLayout globalSetLayout, VkDescriptorSet sets,
+                   std::string shaderPath,
+                   std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet> sets,
                    std::vector<uint32_t> resources);
 	  ~ComputeSystem();
 
@@ -22,7 +22,7 @@ namespace the
 	  void render(FrameInfo &frameInfo);
       uint32_t getBufferIndex() {return resources[0];}
 	private:
-	  void createPipeLineLayout(std::vector<VkDescriptorSetLayout> &globalSetLayout, VkShaderStageFlagBits stages);
+	  void createPipeLineLayout(std::vector<VkDescriptorSetLayout> &globalSetLayout);
 	  void createPipeline(VkRenderPass renderPass, std::string shaderPaths);
 
 	  TheDevice& theDevice;

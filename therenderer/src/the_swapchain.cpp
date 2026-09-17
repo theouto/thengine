@@ -156,6 +156,12 @@ namespace the
   {
     std::vector<uint32_t> indices(0);
 
+    if (pass == PRESENT) 
+    {
+      indices.push_back(0);
+      return indices;
+    }
+
     assert(!(color == DEPTH && depth == ADDITIONAL_DEPTH) && "Both pipeline settings set to depth! Likely not needed!\n");
 
     indices.push_back(createRenderPass(depth));

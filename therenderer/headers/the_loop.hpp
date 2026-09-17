@@ -13,6 +13,7 @@
 #include "../../theloading/headers/the_scene.hpp"
 
 #include "../../thesystems/headers/compute_system.hpp"
+#include "../../thesystems/headers/plane_system.hpp"
 
 #include <vulkan/vulkan_core.h>
 

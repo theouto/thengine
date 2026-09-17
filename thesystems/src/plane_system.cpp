@@ -1,34 +1,24 @@
-#include "../headers/opaque_system.hpp"
+#include "../headers/plane_system.hpp"
 #include <vulkan/vulkan_core.h>
 
 namespace the
 {
-  OpaqueSystem::OpaqueSystem(TheDevice& device, VkRenderPass renderPass,
-                             std::vector<std::string> shaderPaths, VkShaderStageFlagBits stages,
-                             std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet>& sets) : theDevice{device} , sets{sets}
+  PlaneSystem::PlaneSystem(TheDevice& device, VkRenderPass renderPass,
+                           std::vector<std::string> shaderPaths,
+                           std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet> sets) : theDevice{device} , sets{sets}
   {
-    createPipeLineLayout(globalSetLayout, stages);
+    createPipeLineLayout(globalSetLayout);
 	createPipeline(renderPass, shaderPaths);
   }
 
-  void OpaqueSystem::createPipeLineLayout(std::vector<VkDescriptorSetLayout>& globalSetLayout, VkShaderStageFlagBits stages)
-  {
-    /*
-    VkPushConstantRange pushConstantRange{};
-	pushConstantRange.stageFlags = stages;
-	pushConstantRange.offset = 0;
-	pushConstantRange.size = sizeof(SimplePushConstantData);
-    */
+  PlaneSystem::~PlaneSystem() {vkDestroyPipelineLayout(theDevice.device(), pipelineLayout, nullptr);}
 
+  void PlaneSystem::createPipeLineLayout(std::vector<VkDescriptorSetLayout>& globalSetLayout)
+  {
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(globalSetLayout.size());
 	pipelineLayoutInfo.pSetLayouts = globalSetLayout.data();
-
-    /*
-	pipelineLayoutInfo.pushConstantRangeCount = 1;
-	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-    */
 
 	if (vkCreatePipelineLayout(theDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
 	{
@@ -36,7 +26,7 @@ namespace the
 	}
   }
 
-  void OpaqueSystem::createPipeline(VkRenderPass renderPass, std::vector<std::string> shaderPaths)
+  void PlaneSystem::createPipeline(VkRenderPass renderPass, std::vector<std::string> shaderPaths)
   {
     assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
@@ -49,10 +39,11 @@ namespace the
 
   }
 
-  void OpaqueSystem::render(FrameInfo& frameInfo)
+  void PlaneSystem::render(FrameInfo& frameInfo)
   {
     thePipeline->bind(frameInfo.commandBuffer);
     vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
 			0, sets.size(), sets.data(), 0, nullptr);
+    vkCmdDraw(frameInfo.commandBuffer, 3, 1, 0, 0);
   }
 }
