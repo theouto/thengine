@@ -45,7 +45,7 @@ namespace the
 
 			VkDescriptorImageInfo descriptorInfo{};
 
-			descriptorInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			descriptorInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 			descriptorInfo.imageView = textureImageView;
 			descriptorInfo.sampler = textureSampler;
 

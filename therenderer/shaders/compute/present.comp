@@ -8,7 +8,6 @@
 layout (local_size_x = 16, local_size_y = 16) in;
 
 layout(rgba8, set = 0, binding = 0) uniform image2D image[];
-layout(rgba8, set = 1, binding = 0) uniform readonly image2D textures[];
 
 layout(push_constant) uniform Push 
 {
@@ -25,13 +24,9 @@ void main()
 
   if(texelCoord.x < size.x && texelCoord.y < size.y)
   {
-    vec4 color = vec4(0.0, 0.0, 1.0, 1.0);
+    vec4 color = vec4(1.0, 0.0, 0.0, 1.0);
+    color.x = imageLoad(image[nonuniformEXT(3)], texelCoord).x;
 
-    if(gl_LocalInvocationID.x != 0 && gl_LocalInvocationID.y != 0)
-    {
-      color.xy = vec2(float(texelCoord.x)/size.x, float(texelCoord.y)/size.y);//imageLoad(textures[nonuniformEXT(3)], texelCoord/size).xyz;
-    }
-
-    imageStore(image[nonuniformEXT(push.frameIndex)], texelCoord, color);
+    imageStore(image[nonuniformEXT(3)], texelCoord, color);
   }
 }

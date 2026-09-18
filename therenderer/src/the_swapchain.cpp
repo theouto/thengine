@@ -162,6 +162,8 @@ namespace the
       return indices;
     }
 
+    std::cout << "you are here\n";
+
     assert(!(color == DEPTH && depth == ADDITIONAL_DEPTH) && "Both pipeline settings set to depth! Likely not needed!\n");
 
     indices.push_back(createRenderPass(depth));
@@ -217,13 +219,11 @@ namespace the
     } else {
 
       format = swapChainImageFormat;
+      usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
       if (moresetting == COMP)
       {
         format = VK_FORMAT_R8G8B8A8_UNORM;
         usage = VK_IMAGE_USAGE_STORAGE_BIT;
-
-      } else {
-        usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
       }
 
       usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -271,6 +271,8 @@ namespace the
     {
       throw std::runtime_error("failed to create texture image view!");
     }
+
+    imageViewCount++;
   }
 
   uint32_t TheSwapChain::createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex)

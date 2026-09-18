@@ -19,15 +19,8 @@ namespace the
   void TheRender::initBaseImageBuffers()
   {
 
-    auto init = std::make_unique<TheDescriptorWriter>(*(theResources->layouts[2]), *(theResources->pools[2]));
-
-    for(int i = 0; i < theSwapChain->getImageViewCount(); i++)
-    {
-      auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(i));
-      init->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, i);
-    }
-
-    init->build(theResources->sets[2]);
+    TheDescriptorWriter(*(theResources->layouts[2]), *(theResources->pools[2]))
+      .build(theResources->sets[2]);
   }
 
   void TheRender::recreateResources()

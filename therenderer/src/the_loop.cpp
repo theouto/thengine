@@ -9,28 +9,22 @@ namespace the
   void TheLoop::render()
   {
     //For anyone seeing this: I will not be repeating the errors of the past, this is a placeholder until I know that things work as they should
-    std::vector<uint32_t> resources = theRenderer.getNeededResources(TheSwapChain::COMP, TheSwapChain::SYNCED,
+    std::vector<uint32_t> resources = theRenderer.getNeededResources(TheSwapChain::COMP, TheSwapChain::SINGULAR,
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH, 
                                             VkExtent2D{defWidth, defHeight});
 
     ComputeSystem compute{theDevice, theRenderer.getFramePass(resources[0]),
                          "therenderer/shaders/compiled/present.comp.spv", 
-                         {theRenderer.getSetLayout(2)->getDescriptorSetLayout(), theRenderer.getSetLayout(1)->getDescriptorSetLayout()},
-                         {theRenderer.getSet(2), theRenderer.getSet(1)}, resources};
+                         {theRenderer.getSetLayout(1)->getDescriptorSetLayout()},
+                         {theRenderer.getSet(1)}, resources};
 
-    resources = theRenderer.getNeededResources(TheSwapChain::COMP, TheSwapChain::SYNCED,
+    resources = theRenderer.getNeededResources(TheSwapChain::PRESENT, TheSwapChain::SYNCED,
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH,
                                             VkExtent2D{defWidth, defHeight});
 
     PlaneSystem present{theDevice, theRenderer.getFramePass(resources[0]),
                         {"therenderer/shaders/compiled/final_present.vert.spv", "therenderer/shaders/compiled/final_present.frag.spv"},
                         {theRenderer.getSetLayout(1)->getDescriptorSetLayout()}, {theRenderer.getSet(1)}};
-
-    /*
-        PlaneSystem(TheDevice& device, VkRenderPass renderPass,
-                  std::vector<std::string> shaderPaths, VkShaderStageFlagBits stages,
-                  std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet> sets);
-    */
 
     auto viewerObject = TheGameObject::createGameObject();
     viewerObject.transform.translation.z = -1.5f;
@@ -78,7 +72,7 @@ namespace the
         frameInfo.width = theWindow.getExtent().width;
         frameInfo.height = theWindow.getExtent().height;
 
-        //compute.render(frameInfo);
+        compute.render(frameInfo);
 
         theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, 0);
         present.render(frameInfo);

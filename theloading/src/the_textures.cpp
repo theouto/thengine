@@ -45,9 +45,7 @@ namespace the
                 format = 4;
                 break;
           case NORMAL:
-                textureFormat = VK_FORMAT_R8G8B8A8_SRGB; //this prevents me from having to adjust
-                                                         //the gamma in the fragment shader, which
-                                                         //is needed for how I do it.
+                textureFormat = VK_FORMAT_R8G8B8A8_SRGB; 
                 format = 4;
                 break;
           case SINGLE_UNORM:
