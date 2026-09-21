@@ -10,6 +10,9 @@ layout(set = 0, binding = 0) uniform sampler2D images[];
 
 void main()
 {
-  outColor = texture(images[nonuniformEXT(3)], texCoords);
+  outColor = texture(images[nonuniformEXT(5)], texCoords);
+
+  //if (outColor.w == 0.0f) outColor = vec4(0.f);
+
   return;
 }
