@@ -332,12 +332,12 @@ namespace the
     {
         VkSamplerCreateInfo samplerInfo{};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter = VK_FILTER_LINEAR; //nearest or linear, this is the filtering
-		samplerInfo.minFilter = VK_FILTER_LINEAR; //this too
-		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;//samplerMode;
+		samplerInfo.magFilter = VK_FILTER_LINEAR;
+		samplerInfo.minFilter = VK_FILTER_LINEAR;
+		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
 		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
 		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-		samplerInfo.anisotropyEnable = VK_TRUE;
+		samplerInfo.anisotropyEnable = VK_FALSE; //This is meant for rendered images, so anisotropy only creates issues
 		
 		VkPhysicalDeviceProperties properties{};
 		device.property(properties);
