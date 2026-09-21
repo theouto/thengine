@@ -20,13 +20,14 @@ namespace the
     pools[1] = TheDescriptorPool::Builder(theDevice)
             .setMaxSets(1)
             .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1001) //need to make sure that I will never have to worry about this
+                                                                                                 //eventually
             .setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT | VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
             .build();
 
     pools[2] = TheDescriptorPool::Builder(theDevice)
             .setMaxSets(1)
-            .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 20001)
-            .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10000)
+            .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000)
+            .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000)
             .setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT | VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
             .build();
 
@@ -50,7 +51,7 @@ namespace the
     layouts[2] = TheDescriptorSetLayout::Builder(theDevice)
             .addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, 1000, 
                         VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT)
-            .addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, 1000, 
+            .addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, 1000, 
                         VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT)
             .addDescriptorFlags(VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT)
             .build();

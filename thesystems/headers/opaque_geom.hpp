@@ -13,11 +13,14 @@ namespace the
   {
 	public:
       OpaqueGeometry(TheDevice& device, VkRenderPass renderPass, std::vector<std::string> paths,
-                       std::vector<VkDescriptorSetLayout> globalSetLayout);
+                     std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet> sets,
+                     std::vector<uint32_t> resources);
 	  ~OpaqueGeometry();
 
 	  OpaqueGeometry(const OpaqueGeometry&) = delete;
 	  OpaqueGeometry& operator=(const OpaqueGeometry&) = delete;
+
+      uint32_t getBufferIndex() {return resources[0];}
 
 	  void renderGameObjects(FrameInfo &frameInfo);
 	private:
@@ -26,8 +29,11 @@ namespace the
 
       glm::mat4 lightSpaceMatrix{1.f};
       std::vector<std::string> filePaths;
-	  TheDevice& theDevice;
+      std::vector<VkDescriptorSet> sets;
+      std::vector<uint32_t> resources;
 	  std::unique_ptr<ThePipeline> thePipeline;
+
+      TheDevice& theDevice;
 	  VkPipelineLayout pipelineLayout;
   };
 }

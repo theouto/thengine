@@ -4,8 +4,8 @@
 namespace the
 {
   PlaneSystem::PlaneSystem(TheDevice& device, VkRenderPass renderPass,
-                           std::vector<std::string> shaderPaths,
-                           std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet> sets) : theDevice{device} , sets{sets}
+                           std::vector<std::string> shaderPaths, std::vector<VkDescriptorSetLayout> globalSetLayout, 
+                           std::vector<VkDescriptorSet> sets, std::vector<uint32_t> resources) : theDevice{device} , sets{sets}, resources{resources}
   {
     createPipeLineLayout(globalSetLayout);
 	createPipeline(renderPass, shaderPaths);

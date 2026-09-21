@@ -10,12 +10,14 @@ namespace the
   {
     public:
       PlaneSystem(TheDevice& device, VkRenderPass renderPass,
-                  std::vector<std::string> shaderPaths,
-                  std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet> sets);
+                  std::vector<std::string> shaderPaths, std::vector<VkDescriptorSetLayout> globalSetLayout, 
+                  std::vector<VkDescriptorSet> sets, std::vector<uint32_t> resources);
 	  ~PlaneSystem();
 
 	  PlaneSystem(const PlaneSystem&) = delete;
 	  PlaneSystem& operator=(const PlaneSystem&) = delete;
+
+      uint32_t getBufferIndex() {return resources[0];}
 
 	  void render(FrameInfo &frameInfo);
 	private:
@@ -25,6 +27,7 @@ namespace the
 	  TheDevice& theDevice;
       std::vector<VkDescriptorSet> sets;
 	  std::unique_ptr<ThePipeline> thePipeline;
+      std::vector<uint32_t> resources;
 	  VkPipelineLayout pipelineLayout;
   };
 }

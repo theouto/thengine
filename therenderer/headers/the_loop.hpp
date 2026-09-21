@@ -14,6 +14,7 @@
 
 #include "../../thesystems/headers/compute_system.hpp"
 #include "../../thesystems/headers/plane_system.hpp"
+#include "../../thesystems/headers/opaque_geom.hpp"
 
 #include <vulkan/vulkan_core.h>
 
@@ -24,6 +25,7 @@ namespace the
     public:
       static constexpr int defWidth = 1920;
       static constexpr int defHeight = 1080;
+      std::string defShaderPath = "therenderer/shaders/compiled/";
 
       TheLoop(){};
       ~TheLoop(){};

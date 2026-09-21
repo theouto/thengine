@@ -8,7 +8,6 @@
 #include <cassert>
 #include <vulkan/vulkan_core.h>
 
-
 namespace the
 {
 	ThePipeline::ThePipeline(TheDevice& device, std::vector<std::string> filePaths,

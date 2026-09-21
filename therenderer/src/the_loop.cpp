@@ -14,7 +14,7 @@ namespace the
                                             VkExtent2D{defWidth, defHeight});
 
     ComputeSystem compute{theDevice, theRenderer.getFramePass(resources[0]),
-                         "therenderer/shaders/compiled/present.comp.spv", 
+                         defShaderPath + "present.comp.spv", 
                          {theRenderer.getSetLayout(1)->getDescriptorSetLayout()},
                          {theRenderer.getSet(1)}, resources};
 
@@ -23,8 +23,23 @@ namespace the
                                             VkExtent2D{defWidth, defHeight});
 
     PlaneSystem present{theDevice, theRenderer.getFramePass(resources[0]),
-                        {"therenderer/shaders/compiled/final_present.vert.spv", "therenderer/shaders/compiled/final_present.frag.spv"},
-                        {theRenderer.getSetLayout(1)->getDescriptorSetLayout()}, {theRenderer.getSet(1)}};
+                        {defShaderPath + "final_present.vert.spv", defShaderPath + "final_present.frag.spv"},
+                        {theRenderer.getSetLayout(1)->getDescriptorSetLayout()}, {theRenderer.getSet(1)},
+                        resources};
+
+    /*
+    resources = theRenderer.getNeededResources(TheSwapChain::GEOM, TheSwapChain::SYNCED,
+                                               TheSwapChain::COLOR, TheSwapChain::DEPTH,
+                                               VkExtent2D{defWidth, defHeight});
+
+    OpaqueGeometry render{theDevice, theRenderer.getFramePass(resources[0]),
+                          {defShaderPath + "final_present.vert.spv", defShaderPath + "final_present.frag.spv"},
+                          {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
+                          theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
+                          theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
+                          {theRenderer.getSet(0), theRenderer.getSet(1), theRenderer.getSet(2)},
+                          resources};
+    */
 
     auto viewerObject = TheGameObject::createGameObject();
     viewerObject.transform.translation.z = -1.5f;
@@ -74,12 +89,13 @@ namespace the
 
         compute.render(frameInfo);
 
-        theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, 0);
+        theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, present.getBufferIndex());
         present.render(frameInfo);
         theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
 
         theRenderer.endFrame();
       }
     }
+    vkDeviceWaitIdle(theDevice.device());
   }
 };
