@@ -162,8 +162,6 @@ namespace the
       return indices;
     }
 
-    std::cout << "you are here\n";
-
     assert(!(color == DEPTH && depth == ADDITIONAL_DEPTH) && "Both pipeline settings set to depth! Likely not needed!\n");
 
     indices.push_back(createRenderPass(depth));
