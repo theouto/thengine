@@ -15,8 +15,9 @@ namespace the
 
     ComputeSystem compute{theDevice, theRenderer.getFramePass(resources[0]),
                          defShaderPath + "present.comp.spv", 
-                         {theRenderer.getSetLayout(1)->getDescriptorSetLayout()},
-                         {theRenderer.getSet(1)}, resources};
+                         {theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
+                         theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
+                         {theRenderer.getSet(1), theRenderer.getSet(2)}, resources};
 
     resources = theRenderer.getNeededResources(TheSwapChain::PRESENT, TheSwapChain::SYNCED,
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH,
@@ -24,22 +25,21 @@ namespace the
 
     PlaneSystem present{theDevice, theRenderer.getFramePass(resources[0]),
                         {defShaderPath + "final_present.vert.spv", defShaderPath + "final_present.frag.spv"},
-                        {theRenderer.getSetLayout(1)->getDescriptorSetLayout()}, {theRenderer.getSet(1)},
-                        resources};
+                        {theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
+                        theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
+                        {theRenderer.getSet(1), theRenderer.getSet(2)}, resources};
 
-    /*
     resources = theRenderer.getNeededResources(TheSwapChain::GEOM, TheSwapChain::SYNCED,
                                                TheSwapChain::COLOR, TheSwapChain::DEPTH,
                                                VkExtent2D{defWidth, defHeight});
 
     OpaqueGeometry render{theDevice, theRenderer.getFramePass(resources[0]),
-                          {defShaderPath + "final_present.vert.spv", defShaderPath + "final_present.frag.spv"},
+                          {defShaderPath + "main_geom.vert.spv", defShaderPath + "main_geom.frag.spv"},
                           {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
                           theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
                           theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
                           {theRenderer.getSet(0), theRenderer.getSet(1), theRenderer.getSet(2)},
                           resources};
-    */
 
     auto viewerObject = TheGameObject::createGameObject();
     viewerObject.transform.translation.z = -1.5f;

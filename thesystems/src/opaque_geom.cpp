@@ -17,7 +17,7 @@ namespace the
 
   OpaqueGeometry::OpaqueGeometry(TheDevice& device, VkRenderPass renderPass, std::vector<std::string> paths,
                                  std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet> sets,
-                                 std::vector<uint32_t> resources) : theDevice{device} , sets{sets}, resources{resources}
+                                 std::vector<uint32_t> resources) : theDevice{device} , sets{sets}, resources{resources}, filePaths{paths}
   {
   	createPipeLineLayout(globalSetLayout);
   	createPipeline(renderPass);
@@ -30,17 +30,19 @@ namespace the
 
   void OpaqueGeometry::createPipeLineLayout(std::vector<VkDescriptorSetLayout> &globalSetLayout)
   {
+    /*
   	VkPushConstantRange pushConstantRange{};
   	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
   	pushConstantRange.offset = 0;
   	pushConstantRange.size = sizeof(SimplePushConstantData);
+    */
 
   	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
   	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   	pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(globalSetLayout.size());
   	pipelineLayoutInfo.pSetLayouts = globalSetLayout.data();
-    pipelineLayoutInfo.pushConstantRangeCount = 1;
-	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+    pipelineLayoutInfo.pushConstantRangeCount = 0;
+	//pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
   	if (vkCreatePipelineLayout(theDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
   	{

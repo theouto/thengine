@@ -7,7 +7,9 @@
 //size of a workgroup for compute
 layout (local_size_x = 16, local_size_y = 16) in;
 
-layout(rgba8, set = 0, binding = 0) uniform image2D image[];
+layout(rgba8, set = 0, binding = 0) uniform image2D texture[];
+layout(rgba8, set = 1, binding = 0) uniform image2D image[];
+
 
 layout(push_constant) uniform Push 
 {
@@ -20,14 +22,14 @@ layout(push_constant) uniform Push
 void main()
 {
   ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
-  ivec2 size = imageSize(image[nonuniformEXT(5)]);
+  ivec2 size = imageSize(image[nonuniformEXT(0)]);
 
   if(texelCoord.x < size.x && texelCoord.y < size.y)
   {
-    vec4 color = vec4(0.0, 0.0, 1.0, 1.0);
-    color = imageLoad(image[nonuniformEXT(3)], texelCoord);
+    vec4 color = vec4(push.frameIndex/3.0, push.frameIndex/5.0, push.frameIndex/10.0,1.0);
+    color = imageLoad(texture[nonuniformEXT(5)], texelCoord);
     if (color.w == 0.0) return;
 
-    imageStore(image[nonuniformEXT(5)], texelCoord, color);
+    imageStore(image[nonuniformEXT(0)], texelCoord, color);
   }
 }

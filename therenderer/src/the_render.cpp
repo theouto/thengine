@@ -35,13 +35,17 @@ namespace the
   {
     recreateResources();
 
+    auto sacrifice = std::make_unique<TheDescriptorWriter>(*(theResources->layouts[2]), *(theResources->pools[2]));
+
     for (int i = theSwapChain->swapChainImageCount(); i < theSwapChain->getImageViewCount(); i++)
     {
       auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(i));
 
-      TheDescriptorWriter(*(theResources->layouts[2]), *(theResources->pools[2]))
-        .addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, i - theSwapChain->swapChainImageCount())
-        .overwrite(theResources->sets[2]);
+      int idx = i - theSwapChain->swapChainImageCount();
+
+      if (pipelines[idx].settings[0] == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, idx);
+         sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,  idx)
+         .overwrite(theResources->sets[2]);
     }
   }
 
@@ -56,14 +60,17 @@ namespace the
 
     if (frameNumber == TheSwapChain::SYNCED) frames = TheSwapChain::MAX_FRAMES_IN_FLIGHT;
     pipelines.push_back({{pass, frameNumber, color, depth}, theWindow.getExtent(), frames});
+
+    auto sacrifice = std::make_unique<TheDescriptorWriter>(*(theResources->layouts[2]), *(theResources->pools[2]));
+
     if (pass != TheSwapChain::PRESENT)
     {
       for (int i = 0; i < frames; i++)
       {
         auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(returnee[0] + i));
 
-        TheDescriptorWriter(*(theResources->layouts[2]), *(theResources->pools[2]))
-          .addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, returnee[0] + i)
+          if (pass == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, returnee[0] + i);
+          sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, returnee[0] + i)
           .overwrite(theResources->sets[2]);
       }
     }

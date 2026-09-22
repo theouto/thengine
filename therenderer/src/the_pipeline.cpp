@@ -10,48 +10,43 @@
 
 namespace the
 {
-	ThePipeline::ThePipeline(TheDevice& device, std::vector<std::string> filePaths,
-		const PipelineConfigInfo& configInfo) : theDevice{device}
-	{
-      if (filePaths.size() > 1)
-      {
-        createGraphicsPipeline(filePaths[0], filePaths[1], configInfo);
-      } else {
-        createComputePipeline(filePaths[0], configInfo);
-      }
-	}
+  ThePipeline::ThePipeline(TheDevice& device, std::vector<std::string> filePaths,
+  	const PipelineConfigInfo& configInfo) : theDevice{device}
+  {
+    createGraphicsPipeline(filePaths[0], filePaths[1], configInfo);
+  }
 
-    ThePipeline::ThePipeline(TheDevice& device, std::string filePath,
-                             const PipelineConfigInfo& configInfo) : theDevice{device}
-    {
-      createComputePipeline(filePath, configInfo);
-    }
+  ThePipeline::ThePipeline(TheDevice& device, std::string filePath,
+                           const PipelineConfigInfo& configInfo) : theDevice{device}
+  {
+    createComputePipeline(filePath, configInfo);
+  }
 
 	ThePipeline::~ThePipeline()
 	{
-		vkDestroyShaderModule(theDevice.device(), vertShaderModule, nullptr);
-		vkDestroyShaderModule(theDevice.device(), fragShaderModule, nullptr);
-        vkDestroyShaderModule(theDevice.device(), computeModule, nullptr);
-		vkDestroyPipeline(theDevice.device(), graphicsPipeline, nullptr);
+	  vkDestroyShaderModule(theDevice.device(), vertShaderModule, nullptr);
+	  vkDestroyShaderModule(theDevice.device(), fragShaderModule, nullptr);
+      vkDestroyShaderModule(theDevice.device(), computeModule, nullptr);
+	  vkDestroyPipeline(theDevice.device(), graphicsPipeline, nullptr);
 	}
 
 	std::vector<char> ThePipeline::readFile(const std::string& filepath)
 	{
-		std::ifstream file{ filepath, std::ios::ate | std::ios::binary };
+	  std::ifstream file{ filepath, std::ios::ate | std::ios::binary };
 
-		if (!file.is_open())
-		{
-			throw std::runtime_error("failed to open file: " + filepath);
-		}
+	  if (!file.is_open())
+	  {
+	    throw std::runtime_error("failed to open file: " + filepath);
+	  }
 
-		size_t fileSize = static_cast<size_t>(file.tellg());
-		std::vector<char> buffer(fileSize);
+	  size_t fileSize = static_cast<size_t>(file.tellg());
+	  std::vector<char> buffer(fileSize);
 
-		file.seekg(0);
-		file.read(buffer.data(), fileSize);
+	  file.seekg(0);
+	  file.read(buffer.data(), fileSize);
 
-		file.close();
-		return buffer;
+	  file.close();
+	  return buffer;
 	}
 
 	void ThePipeline::createGraphicsPipeline(const std::string& vertFilePath, const std::string& fragFilePath,

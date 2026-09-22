@@ -218,10 +218,11 @@ namespace the
 
       format = swapChainImageFormat;
       usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-      if (moresetting == COMP)
+
+      if (moresetting != PRESENT)
       {
         format = VK_FORMAT_R8G8B8A8_UNORM;
-        usage = VK_IMAGE_USAGE_STORAGE_BIT;
+        if (moresetting == COMP) usage = VK_IMAGE_USAGE_STORAGE_BIT;
       }
 
       usage |= VK_IMAGE_USAGE_SAMPLED_BIT;

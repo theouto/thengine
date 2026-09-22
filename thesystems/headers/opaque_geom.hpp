@@ -12,6 +12,14 @@ namespace the
   class OpaqueGeometry
   {
 	public:
+
+      enum PARAMS
+      {
+        COLOR_BUF,
+        DEPTH_BUF,
+        SHADOW_MAP,
+      };
+
       OpaqueGeometry(TheDevice& device, VkRenderPass renderPass, std::vector<std::string> paths,
                      std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet> sets,
                      std::vector<uint32_t> resources);
