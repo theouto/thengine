@@ -159,6 +159,7 @@ namespace the
     if (pass == PRESENT) 
     {
       indices.push_back(0);
+      indices.push_back(0);
       return indices;
     }
 
@@ -189,13 +190,14 @@ namespace the
     addedDepth.emplace(currentIndex, false);
     for (int i = 0; i < toRender; i++)
     {
-      uint32_t index = createImage(color, pass);
+      createImage(color, pass);
       if (depth == ADDITIONAL_DEPTH) 
       {
         createImage(depth, pass);
         addedDepth.emplace(currentIndex, true);
       }
-      createFrameBuffer(currentIndex + i, currentIndex);
+      uint32_t index = createFrameBuffer(currentIndex + i, currentIndex);
+      if (i == 0) indices.push_back(index);
     }
 
     currentIndex++;
@@ -249,7 +251,7 @@ namespace the
 
     createImageView(workingIndex, format);
 
-    return MAX_FRAMES_IN_FLIGHT + imageCount++;
+    return placeholderImages.size() + imageCount++;
   }
 
   void TheSwapChain::createImageView(uint32_t workingIndex, VkFormat format)
@@ -294,7 +296,7 @@ namespace the
         device.device(),
         &framebufferInfo,
         nullptr,
-        &framebuffers[imageIndex]) != VK_SUCCESS) 
+        &framebuffers[framebufferCount]) != VK_SUCCESS) 
     {
         throw std::runtime_error("failed to create framebuffer!");
     }

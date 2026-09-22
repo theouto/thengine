@@ -28,7 +28,8 @@ namespace the
 	  OpaqueGeometry(const OpaqueGeometry&) = delete;
 	  OpaqueGeometry& operator=(const OpaqueGeometry&) = delete;
 
-      uint32_t getBufferIndex() {return resources[0];}
+      uint32_t getRenderPassIndex() {return resources[0];}
+      uint32_t getBufferIndex() {return resources[1];}
 
 	  void renderGameObjects(FrameInfo &frameInfo);
 	private:

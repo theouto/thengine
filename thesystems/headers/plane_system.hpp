@@ -17,7 +17,8 @@ namespace the
 	  PlaneSystem(const PlaneSystem&) = delete;
 	  PlaneSystem& operator=(const PlaneSystem&) = delete;
 
-      uint32_t getBufferIndex() {return resources[0];}
+      uint32_t getRenderPassIndex() {return resources[0];}
+      uint32_t getBufferIndex() {return resources[1];}
 
 	  void render(FrameInfo &frameInfo);
 	private:

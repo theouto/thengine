@@ -1,6 +1,7 @@
 #pragma once
 
 #include "the_device.hpp"
+#include "the_buffer.hpp"
 #include "the_swapchain.hpp"
 #include "the_resources.hpp"
 #include "the_render.hpp"
@@ -25,6 +26,9 @@ namespace the
     public:
       static constexpr int defWidth = 1920;
       static constexpr int defHeight = 1080;
+      static constexpr float defFar = 500.f;
+      static constexpr float defNear = 0.1f;
+
       std::string defShaderPath = "therenderer/shaders/compiled/";
 
       TheLoop(){};
@@ -39,6 +43,8 @@ namespace the
 
       VkCommandBuffer commandBuffer;
       TheGameObject::Map gameObjects;
+
+      std::vector<std::shared_ptr<TheBuffer>> uboBuffers;
 
       TheCamera camera{};
       TheWindow theWindow{defWidth, defHeight, "thengine"};

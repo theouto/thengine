@@ -168,7 +168,7 @@ namespace the
     currentFrameIndex = (currentFrameIndex + 1) % TheSwapChain::MAX_FRAMES_IN_FLIGHT;
   }
 
-  void TheRender::beginSwapChainRenderPass(VkCommandBuffer commandBuffer, uint32_t bufferIndex) {
+  void TheRender::beginSwapChainRenderPass(VkCommandBuffer commandBuffer, uint32_t bufferIndex, uint32_t renderPassIndex) {
     assert(isFrameStarted && "Can't call beginSwapChainRenderPass if frame is not in progress");
     assert(
         commandBuffer == getCurrentCommandBuffer() &&
@@ -176,8 +176,15 @@ namespace the
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = theSwapChain->getRenderPass(bufferIndex);
-    renderPassInfo.framebuffer = theSwapChain->getFrameBuffer(bufferIndex + currentImageIndex * theSwapChain->isSynced(bufferIndex));
+    renderPassInfo.renderPass = theSwapChain->getRenderPass(renderPassIndex);
+
+    if (bufferIndex == 0)
+    {
+      renderPassInfo.framebuffer = theSwapChain->getFrameBuffer(bufferIndex + currentImageIndex);
+    } else {
+      renderPassInfo.framebuffer = theSwapChain->getFrameBuffer(bufferIndex +
+                                   currentImageIndex % TheSwapChain::MAX_FRAMES_IN_FLIGHT * theSwapChain->isSynced(bufferIndex));
+    }
 
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = theSwapChain->getImageExtent(bufferIndex);

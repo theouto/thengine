@@ -23,6 +23,11 @@ namespace the
       void createPointLightHelper(std::ifstream& scene);
       void createObjectHelper(std::ifstream& scene, TheDescriptorPool& pool);
 
+      void createObject(std::string name, std::string model,
+                              std::string material, glm::vec3 translation,
+                              glm::vec3 scale, glm::vec3 rotation,
+                              TheDescriptorPool& pool);
+
       void loadModel(TheGameObject& object, TheDescriptorPool& pool,
                            TheDescriptorPool& bindlessPool,
                            TheDescriptorSetLayout& bindlessLayout,
@@ -36,6 +41,7 @@ namespace the
                                 const char* path);
 
       TheMaterials& handler() {return *materialHandler;}
+      uint32_t retrieveModel(XXH32_hash_t hash, std::string model);
 
     private:
 
@@ -46,7 +52,7 @@ namespace the
       glm::vec3 rotation{}, scale{1.f, 1.f, 1.f}, translation{}, color{};
       int count, type;
       std::shared_ptr<TheModel> theModel = nullptr;
-
+      std::unordered_map<uint32_t, std::shared_ptr<TheModel>> models;
       std::unique_ptr<TheMaterials> materialHandler;
       std::vector<TheGameObject> objArr;
       TheGameObject::Map& gameObjects;

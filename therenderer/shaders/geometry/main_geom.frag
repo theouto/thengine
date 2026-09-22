@@ -43,16 +43,14 @@ layout(set = 0, binding = 0) uniform GlobalUbo
   mat4 view;
   mat4 invView;
   mat4 viewStat;
-  vec4 ambientLightColor; // w is intensity
-  PointLight pointLights[10];
+  mat4 lightSpaceMatrix[4];
+  vec3 lightPos;
   int numLights;
+  vec4 depthValues;
+  vec4 ambientLightColor; //RGB Intensity
+  PointLight pointLights[10];
   int width;
   int height;
-  int padding;
-  mat4 lightSpaceMatrix[4];//this is ugly
-  vec3 lightPos;
-  float paddingdeux;
-  vec4 depthValues;
 } ubo;
 
 const float M_PI = 3.1415926538;
@@ -315,12 +313,12 @@ float LinearizeDepth(float depth)
 
 void main()
 {
-  vec2 projCoords = vec2(gl_FragCoord.x/ubo.width, gl_FragCoord.y/ubo.height);
+  //vec2 projCoords = vec2(gl_FragCoord.x/ubo.width, gl_FragCoord.y/ubo.height);
   float currDepth = gl_FragCoord.z;
 
-  float prePassDepth = texture(frameBuffers[nonuniformEXT(5)], projCoords).r;
+  //float prePassDepth = texture(frameBuffers[nonuniformEXT(5)], projCoords).r;
 
-  if (prePassDepth < currDepth) discard;
+  //if (prePassDepth < currDepth) discard;
 
   vec3 cameraPosWorld = ubo.invView[3].xyz;
   vec3 viewDirection = normalize(cameraPosWorld - fragPosWorld);

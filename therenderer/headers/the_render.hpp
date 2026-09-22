@@ -47,7 +47,7 @@ namespace the
 
       VkCommandBuffer beginFrame();
 	  void endFrame();
-	  void beginSwapChainRenderPass(VkCommandBuffer commandBuffer, uint32_t bufferIndex);
+	  void beginSwapChainRenderPass(VkCommandBuffer commandBuffer, uint32_t bufferIndex, uint32_t renderPassIndex);
 	  void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
       std::vector<uint32_t> getNeededResources(TheSwapChain::PipelineSettings pass, 
@@ -56,6 +56,20 @@ namespace the
                                                TheSwapChain::PipelineSettings depth,
                                                VkExtent2D resolution,
                                                uint32_t frames = 0);
+
+      void loadUboInfo(std::vector<std::shared_ptr<TheBuffer>> ubos)
+      {
+        uboInfo.resize(TheSwapChain::MAX_FRAMES_IN_FLIGHT);
+        for (int i = 0; i < TheSwapChain::MAX_FRAMES_IN_FLIGHT; i++)
+        {
+          uboInfo[i] = ubos[i]->descriptorInfo();
+        }
+        
+        TheDescriptorWriter(*(theResources->layouts[0]), *(theResources->pools[0]))
+          .writeBuffer(0, &uboInfo[0])
+          .build(theResources->sets[0]);
+
+      }
 
       VkRenderPass getFramePass(uint32_t index) {return theSwapChain->getRenderPass(index);}
       VkDescriptorImageInfo getImageInfo(uint32_t index) {return TheResources::descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(index));}

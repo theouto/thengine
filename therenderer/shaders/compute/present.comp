@@ -27,7 +27,7 @@ void main()
   if(texelCoord.x < size.x && texelCoord.y < size.y)
   {
     vec4 color = vec4(push.frameIndex/3.0, push.frameIndex/5.0, push.frameIndex/10.0,1.0);
-    color = imageLoad(texture[nonuniformEXT(5)], texelCoord);
+    color = imageLoad(texture[nonuniformEXT(3)], texelCoord);
     if (color.w == 0.0) return;
 
     imageStore(image[nonuniformEXT(0)], texelCoord, color);

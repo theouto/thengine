@@ -33,8 +33,13 @@ namespace the
       if (type == -1) createObjectHelper(scene, pool); //std::cout << "chosen!\n";}
       else if (type == 0) createPointLightHelper(scene);
     }
-    
+
     scene.close();
+
+    for (auto &kv : models)
+    {
+      kv.second->createInstanceBuffer();
+    }
   }
 
   void TheScene::loadModel(TheGameObject& object, TheDescriptorPool& pool,
@@ -117,23 +122,43 @@ namespace the
     scene >> translation[0] >> translation[1] >> translation[2];
     scene >> scale[0] >> scale[1] >> scale[2];
     scene >> rotation[0] >> rotation[1] >> rotation[2];
+ 
+    createObject(name, model, material, translation, scale, rotation, pool);
 
-    theModel = TheModel::createModelFromFile(theDevice, model);
+    getline(scene, line); //clear the line
+  }
+
+  void TheScene::createObject(std::string name, std::string model,
+                              std::string material, glm::vec3 translation,
+                              glm::vec3 scale, glm::vec3 rotation,
+                              TheDescriptorPool& pool)
+  {
+    XXH32_hash_t hash = XXH32(model.c_str(), model.length(), 0);
+    uint32_t instanceIndex = retrieveModel(hash, model);
+
     TheGameObject object = TheGameObject::createGameObject();
     object.model = theModel;
     object.matName = material;
     object.modelName = model;
+    object.instanceHash = hash;
+    object.instanceIndex = instanceIndex;
+
     std::vector<uint32_t> arr = materialHandler->retrieveBindless(material, *theRenderer.theResources->layouts[1],
                         *theRenderer.theResources->pools[1], theRenderer.theResources->sets[1],
                                     object);
+
     for (int i = 0; i < arr.size(); i++) {object.textures[i] = arr[i];}
     object.transform.translation = translation;
     object.transform.rotation = rotation;
     object.transform.scale = scale;
     object.name = name;
-    gameObjects.emplace(object.getId(), std::move(object));
 
-    getline(scene, line); //clear the line
+    object.model->addInstanceData(object.transform.mat4(), object.transform.normalMatrix(), arr,
+                                  materialHandler->modi(XXH32(material.c_str(), material.length(), 0)));
+    object.instanceIndex = retrieveModel(hash, model);
+    object.model->updateBuffer();
+
+    gameObjects.emplace(object.getId(), std::move(object));
   }
 
   void TheScene::createPointLightHelper(std::ifstream& scene)
@@ -148,5 +173,21 @@ namespace the
     light.name = name;
     light.transform.translation = translation;
     gameObjects.emplace(light.getId(), std::move(light));
+  }
+
+  uint32_t TheScene::retrieveModel(XXH32_hash_t hash, std::string model)
+  {
+    int instanceCount;
+    try {
+      theModel = models.at(hash);
+      instanceCount = theModel->getInstanceCount();} catch (std::out_of_range e)
+    {
+      theModel = TheModel::createModelFromFile(theDevice, model);
+      models.emplace(hash, theModel);
+      theModel = models.at(hash);
+      instanceCount = 0;
+    }
+
+    return instanceCount;
   }
 }
