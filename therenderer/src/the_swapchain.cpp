@@ -6,6 +6,7 @@
 #include <cassert>
 #include <algorithm>
 #include <numbers>
+#include <ranges>
 #include <vulkan/vulkan_core.h>
 
 namespace the
@@ -65,13 +66,13 @@ namespace the
   void TheSwapChain::init()
   {
     createSwapChain();
-    createRenderPass(NO_ADDITIONAL_DEPTH);
+    createRenderPass(NO_ADDITIONAL_DEPTH, GEOM);
     addedDepth.emplace(0, false);
     synced.emplace(0, true);
     extents.emplace(0, windowExtent);
     for (int i = 0; i < placeholderImages.size(); i++)
     {
-      createImageView(i, swapChainImageFormat);
+      createImageView(i, swapChainImageFormat, NO_ADDITIONAL_DEPTH);
       createFrameBuffer(i, 0);
     }
     createSyncObjects();
@@ -166,7 +167,7 @@ namespace the
 
     assert(!(color == DEPTH && depth == ADDITIONAL_DEPTH) && "Both pipeline settings set to depth! Likely not needed!\n");
 
-    indices.push_back(createRenderPass(depth));
+    indices.push_back(createRenderPass(depth, pass));
     extents.emplace(currentIndex, resolution);
 
     uint32_t toRender;
@@ -198,7 +199,11 @@ namespace the
         addedDepth[currentIndex] = true;
       }
       uint32_t index = createFrameBuffer(currentImage, currentIndex);
-      if (i == 0) indices.push_back(index);
+      if (i == 0)
+      {
+        indices.push_back(index);
+        indices.push_back(currentImage);
+      }
     }
 
     currentIndex++;
@@ -244,18 +249,27 @@ namespace the
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // Explicitly set sharing mode.
 
-    device.createImageWithInfo(
-                imageInfo,
-                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                images[workingIndex],
-                imageMemorys[workingIndex]);
+    if (setting == ADDITIONAL_DEPTH)
+    {
+      device.createImageWithInfo(
+        imageInfo,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        depthImages[workingIndex - 1],
+        imageMemorys[workingIndex]);
+    } else {
+      device.createImageWithInfo(
+        imageInfo,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        images[workingIndex],
+        imageMemorys[workingIndex]);
+    }
 
-    createImageView(workingIndex, format);
+    createImageView(workingIndex, format, setting);
 
     return placeholderImages.size() + imageCount++;
   }
 
-  void TheSwapChain::createImageView(uint32_t workingIndex, VkFormat format)
+  void TheSwapChain::createImageView(uint32_t workingIndex, VkFormat format, PipelineSettings setting)
   {
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -269,7 +283,16 @@ namespace the
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
 
-    if (vkCreateImageView(device.device(), &viewInfo, nullptr, &imageViews[workingIndex]) != VK_SUCCESS) 
+    VkImageView* imageView = &imageViews[workingIndex];
+
+    if (setting == ADDITIONAL_DEPTH) 
+    {
+      viewInfo.image = depthImages[workingIndex - 1];
+      imageView = &depthImageViews[workingIndex - 1];
+      imageViewCount--;
+    }
+
+    if (vkCreateImageView(device.device(), &viewInfo, nullptr, imageView) != VK_SUCCESS) 
     {
       throw std::runtime_error("failed to create texture image view!");
     }
@@ -281,7 +304,7 @@ namespace the
   {
     std::vector<VkImageView> attachments;
     attachments = {imageViews[imageIndex]};
-    if (addedDepth[pipelineIndex]) attachments.push_back(imageViews[imageIndex + 1]);
+    if (addedDepth[pipelineIndex]) attachments.push_back(depthImageViews[imageIndex]);
 
     VkExtent2D swapChainExtent = getImageExtent(pipelineIndex);
     VkFramebufferCreateInfo framebufferInfo = {};
@@ -305,7 +328,7 @@ namespace the
     return framebufferCount++;
   }
 
-  uint32_t TheSwapChain::createRenderPass(PipelineSettings depth)
+  uint32_t TheSwapChain::createRenderPass(PipelineSettings depth, PipelineSettings pass)
   {
     VkAttachmentDescription depthAttachment{};
     VkAttachmentReference depthAttachmentRef{};
@@ -328,7 +351,7 @@ namespace the
     }
 
     VkAttachmentDescription colorAttachment = {};
-    colorAttachment.format = swapChainImageFormat;
+    colorAttachment.format = pass == COMP ? VK_FORMAT_R8G8B8A8_UNORM : swapChainImageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT; //changed
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -350,13 +373,24 @@ namespace the
     VkSubpassDependency dependency = {};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.srcAccessMask = 0;
-    dependency.srcStageMask =
-      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstSubpass = 0;
-    dependency.dstStageMask =
-      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstAccessMask =
-      VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    if (pass == COMP)
+    {
+      dependency.srcStageMask =
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+      dependency.dstSubpass = 0;
+      dependency.dstStageMask =
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+      dependency.dstAccessMask =
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    } else {
+      dependency.srcStageMask =
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+      dependency.dstSubpass = 0;
+      dependency.dstStageMask =
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+      dependency.dstAccessMask =
+        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    }
 
     std::vector<VkAttachmentDescription> attachments = {colorAttachment};
     if (useDepth) attachments.push_back(depthAttachment);

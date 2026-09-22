@@ -43,6 +43,7 @@ namespace the
                         {theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
                         theRenderer.getSetLayout(2)->getDescriptorSetLayout()}, resources};
 
+    
     resources = theRenderer.getNeededResources(TheSwapChain::GEOM, TheSwapChain::SYNCED,
                                                TheSwapChain::COLOR, TheSwapChain::ADDITIONAL_DEPTH,
                                                VkExtent2D{defWidth, defHeight});
@@ -53,13 +54,14 @@ namespace the
                           theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
                           theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
                           resources};
+    
 
     auto viewerObject = TheGameObject::createGameObject();
     viewerObject.transform.translation.z = -1.5f;
 
     sceneManager.load("scenes/light_test.ths", *(theRenderer.theResources->pools[1]));
     auto currentTime = std::chrono::high_resolution_clock::now();
-    std::cout << "rendering🙏: \n";
+    std::cout << "rendering🙏: \n\n\n";
 
     while (theEvents.eventHandler())
     {

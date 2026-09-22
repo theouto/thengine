@@ -43,6 +43,8 @@ namespace the
 
       int idx = i - theSwapChain->swapChainImageCount();
 
+         std::cout << idx << '\n';
+
       if (pipelines[idx].settings[0] == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, idx);
          sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,  idx)
          .overwrite(theResources->sets[3]);
@@ -69,8 +71,8 @@ namespace the
       {
         auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(returnee[0] + i));
 
-          if (pass == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, returnee[0] + i);
-          sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, returnee[0] + i)
+        if (pass == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, returnee[0] + i);
+        sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, returnee[0] + i)
           .overwrite(theResources->sets[3]);
       }
     }

@@ -89,8 +89,8 @@ namespace the
       */
       uint32_t createImage(PipelineSettings setting, PipelineSettings moresetting);
       uint32_t createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex);
-      uint32_t createRenderPass(PipelineSettings depth);
-      void createImageView(uint32_t workingIndex, VkFormat format);
+      uint32_t createRenderPass(PipelineSettings depth, PipelineSettings pass);
+      void createImageView(uint32_t workingIndex, VkFormat format, PipelineSettings setting);
 
       VkFormat swapChainImageFormat;
       VkFormat swapChainDepthFormat;
@@ -108,11 +108,12 @@ namespace the
 
       std::vector<VkImage> placeholderImages;
 
-      
       std::unordered_map<uint32_t, VkFramebuffer> framebuffers;
       std::unordered_map<uint32_t, VkDeviceMemory> imageMemorys;
       std::unordered_map<uint32_t, VkImage> images;
+      std::unordered_map<uint32_t, VkImage> depthImages;
       std::unordered_map<uint32_t, VkImageView> imageViews;
+      std::unordered_map<uint32_t, VkImageView> depthImageViews;
       std::unordered_map<uint32_t, VkRenderPass> renderPasses;
       std::unordered_map<uint32_t, VkExtent2D> extents;
 

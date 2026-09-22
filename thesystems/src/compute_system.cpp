@@ -51,8 +51,7 @@ namespace the
 
 	pipelineConfig.renderPass = renderPass;
 	pipelineConfig.pipelineLayout = pipelineLayout;
-	thePipeline = std::make_unique<ThePipeline>(theDevice, shaderPaths, pipelineConfig);
-
+	thePipeline = std::make_unique<ThePipeline>(theDevice, shaderPaths, pipelineConfig);  
   }
 
   void ComputeSystem::render(FrameInfo& frameInfo)
