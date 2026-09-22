@@ -64,11 +64,14 @@ namespace the
         {
           uboInfo[i] = ubos[i]->descriptorInfo();
         }
-        
+ 
         TheDescriptorWriter(*(theResources->layouts[0]), *(theResources->pools[0]))
           .writeBuffer(0, &uboInfo[0])
           .build(theResources->sets[0]);
 
+        TheDescriptorWriter(*(theResources->layouts[0]), *(theResources->pools[0]))
+          .writeBuffer(0, &uboInfo[1])
+          .build(theResources->sets[1]);
       }
 
       VkRenderPass getFramePass(uint32_t index) {return theSwapChain->getRenderPass(index);}

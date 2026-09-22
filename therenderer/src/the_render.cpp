@@ -19,7 +19,7 @@ namespace the
   void TheRender::initBaseImageBuffers()
   {
     TheDescriptorWriter(*(theResources->layouts[2]), *(theResources->pools[2]))
-      .build(theResources->sets[2]);
+      .build(theResources->sets[3]);
   }
 
   void TheRender::recreateResources()
@@ -45,7 +45,7 @@ namespace the
 
       if (pipelines[idx].settings[0] == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, idx);
          sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,  idx)
-         .overwrite(theResources->sets[2]);
+         .overwrite(theResources->sets[3]);
     }
   }
 
@@ -71,7 +71,7 @@ namespace the
 
           if (pass == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, returnee[0] + i);
           sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, returnee[0] + i)
-          .overwrite(theResources->sets[2]);
+          .overwrite(theResources->sets[3]);
       }
     }
 
@@ -178,16 +178,16 @@ namespace the
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = theSwapChain->getRenderPass(renderPassIndex);
 
-    if (bufferIndex == 0)
+    if (renderPassIndex == 0)
     {
-      renderPassInfo.framebuffer = theSwapChain->getFrameBuffer(bufferIndex + currentImageIndex);
+      renderPassInfo.framebuffer = theSwapChain->getFrameBuffer(currentImageIndex);
     } else {
       renderPassInfo.framebuffer = theSwapChain->getFrameBuffer(bufferIndex +
-                                   currentImageIndex % TheSwapChain::MAX_FRAMES_IN_FLIGHT * theSwapChain->isSynced(bufferIndex));
+                                   currentImageIndex % TheSwapChain::MAX_FRAMES_IN_FLIGHT * theSwapChain->isSynced(renderPassIndex));
     }
 
     renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = theSwapChain->getImageExtent(bufferIndex);
+    renderPassInfo.renderArea.extent = theSwapChain->getImageExtent(renderPassIndex);
 
     std::array<VkClearValue, 2> clearValues{};
     clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
@@ -200,11 +200,11 @@ namespace the
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = static_cast<float>(theSwapChain->getImageExtent(bufferIndex).width);
-    viewport.height = static_cast<float>(theSwapChain->getImageExtent(bufferIndex).height);
+    viewport.width = static_cast<float>(theSwapChain->getImageExtent(renderPassIndex).width);
+    viewport.height = static_cast<float>(theSwapChain->getImageExtent(renderPassIndex).height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
-    VkRect2D scissor{{0, 0}, theSwapChain->getImageExtent(bufferIndex)};
+    VkRect2D scissor{{0, 0}, theSwapChain->getImageExtent(renderPassIndex)};
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
   }

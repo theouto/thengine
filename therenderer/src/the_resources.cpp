@@ -13,8 +13,8 @@ namespace the
     sets.resize(4);
 
     pools[0] = TheDescriptorPool::Builder(theDevice)
-            .setMaxSets(1)
-            .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 5)
+            .setMaxSets(4)
+            .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 5)
             .build();
 
     pools[1] = TheDescriptorPool::Builder(theDevice)
@@ -40,7 +40,7 @@ namespace the
             .build();
 
     layouts[0] = TheDescriptorSetLayout::Builder(theDevice)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_ALL, 1)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL, 1)
             .build();
 
     layouts[1] = TheDescriptorSetLayout::Builder(theDevice)
@@ -81,6 +81,6 @@ namespace the
     TheDescriptorWriter(*layouts[1], *pools[1])
       .addImage(0, &image1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 0)
       .addImage(0, &image2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
-      .build(sets[1]);
+      .build(sets[2]);
   }
 };

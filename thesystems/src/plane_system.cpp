@@ -5,7 +5,7 @@ namespace the
 {
   PlaneSystem::PlaneSystem(TheDevice& device, VkRenderPass renderPass,
                            std::vector<std::string> shaderPaths, std::vector<VkDescriptorSetLayout> globalSetLayout, 
-                           std::vector<VkDescriptorSet> sets, std::vector<uint32_t> resources) : theDevice{device} , sets{sets}, resources{resources}
+                           std::vector<uint32_t> resources) : theDevice{device} , resources{resources}
   {
     createPipeLineLayout(globalSetLayout);
 	createPipeline(renderPass, shaderPaths);
@@ -33,17 +33,21 @@ namespace the
     PipelineConfigInfo pipelineConfig{};
 	ThePipeline::defaultPipelineConfigInfo(pipelineConfig);
 
+	pipelineConfig.attributeDescriptions.clear();
+	pipelineConfig.bindingDescriptions.clear();
 	pipelineConfig.renderPass = renderPass;
 	pipelineConfig.pipelineLayout = pipelineLayout;
 	thePipeline = std::make_unique<ThePipeline>(theDevice, shaderPaths, pipelineConfig);
-
   }
 
   void PlaneSystem::render(FrameInfo& frameInfo)
   {
     thePipeline->bind(frameInfo.commandBuffer);
+
+    std::vector<VkDescriptorSet> sacrifice = {frameInfo.sets[1], frameInfo.sets[2]};
+
     vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
-			0, sets.size(), sets.data(), 0, nullptr);
+			0, sacrifice.size(), sacrifice.data(), 0, nullptr);
     vkCmdDraw(frameInfo.commandBuffer, 3, 1, 0, 0);
   }
 }

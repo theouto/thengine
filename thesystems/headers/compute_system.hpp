@@ -12,7 +12,7 @@ namespace the
     public:
       ComputeSystem(TheDevice& device, VkRenderPass renderPass,
                    std::string shaderPath,
-                   std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet> sets,
+                   std::vector<VkDescriptorSetLayout> globalSetLayout,
                    std::vector<uint32_t> resources);
 	  ~ComputeSystem();
 
@@ -29,7 +29,6 @@ namespace the
 	  TheDevice& theDevice;
 
       std::vector<uint32_t> resources;
-      std::vector<VkDescriptorSet> sets;
 
 	  std::unique_ptr<ThePipeline> thePipeline;
 	  VkPipelineLayout pipelineLayout;

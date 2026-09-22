@@ -14,7 +14,7 @@ layout(location = 9) in vec4 fmodifiers;
 layout(location = 0) out vec4 outColor;
 
 layout(set = 1, binding = 0) uniform sampler2D storageSampler[];
-layout(set = 2, binding = 0) uniform sampler2D frameBuffers[];
+layout(set = 2, binding = 1) uniform sampler2D frameBuffers[];
 
 layout(push_constant) uniform Push 
 {

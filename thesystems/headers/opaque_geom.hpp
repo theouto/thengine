@@ -21,7 +21,7 @@ namespace the
       };
 
       OpaqueGeometry(TheDevice& device, VkRenderPass renderPass, std::vector<std::string> paths,
-                     std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet> sets,
+                     std::vector<VkDescriptorSetLayout> globalSetLayout,
                      std::vector<uint32_t> resources);
 	  ~OpaqueGeometry();
 
@@ -38,7 +38,6 @@ namespace the
 
       glm::mat4 lightSpaceMatrix{1.f};
       std::vector<std::string> filePaths;
-      std::vector<VkDescriptorSet> sets;
       std::vector<uint32_t> resources;
 	  std::unique_ptr<ThePipeline> thePipeline;
 

@@ -16,8 +16,8 @@ namespace the
   struct SimplePushConstantData{};
 
   OpaqueGeometry::OpaqueGeometry(TheDevice& device, VkRenderPass renderPass, std::vector<std::string> paths,
-                                 std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet> sets,
-                                 std::vector<uint32_t> resources) : theDevice{device} , sets{sets}, resources{resources}, filePaths{paths}
+                                 std::vector<VkDescriptorSetLayout> globalSetLayout,
+                                 std::vector<uint32_t> resources) : theDevice{device} , resources{resources}, filePaths{paths}
   {
   	createPipeLineLayout(globalSetLayout);
   	createPipeline(renderPass);
@@ -67,7 +67,7 @@ namespace the
     thePipeline->bind(frameInfo.commandBuffer);
 
     vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
-	    0, sets.size(), sets.data(), 0, nullptr);
+	    0, frameInfo.sets.size(), frameInfo.sets.data(), 0, nullptr);
 
     std::unordered_map<XXH32_hash_t, bool> render;
 

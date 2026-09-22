@@ -10,8 +10,8 @@ namespace the
   {
     public:
       PlaneSystem(TheDevice& device, VkRenderPass renderPass,
-                  std::vector<std::string> shaderPaths, std::vector<VkDescriptorSetLayout> globalSetLayout, 
-                  std::vector<VkDescriptorSet> sets, std::vector<uint32_t> resources);
+                  std::vector<std::string> shaderPaths, std::vector<VkDescriptorSetLayout> globalSetLayout,
+                  std::vector<uint32_t> resources);
 	  ~PlaneSystem();
 
 	  PlaneSystem(const PlaneSystem&) = delete;
@@ -26,7 +26,6 @@ namespace the
 	  void createPipeline(VkRenderPass renderPass, std::vector<std::string> shaderPaths);
 
 	  TheDevice& theDevice;
-      std::vector<VkDescriptorSet> sets;
 	  std::unique_ptr<ThePipeline> thePipeline;
       std::vector<uint32_t> resources;
 	  VkPipelineLayout pipelineLayout;

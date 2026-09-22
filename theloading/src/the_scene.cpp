@@ -48,7 +48,6 @@ namespace the
                            VkDescriptorSet& bindlessSet,
                            const char* path)
   {
-    //object.descriptorSet = materialHandler->retrieveMaterial(path, *matLayout, pool);
     changeMaterial(object, bindlessPool, bindlessLayout, bindlessSet, path);
     gameObjects.emplace(object.getId(), std::move(object));
   }
@@ -144,8 +143,8 @@ namespace the
     object.instanceIndex = instanceIndex;
 
     std::vector<uint32_t> arr = materialHandler->retrieveBindless(material, *theRenderer.theResources->layouts[1],
-                        *theRenderer.theResources->pools[1], theRenderer.theResources->sets[1],
-                                    object);
+                                *theRenderer.theResources->pools[1], theRenderer.theResources->sets[2],
+                                object);
 
     for (int i = 0; i < arr.size(); i++) {object.textures[i] = arr[i];}
     object.transform.translation = translation;

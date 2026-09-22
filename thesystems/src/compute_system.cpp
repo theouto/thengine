@@ -13,8 +13,8 @@ namespace the
 
   ComputeSystem::ComputeSystem(TheDevice& device, VkRenderPass renderPass,
                              std::string shaderPath, 
-                             std::vector<VkDescriptorSetLayout> globalSetLayout, std::vector<VkDescriptorSet> sets,
-                             std::vector<uint32_t> resources) : theDevice{device}, resources{resources}, sets{sets}
+                             std::vector<VkDescriptorSetLayout> globalSetLayout,
+                             std::vector<uint32_t> resources) : theDevice{device}, resources{resources}
   {
     createPipeLineLayout(globalSetLayout);
 	createPipeline(renderPass, shaderPath);
@@ -58,8 +58,11 @@ namespace the
   void ComputeSystem::render(FrameInfo& frameInfo)
   {
     thePipeline->bindCompute(frameInfo.commandBuffer);
+
+    std::vector<VkDescriptorSet> sacrifice = {frameInfo.sets[1], frameInfo.sets[2]};
+
     vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout,
-	  0, sets.size(), sets.data(), 0, nullptr);
+	  0, sacrifice.size(), sacrifice.data(), 0, nullptr);
 
     ComputeData data{frameInfo.frameIndex, frameInfo.width, frameInfo.height};
 

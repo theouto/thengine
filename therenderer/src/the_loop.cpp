@@ -26,14 +26,13 @@ namespace the
     //For anyone seeing this: I will not be repeating the errors of the past, this is a placeholder until I know that things work as they should
     //Actually no, these are not the mistakes of the past, or at least I don't think they are
     std::vector<uint32_t> resources = theRenderer.getNeededResources(TheSwapChain::COMP, TheSwapChain::SINGULAR,
-                                            TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH, 
+                                            TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH,
                                             VkExtent2D{defWidth, defHeight});
 
     ComputeSystem compute{theDevice, theRenderer.getFramePass(resources[0]),
                          defShaderPath + "present.comp.spv", 
                          {theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
-                         theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
-                         {theRenderer.getSet(1), theRenderer.getSet(2)}, resources};
+                         theRenderer.getSetLayout(2)->getDescriptorSetLayout()}, resources};
 
     resources = theRenderer.getNeededResources(TheSwapChain::PRESENT, TheSwapChain::SYNCED,
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH,
@@ -42,11 +41,10 @@ namespace the
     PlaneSystem present{theDevice, theRenderer.getFramePass(resources[0]),
                         {defShaderPath + "final_present.vert.spv", defShaderPath + "final_present.frag.spv"},
                         {theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
-                        theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
-                        {theRenderer.getSet(1), theRenderer.getSet(2)}, resources};
+                        theRenderer.getSetLayout(2)->getDescriptorSetLayout()}, resources};
 
     resources = theRenderer.getNeededResources(TheSwapChain::GEOM, TheSwapChain::SYNCED,
-                                               TheSwapChain::COLOR, TheSwapChain::DEPTH,
+                                               TheSwapChain::COLOR, TheSwapChain::ADDITIONAL_DEPTH,
                                                VkExtent2D{defWidth, defHeight});
 
     OpaqueGeometry render{theDevice, theRenderer.getFramePass(resources[0]),
@@ -54,7 +52,6 @@ namespace the
                           {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
                           theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
                           theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
-                          {theRenderer.getSet(0), theRenderer.getSet(1), theRenderer.getSet(2)},
                           resources};
 
     auto viewerObject = TheGameObject::createGameObject();
@@ -87,7 +84,6 @@ namespace the
         FrameInfo frameInfo
         {
           0,
-          0,
           frameTime,
           0,
           0,
@@ -101,9 +97,13 @@ namespace the
         };
 
         frameInfo.frameIndex = theRenderer.getFrameIndex();
-        frameInfo.imageIndex = theRenderer.getImageIndex();
         frameInfo.width = theWindow.getExtent().width;
         frameInfo.height = theWindow.getExtent().height;
+
+        std::vector<VkDescriptorSet> sets = {theRenderer.theResources->sets[frameInfo.frameIndex],
+                                             theRenderer.theResources->sets[2],
+                                             theRenderer.theResources->sets[3]};
+        frameInfo.sets = sets;
 
         GlobalUbo ubo{};
         ubo.projection = camera.getProjection();
@@ -113,8 +113,8 @@ namespace the
         ubo.width = theWindow.getExtent().width;
         ubo.height = theWindow.getExtent().height;
 
-        uboBuffers[0]->writeToBuffer(&ubo);
-        uboBuffers[0]->flush();
+        uboBuffers[frameInfo.frameIndex]->writeToBuffer(&ubo);
+        uboBuffers[frameInfo.frameIndex]->flush();
 
         theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, render.getBufferIndex(), render.getRenderPassIndex());
         render.renderGameObjects(frameInfo);
@@ -122,7 +122,7 @@ namespace the
 
         compute.render(frameInfo);
 
-        theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, present.getBufferIndex(), render.getRenderPassIndex());
+        theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, present.getBufferIndex(), present.getRenderPassIndex());
         present.render(frameInfo);
         theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
 

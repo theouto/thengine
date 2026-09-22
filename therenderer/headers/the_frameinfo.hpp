@@ -37,7 +37,6 @@ namespace the
   struct FrameInfo
   {
   	int frameIndex;
-    int imageIndex;
 	float frameTime;
     int width;
     int height;
@@ -48,5 +47,6 @@ namespace the
     VkDescriptorSet shadowSet;
 	TheGameObject::Map &gameObjects;
     TheMaterials materials;
+    std::vector<VkDescriptorSet> sets;
   };
 }

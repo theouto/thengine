@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <iostream>
 #include <cassert>
+#include <algorithm>
 #include <numbers>
 #include <vulkan/vulkan_core.h>
 
@@ -190,13 +191,13 @@ namespace the
     addedDepth.emplace(currentIndex, false);
     for (int i = 0; i < toRender; i++)
     {
-      createImage(color, pass);
+      uint32_t currentImage = createImage(color, pass);
       if (depth == ADDITIONAL_DEPTH) 
       {
         createImage(depth, pass);
-        addedDepth.emplace(currentIndex, true);
+        addedDepth[currentIndex] = true;
       }
-      uint32_t index = createFrameBuffer(currentIndex + i, currentIndex);
+      uint32_t index = createFrameBuffer(currentImage, currentIndex);
       if (i == 0) indices.push_back(index);
     }
 
@@ -221,10 +222,10 @@ namespace the
       format = swapChainImageFormat;
       usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-      if (moresetting != PRESENT)
+      if (moresetting == COMP)
       {
+        usage = VK_IMAGE_USAGE_STORAGE_BIT;
         format = VK_FORMAT_R8G8B8A8_UNORM;
-        if (moresetting == COMP) usage = VK_IMAGE_USAGE_STORAGE_BIT;
       }
 
       usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -344,7 +345,7 @@ namespace the
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
-    if (depth == ADDITIONAL_DEPTH) subpass.pDepthStencilAttachment = &depthAttachmentRef;
+    if (useDepth) subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
     VkSubpassDependency dependency = {};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -358,7 +359,8 @@ namespace the
       VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
     std::vector<VkAttachmentDescription> attachments = {colorAttachment};
-    if (depth == ADDITIONAL_DEPTH) attachments.push_back(depthAttachment);
+    if (useDepth) attachments.push_back(depthAttachment);
+
     VkRenderPassCreateInfo renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
