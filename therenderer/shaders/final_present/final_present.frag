@@ -38,5 +38,6 @@ layout(set = 0, binding = 0) uniform GlobalUbo
 
 void main()
 {
-  outColor = vec4(texture(imageBuffers[nonuniformEXT(1 + ubo.frameIndex)], texCoords).xyz, 1.f);
+  ivec2 coords = ivec2(0, 0);
+  outColor = vec4(imageLoad(images[nonuniformEXT(0)], coords).xyz, 1.f);
 }

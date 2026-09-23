@@ -191,6 +191,8 @@ namespace the
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = theSwapChain->getImageExtent(renderPassIndex);
 
+    std::cout << "lala\n";
+
     std::array<VkClearValue, 2> clearValues{};
     clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
     clearValues[1].depthStencil = {1.0f, 0};
@@ -198,6 +200,8 @@ namespace the
     renderPassInfo.pClearValues = clearValues.data();
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    std::cout << "lolo\n";
 
     VkViewport viewport{};
     viewport.x = 0.0f;
