@@ -40,7 +40,8 @@ namespace the
 
     PlaneSystem present{theDevice, theRenderer.getFramePass(resources[0]),
                         {defShaderPath + "final_present.vert.spv", defShaderPath + "final_present.frag.spv"},
-                        {theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
+                        {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
+                        theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
                         theRenderer.getSetLayout(2)->getDescriptorSetLayout()}, resources};
 
     
@@ -111,6 +112,7 @@ namespace the
         ubo.inverseView = camera.getInverseView();
         ubo.width = theWindow.getExtent().width;
         ubo.height = theWindow.getExtent().height;
+        ubo.frameIndex = frameInfo.frameIndex;
 
         uboBuffers[frameInfo.frameIndex]->writeToBuffer(&ubo);
         uboBuffers[frameInfo.frameIndex]->flush();

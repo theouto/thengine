@@ -32,6 +32,7 @@ namespace the
     int height;
     float near;
     float far;
+    int frameIndex;
   };
 
   struct FrameInfo

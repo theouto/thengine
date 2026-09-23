@@ -1,17 +1,14 @@
 #!/bin/bash
 
-glslc_catch()
-{
+glslc_catch() {
   echo "missing glslc!" && exit
 }
 
-rg_catch()
-{
+rg_catch() {
   echo "you should install rg (ripgrep)" && exit
 }
 
-compilation_error()
-{
+compilation_error() {
   echo "unable to compile ""$val"
   echo "ignore the message below telling you that it did compile, it's lying."
 }
@@ -22,7 +19,7 @@ glslc --help >/dev/null
 
 trap 'rg_catch' ERR
 
-cd ./shaders/
+cd ./therenderer/shaders/
 
 [ ! -d ./compiled ] && mkdir ./compiled
 
@@ -48,4 +45,4 @@ for val in "${shaderfiles[@]}"; do
 
 done
 
-cd ..
+cd ../..

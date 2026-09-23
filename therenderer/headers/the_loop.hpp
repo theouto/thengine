@@ -24,8 +24,8 @@ namespace the
   class TheLoop
   {
     public:
-      static constexpr int defWidth = 1920;
-      static constexpr int defHeight = 1080;
+      static constexpr int defWidth = 1600;
+      static constexpr int defHeight = 900;
       static constexpr float defFar = 500.f;
       static constexpr float defNear = 0.1f;
 

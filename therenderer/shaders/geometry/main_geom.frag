@@ -51,6 +51,9 @@ layout(set = 0, binding = 0) uniform GlobalUbo
   PointLight pointLights[10];
   int width;
   int height;
+  float near;
+  float far;
+  int frameIndex;
 } ubo;
 
 const float M_PI = 3.1415926538;

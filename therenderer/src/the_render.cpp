@@ -33,19 +33,23 @@ namespace the
       auto sacrifices = theSwapChain->createNeededResources(c.settings[0], c.settings[1], 
                                               c.settings[2], c.settings[3],  theWindow.getExtent(), c.frames);
 
-      std::cout << "outside of the loop: " << sacrifices[2] << " " << sacrifices[0] << " " << c.frames << '\n';
+      std::cout << theSwapChain->getImageViewCount() << '\n';
 
-      for (int i = 0; i < c.frames; i++)
+      for (int j = 0; j < c.frames; j++)
       {
-        auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(sacrifices[2] + i));
+        auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(sacrifices[2] + j));
 
-        std::cout << sacrifices[2] + i << " " << sacrifices[0] + i << '\n';
+        std::cout << "comp: " << sacrifices[2] + j << " " << sacrifices[0] + j - 1 << '\n';
 
-        if (c.settings[0] == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, sacrifices[0] + i);
-        sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sacrifices[0] + i)
-          .overwrite(theResources->sets[3]);
+        if (c.settings[0] == TheSwapChain::COMP)
+        {
+          sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, sacrifices[0] + j - 1);
+        }
+
+        sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sacrifices[0] + j - 1)
+            .overwrite(theResources->sets[3]);
+          std::cout << "thingy!\n";
       }
-
     }
   }
 
@@ -64,16 +68,18 @@ namespace the
 
     if (pass != TheSwapChain::PRESENT)
     {
+
       pipelines.push_back({{pass, frameNumber, color, depth}, theWindow.getExtent(), frames});
 
       for (int i = 0; i < frames; i++)
       {
         auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(returnee[2] + i));
 
-        std::cout << returnee[2] + i << " " << returnee[0] + i << '\n';
-
-        if (pass == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, returnee[0] + i);
-        sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, returnee[0] + i)
+        if (pass == TheSwapChain::COMP)
+        {
+          sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, returnee[0] + i - 1);
+        }
+        sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, returnee[0] + i - 1)
           .overwrite(theResources->sets[3]);
       }
     }
