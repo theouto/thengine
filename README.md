@@ -5,7 +5,8 @@ Dependencies that you need to install yourself are: vulkan-devel, sdl3, sdl3_ima
 for easy dependencies on Arch-based systems:
 
 ```bash
-sudo pacman -S base-devel glm ripgrep shaderc sdl3 sdl3_image vulkan-devel```
+sudo pacman -S base-devel glm ripgrep shaderc sdl3 sdl3_image vulkan-devel
+```
 
 This is a rendering engine (also hopefully eventually game engine) made because I enjoy vulkan and graphics programming, and hope to eventually do something with this.
 
