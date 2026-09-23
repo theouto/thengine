@@ -41,14 +41,17 @@ layout(std430, set = 0, binding = 0) uniform GlobalUbo
   mat4 view;
   mat4 invView;
   mat4 viewStat;
-  vec4 ambientLightColor; // w is intensity
-  PointLight pointLights[10];
+  vec3 lightPos;
   int numLights;
+  vec4 depthValues;
+  vec4 ambientLightColor; //RGB Intensity
+  PointLight pointLights[10];
   int width;
   int height;
-  int padding;
+  float near;
+  float far;
   mat4 lightSpaceMatrix[4];
-  vec3 lightPos;
+  int frameIndex;
 } ubo;
 
 layout(push_constant) uniform Push 

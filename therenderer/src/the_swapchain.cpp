@@ -494,7 +494,8 @@ namespace the
     {
     for (const auto& availableFormat : availableFormats) 
     {
-      if (availableFormat.format == VK_FORMAT_R8G8B8A8_SRGB && //
+      //if (availableFormat.format == VK_FORMAT_R8G8B8A8_SRGB && //
+      if (availableFormat.format == VK_FORMAT_R16G16B16A16_SFLOAT &&
           availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
       {
           return availableFormat;

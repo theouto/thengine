@@ -43,7 +43,6 @@ layout(set = 0, binding = 0) uniform GlobalUbo
   mat4 view;
   mat4 invView;
   mat4 viewStat;
-  mat4 lightSpaceMatrix[4];
   vec3 lightPos;
   int numLights;
   vec4 depthValues;
@@ -53,6 +52,7 @@ layout(set = 0, binding = 0) uniform GlobalUbo
   int height;
   float near;
   float far;
+  mat4 lightSpaceMatrix[4];
   int frameIndex;
 } ubo;
 
@@ -199,7 +199,7 @@ float ShadowCalculation(vec3 lightDir, vec3 normal, vec3 pos, int image)
   float currentDepth = projCoords.z ;
 
   float shadow = calculateRandPCF(currentDepth, uv, image);
-
+  shadow = 1.f;
   return clamp(shadow, 0.f, 1.f);
 }
 
@@ -336,18 +336,10 @@ void main()
   sun.direction = ubo.lightPos;
   sun.color = vec4(1.f, 1.f, 0.7f, 1.5f);
 
-    //vec2 boxuv = SampleSphericalMap(normalize(viewDirection));
-    //vec3 boxcolor = texture(fakebox, boxuv).rgb;
-
-	//UVs = parallaxOcclusionMapping(UVs, TBN * viewDirection);
-
   vec3 tangentNormal = texture(storageSampler[nonuniformEXT(fRIDone[2])], UVs).xyz * 255.f/127.f - 128.f/127.f;
   vec3 surfaceNormal = normalize(TBN * tangentNormal);
 
-    //vec3 surfaceNormal = normalize(fragNormalWorld);
-
-  vec3 diffcont = vec3(0.f);
-    //float diffcont = 0.f;
+  //surfaceNormal = normalize(fragNormalWorld);
 
   vec3 F0 = vec3(0.04);
   float halfView = dot(normalize(viewDirection + surfaceNormal), surfaceNormal); 
@@ -355,7 +347,6 @@ void main()
 
   vec3 Lo = vec3(0.f);
 
-    //hell is here
   int image = -1;
   vec3[] debugColours =
   {
@@ -374,8 +365,8 @@ void main()
   //image = 1;
 
   //vec3 diffuseLight = vec3(0.f);//vec3(0.02f, 0.01f, 0.08f);
-  //Lo += calculateSunLight(sun, surfaceNormal, UVs, viewDirection, F0, cameraPosWorld, image);
-  //Lo += calculateLights(surfaceNormal, UVs, viewDirection, F0);
+  Lo += calculateSunLight(sun, surfaceNormal, UVs, viewDirection, F0, cameraPosWorld, image);
+  Lo += calculateLights(surfaceNormal, UVs, viewDirection, F0);
 
     //https://www.youtube.com/watch?v=BFld4EBO2RE great video!
   vec3 lambda = exp(-0.0005f * currDepth * vec3(.5f, 1.f, 4.f));
@@ -388,7 +379,8 @@ void main()
   //outColor = vec4(vec3(depth), 0.f);
   //outColor = diffuse + vec4(Lo, 0.f) + vec4(debugColours[image]/5.f, 0.f);
   //outColor = vec4(debugColours[fRIDone[0] % 4], 0.f);
-  outColor = diffuse + vec4(Lo, 0.f);
+  //outColor = diffuse + vec4(Lo, 0.f);
+  outColor = vec4(surfaceNormal, 1.f);
   //outColor = vec4(texture(storageSampler[nonuniformEXT(fRIDone[0])], fragUv).rgb, 1.f);
   //outColor = vec4(texture(shadowStorage[fRIDo], fragUv).rgb, 1.f);
 }
