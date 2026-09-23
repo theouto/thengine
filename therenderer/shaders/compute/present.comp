@@ -21,14 +21,14 @@ layout(push_constant) uniform Push
 void main()
 {
   ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
-  ivec2 size = imageSize(image[nonuniformEXT(0)]);
+  ivec2 size = imageSize(image[nonuniformEXT(1)]);
 
   if(texelCoord.x < size.x && texelCoord.y < size.y)
   {
     vec4 color = vec4(push.frameIndex/3.0, push.frameIndex/5.0, push.frameIndex/10.0,1.0);
-    color = texture(textures[nonuniformEXT(5)], texelCoord);
+    //color = imageLoad(image[nonuniformEXT(2 + push.frameIndex)], texelCoord);
     if (color.w == 0.0) return;
 
-    imageStore(image[nonuniformEXT(0)], texelCoord, color);
+    imageStore(image[nonuniformEXT(1)], texelCoord, color);
   }
 }

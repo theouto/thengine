@@ -12,5 +12,5 @@ layout(rgba8, set = 1, binding = 0) uniform image2D images[];
 
 void main()
 {
-  outColor = vec4(texture(imageBuffers[nonuniformEXT(5)], texCoords).xyz, 1.f);
+  outColor = vec4(texture(imageBuffers[nonuniformEXT(1)], texCoords).xyz, 1.f);
 }

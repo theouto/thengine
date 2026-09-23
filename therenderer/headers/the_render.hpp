@@ -55,7 +55,7 @@ namespace the
                                                TheSwapChain::PipelineSettings color,
                                                TheSwapChain::PipelineSettings depth,
                                                VkExtent2D resolution,
-                                               uint32_t frames = 0);
+                                               uint32_t frames = 1);
 
       void loadUboInfo(std::vector<std::shared_ptr<TheBuffer>> ubos)
       {

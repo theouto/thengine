@@ -43,7 +43,7 @@ namespace the
                                                   PipelineSettings color,
                                                   PipelineSettings depth,
                                                   VkExtent2D resolution,
-                                                  uint32_t frames = 0);
+                                                  uint32_t frames = 1);
 
       void setImageExtent(uint32_t index, uint32_t w, uint32_t h) {extents[index] = {w, h};}
 

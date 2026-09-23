@@ -33,9 +33,13 @@ namespace the
       auto sacrifices = theSwapChain->createNeededResources(c.settings[0], c.settings[1], 
                                               c.settings[2], c.settings[3],  theWindow.getExtent(), c.frames);
 
+      std::cout << "outside of the loop: " << sacrifices[2] << " " << sacrifices[0] << " " << c.frames << '\n';
+
       for (int i = 0; i < c.frames; i++)
       {
         auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(sacrifices[2] + i));
+
+        std::cout << sacrifices[2] + i << " " << sacrifices[0] + i << '\n';
 
         if (c.settings[0] == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, sacrifices[0] + i);
         sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sacrifices[0] + i)
@@ -65,6 +69,8 @@ namespace the
       for (int i = 0; i < frames; i++)
       {
         auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(returnee[2] + i));
+
+        std::cout << returnee[2] + i << " " << returnee[0] + i << '\n';
 
         if (pass == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, returnee[0] + i);
         sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, returnee[0] + i)
