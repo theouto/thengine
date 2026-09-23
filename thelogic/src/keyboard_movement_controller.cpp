@@ -14,7 +14,6 @@ namespace the
 	if (keyse[keys.lookDown]) rotate.x -= 1.f;
 
     glm::vec3 mousetate{0};
-    SDL_MouseButtonFlags mouse = SDL_GetMouseState(&mouseX, &mouseY);
     if (mousecontrol)
     {
 	  float rotx = height - mouseY;

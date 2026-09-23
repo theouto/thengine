@@ -71,7 +71,7 @@ namespace the
 
       keyboardController.processRegularKeys(theWindow.getSDLwindow());
       keyboardController.moveInPlaneXZ(frameTime, theWindow.getSDLwindow(), viewerObject,
-                                       theWindow.getExtent().width, theWindow.getExtent().height);
+                                       theWindow.getExtent().width/2.0, theWindow.getExtent().height/2.0);
 
       if (keyboardController.mousecontrol) SDL_WarpMouseInWindow(theWindow.getSDLwindow(),
                                             (theWindow.getExtent().width/2.0),
