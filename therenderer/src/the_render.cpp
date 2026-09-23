@@ -24,22 +24,17 @@ namespace the
 
   void TheRender::recreateResources()
   {
-
-    auto sacrifice = std::make_unique<TheDescriptorWriter>(*(theResources->layouts[2]), *(theResources->pools[2]));
-
     for (int i = 0; i < pipelines.size(); i++)
     {
       auto c = pipelines[i];
       auto sacrifices = theSwapChain->createNeededResources(c.settings[0], c.settings[1], 
                                               c.settings[2], c.settings[3],  theWindow.getExtent(), c.frames);
 
-      std::cout << theSwapChain->getImageViewCount() << '\n';
-
       for (int j = 0; j < c.frames; j++)
       {
-        auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(sacrifices[2] + j));
 
-        std::cout << "comp: " << sacrifices[2] + j << " " << sacrifices[0] + j - 1 << '\n';
+        auto sacrifice = std::make_unique<TheDescriptorWriter>(*(theResources->layouts[2]), *(theResources->pools[2]));
+        auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(sacrifices[2] + j));
 
         if (c.settings[0] == TheSwapChain::COMP)
         {
@@ -48,7 +43,6 @@ namespace the
 
         sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sacrifices[0] + j - 1)
             .overwrite(theResources->sets[3]);
-          std::cout << "thingy!\n";
       }
     }
   }
@@ -64,8 +58,6 @@ namespace the
 
     if (frameNumber == TheSwapChain::SYNCED) frames = TheSwapChain::MAX_FRAMES_IN_FLIGHT;
 
-    auto sacrifice = std::make_unique<TheDescriptorWriter>(*(theResources->layouts[2]), *(theResources->pools[2]));
-
     if (pass != TheSwapChain::PRESENT)
     {
 
@@ -74,6 +66,7 @@ namespace the
       for (int i = 0; i < frames; i++)
       {
         auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(returnee[2] + i));
+        auto sacrifice = std::make_unique<TheDescriptorWriter>(*(theResources->layouts[2]), *(theResources->pools[2]));
 
         if (pass == TheSwapChain::COMP)
         {
