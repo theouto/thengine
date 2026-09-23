@@ -91,9 +91,6 @@ namespace the
           0,
           commandBuffer,
           camera,
-          nullptr,
-          nullptr,
-          nullptr,
           gameObjects,
           sceneManager.handler()
         };

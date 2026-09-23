@@ -88,7 +88,7 @@ namespace the
       this way or if I want to return a pair with the index and the resource.
       */
       uint32_t createImage(PipelineSettings setting, PipelineSettings moresetting);
-      uint32_t createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex);
+      uint32_t createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex, PipelineSettings pass);
       uint32_t createRenderPass(PipelineSettings depth, PipelineSettings pass);
       void createImageView(uint32_t workingIndex, VkFormat format, PipelineSettings setting);
 

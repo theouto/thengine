@@ -24,30 +24,24 @@ namespace the
 
   void TheRender::recreateResources()
   {
-    for (int i = 0; i < pipelines.size(); i++)
-    {
-      auto c = pipelines[i];
-      theSwapChain->createNeededResources(c.settings[0], c.settings[1], c.settings[2], c.settings[3],  theWindow.getExtent(), c.frames);
-    }
-  }
-
-  void TheRender::recreateBuffers()
-  {
-    recreateResources();
 
     auto sacrifice = std::make_unique<TheDescriptorWriter>(*(theResources->layouts[2]), *(theResources->pools[2]));
 
-    for (int i = theSwapChain->swapChainImageCount(); i < theSwapChain->getImageViewCount(); i++)
+    for (int i = 0; i < pipelines.size(); i++)
     {
-      auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(i));
+      auto c = pipelines[i];
+      auto sacrifices = theSwapChain->createNeededResources(c.settings[0], c.settings[1], 
+                                              c.settings[2], c.settings[3],  theWindow.getExtent(), c.frames);
 
-      int idx = i - theSwapChain->swapChainImageCount();
+      for (int i = 0; i < c.frames; i++)
+      {
+        auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(sacrifices[2] + i));
 
-         std::cout << idx << '\n';
+        if (c.settings[0] == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, sacrifices[0] + i);
+        sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sacrifices[0] + i)
+          .overwrite(theResources->sets[3]);
+      }
 
-      if (pipelines[idx].settings[0] == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, idx);
-         sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,  idx)
-         .overwrite(theResources->sets[3]);
     }
   }
 
@@ -61,15 +55,16 @@ namespace the
     auto returnee = theSwapChain->createNeededResources(pass, frameNumber, color, depth, theWindow.getExtent(), frames);
 
     if (frameNumber == TheSwapChain::SYNCED) frames = TheSwapChain::MAX_FRAMES_IN_FLIGHT;
-    pipelines.push_back({{pass, frameNumber, color, depth}, theWindow.getExtent(), frames});
 
     auto sacrifice = std::make_unique<TheDescriptorWriter>(*(theResources->layouts[2]), *(theResources->pools[2]));
 
     if (pass != TheSwapChain::PRESENT)
     {
+      pipelines.push_back({{pass, frameNumber, color, depth}, theWindow.getExtent(), frames});
+
       for (int i = 0; i < frames; i++)
       {
-        auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(returnee[0] + i));
+        auto imageInfo = theResources->descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(returnee[2] + i));
 
         if (pass == TheSwapChain::COMP) sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, returnee[0] + i);
         sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, returnee[0] + i)
@@ -94,7 +89,7 @@ namespace the
     } else {
       std::shared_ptr<TheSwapChain> oldSwapChain = std::move(theSwapChain);
       theSwapChain = std::make_unique<TheSwapChain>(theDevice, extent, oldSwapChain);
-      recreateBuffers();
+      recreateResources();
 
       if (!oldSwapChain->compareSwapFormats(*theSwapChain.get())) {
         throw std::runtime_error("Swap chain image(or depth) format has changed!");

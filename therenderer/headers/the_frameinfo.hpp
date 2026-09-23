@@ -42,9 +42,6 @@ namespace the
     int height;
 	VkCommandBuffer commandBuffer;
 	TheCamera& camera;
-	VkDescriptorSet globalDescriptorSet;
-    VkDescriptorSet bindlessSet;
-    VkDescriptorSet shadowSet;
 	TheGameObject::Map &gameObjects;
     TheMaterials materials;
     std::vector<VkDescriptorSet> sets;

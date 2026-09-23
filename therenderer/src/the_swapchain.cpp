@@ -73,7 +73,7 @@ namespace the
     for (int i = 0; i < placeholderImages.size(); i++)
     {
       createImageView(i, swapChainImageFormat, NO_ADDITIONAL_DEPTH);
-      createFrameBuffer(i, 0);
+      createFrameBuffer(i, 0, PRESENT);
     }
     createSyncObjects();
     currentIndex++;
@@ -198,7 +198,7 @@ namespace the
         createImage(depth, pass);
         addedDepth[currentIndex] = true;
       }
-      uint32_t index = createFrameBuffer(currentImage, currentIndex);
+      uint32_t index = createFrameBuffer(currentImage, currentIndex, pass);
       if (i == 0)
       {
         indices.push_back(index);
@@ -220,7 +220,7 @@ namespace the
     if (setting == DEPTH || setting == ADDITIONAL_DEPTH)
     {
       format = swapChainDepthFormat;
-      usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+      usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 
     } else {
 
@@ -232,9 +232,9 @@ namespace the
         usage = VK_IMAGE_USAGE_STORAGE_BIT;
         format = VK_FORMAT_R8G8B8A8_UNORM;
       }
-
-      usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
     }
+
+    usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
 
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -256,6 +256,7 @@ namespace the
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         depthImages[workingIndex - 1],
         imageMemorys[workingIndex]);
+      imageCount--;
     } else {
       device.createImageWithInfo(
         imageInfo,
@@ -300,7 +301,7 @@ namespace the
     imageViewCount++;
   }
 
-  uint32_t TheSwapChain::createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex)
+  uint32_t TheSwapChain::createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex, PipelineSettings pass)
   {
     std::vector<VkImageView> attachments;
     attachments = {imageViews[imageIndex]};
@@ -315,6 +316,18 @@ namespace the
     framebufferInfo.width = extents[pipelineIndex].width;
     framebufferInfo.height = extents[pipelineIndex].height;
     framebufferInfo.layers = 1;
+
+    if (pass == COMP)
+    {
+      VkFramebufferAttachmentsCreateInfo createInfo{};
+      createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_ATTACHMENTS_CREATE_INFO;
+      createInfo.attachmentImageInfoCount = 0;
+      createInfo.pAttachmentImageInfos = nullptr;
+      createInfo.pNext = nullptr;
+
+      framebufferInfo.flags = VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT;
+      framebufferInfo.pNext = nullptr;
+    }
 
     if (vkCreateFramebuffer(
         device.device(),
@@ -435,11 +448,6 @@ namespace the
     VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
-
-    //if (vkQueueSubmit(device.computeQueue(), 1, &submitInfo, nullptr) != VK_SUCCESS)
-    //{
-    //  throw std::runtime_error("failed to submit draw command buffer!");
-    //}
 
     vkResetFences(device.device(), 1, &inFlightFences[currentFrame]);
     if (vkQueueSubmit(device.graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) 

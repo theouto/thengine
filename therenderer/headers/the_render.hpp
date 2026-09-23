@@ -88,7 +88,6 @@ namespace the
       void initBaseImageBuffers();
 	  void freeCommandBuffers();
 	  void recreateSwapChain();
-      void recreateBuffers();
       void recreateResources();
 
 	  TheWindow& theWindow;
