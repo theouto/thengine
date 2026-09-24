@@ -26,7 +26,7 @@ namespace the
 			glm::vec3 position;
 			//glm::vec3 color;
 			glm::vec3 normal{};
-			glm::vec2 uv{};
+			alignas(16) glm::vec2 uv{};
 
 			static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
 			static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
@@ -37,14 +37,9 @@ namespace the
 
         struct InstanceData
         {
-          glm::vec4 modelMatrixI;
-          glm::vec4 modelMatrixII;
-          glm::vec4 modelMatrixIII;
-          glm::vec4 modelMatrixIV;
-
-          alignas(16) glm::vec3 normalMatrixI;
-          alignas(16) glm::vec3 normalMatrixII;
-          alignas(16) glm::vec3 normalMatrixIII;
+          alignas(16) glm::vec3 translation;
+          alignas(16) glm::vec3 rotation;
+          alignas(16) glm::vec3 scale;
           
           alignas(16) glm::ivec3 RIDone;
           alignas(16) glm::ivec3 RIDtwo;
@@ -53,12 +48,6 @@ namespace the
           static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
           static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
         };
-
-		struct UniformBufferObject {
-			alignas(16) glm::mat4 model;
-			alignas(16) glm::mat4 view;
-			alignas(16) glm::mat4 proj;
-		}; 
 
 		struct Builder
 		{
@@ -80,25 +69,14 @@ namespace the
 
 		static std::unique_ptr<TheModel> createModelFromFile(TheDevice& device, const std::string &filepath);
 
-        uint32_t addInstanceData(glm::mat4 modelMatrix, glm::mat3 normalMatrix, std::vector<uint32_t> material, std::vector<float> materialModifiers);
+        uint32_t addInstanceData(glm::vec3 scale, glm::vec3 translation, glm::vec3 rotation, std::vector<uint32_t> material, std::vector<float> materialModifiers);
 
         void createInstanceBuffer();
         void updateBuffer();
 
-        void setModelMatrix(uint32_t index, glm::mat4 modelMatrix) 
-        {
-          instanceData[index].modelMatrixI = modelMatrix[0];
-          instanceData[index].modelMatrixII = modelMatrix[1];
-          instanceData[index].modelMatrixIII = modelMatrix[2];
-          instanceData[index].modelMatrixIV = modelMatrix[3];
-        }
-
-        void setNormalMatrix(uint32_t index, glm::mat3 normalMatrix) 
-        {
-          instanceData[index].normalMatrixI = normalMatrix[0];
-          instanceData[index].normalMatrixII = normalMatrix[1];
-          instanceData[index].normalMatrixIII = normalMatrix[2];
-        }
+        void setScale(uint32_t index, glm::vec3 scale) {instanceData[index].scale = scale;}
+        void setTranslation(uint32_t index, glm::vec3 translation) {instanceData[index].translation = translation;}
+        void setRotation(uint32_t index, glm::vec3 rotation) {instanceData[index].rotation = rotation;}
 
         void setMaterial(uint32_t index, uint32_t* RID, float* modi)
         {

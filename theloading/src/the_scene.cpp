@@ -152,7 +152,7 @@ namespace the
     object.transform.scale = scale;
     object.name = name;
 
-    object.model->addInstanceData(object.transform.mat4(), object.transform.normalMatrix(), arr,
+    object.model->addInstanceData(scale, translation, rotation, arr,
                                   materialHandler->modi(XXH32(material.c_str(), material.length(), 0)));
     object.instanceIndex = retrieveModel(hash, model);
     object.model->updateBuffer();

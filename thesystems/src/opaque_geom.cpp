@@ -13,7 +13,11 @@
 
 namespace the
 {
-  struct SimplePushConstantData{};
+  struct ModelMatrices
+  {
+    glm::mat4 modelMatrix;
+    glm::mat4 normalMatrix;
+  };
 
   OpaqueGeometry::OpaqueGeometry(TheDevice& device, VkRenderPass renderPass, std::vector<std::string> paths,
                                  std::vector<VkDescriptorSetLayout> globalSetLayout,
@@ -30,19 +34,17 @@ namespace the
 
   void OpaqueGeometry::createPipeLineLayout(std::vector<VkDescriptorSetLayout> &globalSetLayout)
   {
-    /*
   	VkPushConstantRange pushConstantRange{};
   	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
   	pushConstantRange.offset = 0;
-  	pushConstantRange.size = sizeof(SimplePushConstantData);
-    */
+  	pushConstantRange.size = sizeof(ModelMatrices);
 
   	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
   	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   	pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(globalSetLayout.size());
   	pipelineLayoutInfo.pSetLayouts = globalSetLayout.data();
-    pipelineLayoutInfo.pushConstantRangeCount = 0;
-	//pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
+	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
   	if (vkCreatePipelineLayout(theDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
   	{
@@ -77,6 +79,13 @@ namespace the
 	  if (obj.model == nullptr) continue;
       try {render.at(obj.instanceHash);} catch (std::out_of_range e)
       {
+        ModelMatrices data{};
+        data.modelMatrix = obj.transform.mat4();
+        data.normalMatrix = obj.transform.normalMatrix();
+
+        vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0, sizeof(ModelMatrices), &data);
+
 		obj.model->bind(frameInfo.commandBuffer);
 		obj.model->draw(frameInfo.commandBuffer);
 
