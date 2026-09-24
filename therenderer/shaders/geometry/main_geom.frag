@@ -72,33 +72,29 @@ vec2 SampleSphericalMap(vec3 v)
 
 //==============================================================================
 
-mat3 cotangent_frame( vec3 N, vec3 p, vec2 uv )
+mat3 cotangent_frame( vec3 normal, vec3 worldPos, vec2 texCoord )
 {
-  // get edge vectors of the pixel triangle
-  vec3 dp1 = dFdx(p);
-  vec3 dp2 = dFdy(p);
-  vec2 duv1 = dFdx(uv);
-  vec2 duv2 = dFdy(uv);
+  vec3 Q1 = dFdx(worldPos);
+  vec3 Q2 = dFdy(worldPos);
+  vec2 st1 = dFdx(texCoord);
+  vec2 st2 = dFdy(texCoord);
 
-  // solve the linear system
-  vec3 dp2perp = cross( dp2, N );
-  vec3 dp1perp = cross( N, dp1 );
-  vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
-  vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
+  vec3 N = normalize(normal);
+  vec3 T = normalize(Q1 * st2.t - Q2 * st1.t);
+  vec3 B = -normalize(cross(N, T));
 
-  // construct a scale-invariant frame 
-  float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) );
-  return mat3( T * invmax, B * invmax, N );
+  mat3 TBN = mat3(T, B, N);
+  return TBN;
 }
 
 vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord ) 
 { 
   // assume N, the interpolated vertex normal and 
   // V, the view vector (vertex to eye) 
-  vec3 map = texture(storageSampler[nonuniformEXT(fRIDone[2])], texcoord).rgb; 
-  map = map * 255.f/127.f - 128.f/127.f;
-  map.y = -map.y;
-  mat3 TBN = cotangent_frame(N, -V, texcoord);
+  vec3 map = texture(storageSampler[nonuniformEXT(fRIDone[2])], texcoord).xyz;
+  map = map * 2 - 1;
+  V.y = -V.y;
+  mat3 TBN = cotangent_frame(N, V, texcoord);
   return normalize( TBN * map ); }
 
 //==============================================================================
@@ -340,7 +336,7 @@ void main()
   sun.color = vec4(1.f, 1.f, 0.7f, 1.5f);
 
   vec3 surfaceNormal = normalize(fragNormalWorld);
-  surfaceNormal = perturb_normal(surfaceNormal, viewDirection, UVs);
+  surfaceNormal = perturb_normal(surfaceNormal, fragPosWorld, UVs);
 
   vec3 F0 = vec3(0.04);
   float halfView = dot(normalize(viewDirection + surfaceNormal), surfaceNormal); 

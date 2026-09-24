@@ -114,7 +114,7 @@ namespace the
         ubo.height = theWindow.getExtent().height;
         ubo.frameIndex = frameInfo.frameIndex;
 
-        ubo.pointLights[0] = PointLight{glm::vec4(1.5f, -1.2f, 0.f, 1.f), glm::vec4(2.f, 0.f, 0.f, 3.f)};
+        ubo.pointLights[0] = PointLight{glm::vec4(1.5f, -1.2f, 0.f, 1.f), glm::vec4(2.f, 0.f, 0.f, 1.f)};
         ubo.numLights = 1;
 
         uboBuffers[frameInfo.frameIndex]->writeToBuffer(&ubo);
