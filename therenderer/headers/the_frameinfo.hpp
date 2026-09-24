@@ -22,7 +22,7 @@ namespace the
     glm::mat4 view{ 1.f };
     glm::mat4 inverseView{ 1.f };
     glm::mat4 viewStat{ 1.f };
-    glm::vec3 lightPos{-1.f, 5.f, -1.f};
+    glm::vec3 lightPos{1.f, 5.f, 0.f};
     int numLights;
     glm::vec4 depthValues;
 	glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f }; //RGB Intensity

@@ -95,9 +95,8 @@ vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord )
 { 
   // assume N, the interpolated vertex normal and 
   // V, the view vector (vertex to eye) 
-  vec3 map = texture(storageSampler[nonuniformEXT(fRIDone[2])], texcoord).rgb; 
+  vec3 map = texture(storageSampler[nonuniformEXT(fRIDone[2])], texcoord).xyz; 
   map = map * 255.f/127.f - 128.f/127.f;
-  map.y = -map.y;
   mat3 TBN = cotangent_frame(N, -V, texcoord);
   return normalize( TBN * map ); }
 
@@ -336,11 +335,11 @@ void main()
   vec3 specularLight = vec3(0.0);
 
   DirectionalLight sun;
-  sun.direction = normalize(ubo.lightPos);
+  sun.direction = normalize(ubo.lightDir);
   sun.color = vec4(1.f, 1.f, 0.7f, 1.5f);
 
   vec3 surfaceNormal = normalize(fragNormalWorld);
-  surfaceNormal = perturb_normal(surfaceNormal, viewDirection, UVs);
+  surfaceNormal = perturb_normal(surfaceNormal, surfaceNormal, UVs);
 
   vec3 F0 = vec3(0.04);
   float halfView = dot(normalize(viewDirection + surfaceNormal), surfaceNormal); 
@@ -377,6 +376,6 @@ void main()
 
   //outColor = vec4(vec3(depth), 0.f);
   //outColor = diffuse + vec4(Lo, 0.f) + vec4(debugColours[image]/5.f, 0.f);
-  outColor = diffuse + vec4(Lo, 0.f);
-  //outColor = vec4(surfaceNormal, 1.f);
+  //outColor = diffuse + vec4(Lo, 0.f);
+  outColor = vec4(surfaceNormal, 1.f);
 }
