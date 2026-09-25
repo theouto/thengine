@@ -28,6 +28,6 @@ void main()
     vec4 color = vec4(1.0);
     //color = texture(imageBuffers[nonuniformEXT(1 + push.frameIndex)], texelCoord);
 
-    imageStore(image[nonuniformEXT(0)], texelCoord, color);
+    imageStore(image[nonuniformEXT(0 + push.frameIndex)], texelCoord, color);
   }
 }

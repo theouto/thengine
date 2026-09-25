@@ -45,7 +45,7 @@ namespace the
                 format = 4;
                 break;
           case NORMAL:
-                textureFormat = VK_FORMAT_R8G8B8A8_SRGB; 
+                textureFormat = VK_FORMAT_R8G8B8A8_UNORM;
                 format = 4;
                 break;
           case SINGLE_UNORM:

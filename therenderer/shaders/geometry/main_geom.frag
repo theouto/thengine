@@ -85,14 +85,13 @@ mat3 cotangent_frame( vec3 normal, vec3 worldPos, vec2 texCoord )
 }
 
 vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord ) 
-{ 
-  // assume N, the interpolated vertex normal and 
-  // V, the view vector (vertex to eye) 
+{
   vec3 map = texture(storageSampler[nonuniformEXT(fRIDone[2])], texcoord).xyz;
   map = map * 2 - 1;
   V.y = -V.y;
   mat3 TBN = cotangent_frame(N, V, texcoord);
-  return normalize( TBN * map ); }
+  return normalize( TBN * map ); 
+}
 
 //==============================================================================
 
@@ -285,9 +284,16 @@ void main()
   vec3 cameraPosWorld = ubo.invView[3].xyz;
   vec3 viewDirection = normalize(cameraPosWorld - fragPosWorld);
 
+  vec3 surfaceNormal = normalize(fragNormalWorld);
   vec2 UVs = fragUv;
-  //mat3 TBN = cotangent_frame(normalize(fragNormalWorld), viewDirection, UVs);
-	
+  mat3 TBN = cotangent_frame(surfaceNormal, fragPosWorld, UVs);
+
+  if (fRIDone[2] != 0)
+  {
+    vec3 tangentNormal = texture(storageSampler[nonuniformEXT(fRIDone[2])], UVs).xyz * 2 - 1.f;
+    surfaceNormal = normalize(TBN * tangentNormal);
+  }
+
   vec3 diffuseLight = ubo.ambientLightColor.xyz * ubo.ambientLightColor.w;
   vec3 specularLight = vec3(0.0);
 
@@ -295,7 +301,6 @@ void main()
   sun.direction = normalize(ubo.lightPos);
   sun.color = vec4(1.f, 1.f, 0.7f, 1.5f);
 
-  vec3 surfaceNormal = normalize(fragNormalWorld);
   //surfaceNormal = perturb_normal(surfaceNormal, fragPosWorld, UVs);
 
   vec3 F0 = vec3(0.04);

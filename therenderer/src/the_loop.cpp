@@ -25,7 +25,7 @@ namespace the
 
     //For anyone seeing this: I will not be repeating the errors of the past, this is a placeholder until I know that things work as they should
     //Actually no, these are not the mistakes of the past, or at least I don't think they are
-    std::vector<uint32_t> resources = theRenderer.getNeededResources(TheSwapChain::COMP, TheSwapChain::SINGULAR,
+    std::vector<uint32_t> resources = theRenderer.getNeededResources(TheSwapChain::COMP, TheSwapChain::SYNCED,
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH,
                                             VkExtent2D{defWidth, defHeight});
 
