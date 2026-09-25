@@ -68,7 +68,7 @@ namespace the
     vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout,
                        VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(ComputeData), &data);
 
-    vkCmdDispatch(frameInfo.commandBuffer, std::ceil(frameInfo.width / 16.0),
-                  std::ceil(frameInfo.height / 16.0), 1);
+    vkCmdDispatch(frameInfo.commandBuffer, std::ceil(frameInfo.width / 4.0),
+                  std::ceil(frameInfo.height / 4.0), 1);
   }
 }
