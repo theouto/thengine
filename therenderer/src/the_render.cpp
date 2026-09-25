@@ -24,6 +24,8 @@ namespace the
 
   void TheRender::recreateResources()
   {
+    int offset = theSwapChain->swapChainImageCount();
+
     for (int i = 0; i < pipelines.size(); i++)
     {
       auto c = pipelines[i];
@@ -38,10 +40,9 @@ namespace the
 
         if (c.settings[0] == TheSwapChain::COMP)
         {
-          sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, sacrifices[0] + j - 1);
+          sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, sacrifices[2] + j - offset);
         }
-
-        sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sacrifices[0] + j - 1)
+        sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sacrifices[2] + j - offset)
             .overwrite(theResources->sets[3]);
       }
     }

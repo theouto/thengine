@@ -84,15 +84,6 @@ mat3 cotangent_frame( vec3 normal, vec3 worldPos, vec2 texCoord )
   return TBN;
 }
 
-vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord ) 
-{
-  vec3 map = texture(storageSampler[nonuniformEXT(fRIDone[2])], texcoord).xyz;
-  map = map * 2 - 1;
-  V.y = -V.y;
-  mat3 TBN = cotangent_frame(N, V, texcoord);
-  return normalize( TBN * map ); 
-}
-
 //==============================================================================
 
 vec3 BurleyDiffuse(float lightAng, float viewAng, float halfAng, vec2 UVs)
@@ -120,29 +111,6 @@ float DistributionGGX(vec3 N, vec3 H, float a)
   denom        = M_PI * denom * denom;
 	
   return nom / denom;
-}
-
-//==============================================================================
-
-float GeometrySchlickGGX(float NdotV, float roughness)
-{
-  float r = (roughness + 1.0);
-  float k = (r*r) / 8.0;
-
-  float nom   = NdotV;
-  float denom = NdotV * (1.0 - k) + k;
-
-  return nom / denom;
-}
-
-float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
-{
-  float NdotV = max(dot(N, V), 0.0);
-  float NdotL = max(dot(N, L), 0.0);
-  float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-  float ggx1 = GeometrySchlickGGX(NdotL, roughness);
-
-  return ggx1 * ggx2;
 }
 
 //==============================================================================

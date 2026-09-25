@@ -21,13 +21,12 @@ layout(push_constant) uniform Push
 void main()
 {
   ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
-  ivec2 size = imageSize(image[nonuniformEXT(1 + push.frameIndex)]);
+  ivec2 size = imageSize(image[nonuniformEXT(0 + push.frameIndex)]);
 
-  if(texelCoord.x < size.x && texelCoord.y < size.y)
-  {
-    vec4 color = vec4(1.0);
-    //color = texture(imageBuffers[nonuniformEXT(1 + push.frameIndex)], texelCoord);
+  vec2 uv = vec2(float(texelCoord.x)/push.width, float(texelCoord.y)/push.height);
 
-    imageStore(image[nonuniformEXT(0 + push.frameIndex)], texelCoord, color);
-  }
+  vec4 color = vec4(float(texelCoord.x)/size.x, float(texelCoord.y)/size.y, 1.0, 1.0);
+  color = texture(imageBuffers[nonuniformEXT(2 + push.frameIndex)], uv);
+
+  imageStore(image[nonuniformEXT(0 + push.frameIndex)], texelCoord, color);
 }

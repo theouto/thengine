@@ -52,6 +52,6 @@ void main()
   //ivec2 coords = ivec2(0, 0);
   //outColor = vec4(imageLoad(images[nonuniformEXT(0)], coords).xyz, 1.f);
 
-  outColor = texture(imageBuffers[nonuniformEXT(1 + ubo.frameIndex)], texCoords);
+  outColor = texture(imageBuffers[nonuniformEXT(0 + ubo.frameIndex)], texCoords);
   outColor = fromLinear(outColor);
 }
