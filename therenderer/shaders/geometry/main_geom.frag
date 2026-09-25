@@ -20,9 +20,6 @@ layout(push_constant) uniform Push
 {
   mat4 modelMatrix;
   mat4 normalMatrix;
-  int RIDo;
-  uint RID[7];
-  float modifiers[4];
 } push;
 
 struct PointLight
@@ -211,15 +208,8 @@ float ShadowCalculation(vec3 lightDir, vec3 normal, vec3 pos, int image)
 
 //==============================================================================
 
-vec3 calculateSunLight(DirectionalLight sun, vec3 surfaceNormal, vec2 UVs, vec3 viewDirection, vec3 F0, vec3 cameraPosWorld, int image)
+vec3 surfaceLightingHelper(vec2 UVs, vec3 surfaceNormal, vec3 viewDirection, vec3 F0, vec3 intensity, vec3 directionToLight)
 {
-  vec3 directionToLight = sun.direction;
-  directionToLight = normalize(-directionToLight);
-  float shadow = ShadowCalculation(directionToLight, surfaceNormal, cameraPosWorld, image);
-
-  if (shadow <= 0) return vec3(0.f);
-
-  vec3 intensity = sun.color.xyz * sun.color.w;
   vec3 halfAngle = normalize(directionToLight + viewDirection);
 
   vec3 fres = fresnelSchlick(clamp(dot(halfAngle, viewDirection), 0.f, 1.f), F0);
@@ -239,9 +229,22 @@ vec3 calculateSunLight(DirectionalLight sun, vec3 surfaceNormal, vec2 UVs, vec3 
 
   vec3 kD = metallic(fres, texture(storageSampler[nonuniformEXT(fRIDtwo[2])], UVs).r * fmodifiers[3]);
 
-  float NdotL = max(dot(surfaceNormal, directionToLight), 0.f); 
+  float NdotL = max(dot(surfaceNormal, directionToLight), 0.f);
 
-  return (shadow) * (kD * texture(storageSampler[nonuniformEXT(fRIDone[0])], UVs).rgb / M_PI + spec) * intensity * NdotL;
+  return (kD * texture(storageSampler[nonuniformEXT(fRIDone[0])], UVs).rgb / M_PI + spec) * intensity * NdotL;
+}
+
+vec3 calculateSunLight(DirectionalLight sun, vec3 surfaceNormal, vec2 UVs, vec3 viewDirection, vec3 F0, vec3 cameraPosWorld, int image)
+{
+  vec3 directionToLight = sun.direction;
+  directionToLight = normalize(-directionToLight);
+  float shadow = ShadowCalculation(directionToLight, surfaceNormal, cameraPosWorld, image);
+
+  if (shadow <= 0) return vec3(0.f);
+
+  vec3 intensity = sun.color.xyz * sun.color.w;
+
+  return (shadow) * surfaceLightingHelper(UVs, surfaceNormal, viewDirection, F0, intensity, directionToLight);
 }
 
 vec3 calculateLights(vec3 surfaceNormal, vec2 UVs, vec3 viewDirection, vec3 F0)
@@ -258,54 +261,11 @@ vec3 calculateLights(vec3 surfaceNormal, vec2 UVs, vec3 viewDirection, vec3 F0)
     directionToLight = normalize(directionToLight);
 
     vec3 intensity = light.color.xyz * light.color.w * attenuation;
-    vec3 halfAngle = normalize(directionToLight + viewDirection); 
 
-    vec3 fres = fresnelSchlick(clamp(dot(halfAngle, viewDirection), 0.f, 1.f), F0);
-
-    vec3 diff = BurleyDiffuse(
-       max(dot(directionToLight, surfaceNormal), 0.0),
-       max(dot(viewDirection, surfaceNormal), 0.0),
-       max(dot(directionToLight, halfAngle), 0.0),
-       UVs);
-
-    float specular = DistributionGGX(surfaceNormal, halfAngle, clamp(texture(storageSampler[nonuniformEXT(fRIDone[1])], UVs).x * fmodifiers[1], 0.001f, 1.f));
-
-    vec3 numerator = specular * (diff + fres);
-    float denominator = max(max(dot(surfaceNormal, viewDirection), 0.0) * max(dot(surfaceNormal, directionToLight), 0.0), 0.08);
-    vec3 spec = numerator / denominator;
-
-    vec3 kD = metallic(fres, texture(storageSampler[nonuniformEXT(fRIDtwo[2])], UVs).r * fmodifiers[3]);
-
-    float NdotL = max(dot(surfaceNormal, directionToLight), 0.f);
-
-    Lo += (kD * texture(storageSampler[nonuniformEXT(fRIDone[0])], UVs).rgb / M_PI + spec) * intensity * NdotL;
+    Lo += surfaceLightingHelper(UVs, surfaceNormal, viewDirection, F0, intensity, directionToLight);;
   }
 
   return Lo;
-}
-
-vec3 calculateDiffuse(vec3 fragNormal, vec3 surfaceNormal, vec2 UVs, vec3 viewDirection, vec3 F0)
-{
-  vec3 directionToLight = vec3(0.f, -1.f, 0.f);
-  vec3 intensity = (ubo.ambientLightColor.xyz * vec3(0.8, 0.8f, 1./2.f)) * ubo.ambientLightColor.w * 80;
-
-  vec3 halfAngle = normalize(directionToLight + viewDirection);
-
-  vec3 fres = fresnelSchlick(clamp(dot(halfAngle, viewDirection), 0.f, 1.f), F0);
- 
-  float diff = GeometrySmith(surfaceNormal, viewDirection, directionToLight ,texture(storageSampler[fRIDone[1]], UVs).r * fmodifiers[0]);
-
-  float specular = 1.f;//DistributionGGX(surfaceNormal, halfAngle, clamp(texture(specular, UVs).x, 0.001f, 1.f));
-
-  vec3 numerator = specular * diff * fres;
-  float denominator = 4.0 * max(dot(surfaceNormal, viewDirection), 0.0) * max(dot(surfaceNormal, directionToLight), 0.0) + 0.0001;
-  vec3 spec = numerator / denominator;
-
-  vec3 kD = metallic(fres, texture(storageSampler[fRIDtwo[2]], UVs).r * fmodifiers[3]);
-
-  float NdotL = max(dot(surfaceNormal, directionToLight), 0.f);
-
-  return (kD * texture(storageSampler[fRIDone[0]], UVs).rgb / M_PI + spec) * intensity * NdotL;
 }
 
 float LinearizeDepth(float depth) 
@@ -336,7 +296,7 @@ void main()
   sun.color = vec4(1.f, 1.f, 0.7f, 1.5f);
 
   vec3 surfaceNormal = normalize(fragNormalWorld);
-  surfaceNormal = perturb_normal(surfaceNormal, fragPosWorld, UVs);
+  //surfaceNormal = perturb_normal(surfaceNormal, fragPosWorld, UVs);
 
   vec3 F0 = vec3(0.04);
   float halfView = dot(normalize(viewDirection + surfaceNormal), surfaceNormal); 
@@ -372,6 +332,7 @@ void main()
   diffuse = vec4(lambda, 0.f) * diffuse + vec4((1 - lambda), 0.f) * vec4(0.1f, 0.1f, 0.1f, 0.f);
 
   //outColor = vec4(vec3(depth), 0.f);
+  //outColor = vec4(fragPosWorld, 1.f);
   //outColor = diffuse + vec4(Lo, 0.f) + vec4(debugColours[image]/5.f, 0.f);
   outColor = diffuse + vec4(Lo, 0.f);
   //outColor = vec4(surfaceNormal, 1.f);

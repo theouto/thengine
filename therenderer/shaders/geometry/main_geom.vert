@@ -124,7 +124,7 @@ void main()
   vec3 nuNormal = normal;
 
   fragNormalWorld = normalize(mat3(rotationMatrix * invScaleMatrix * push.normalMatrix) * normal);
-  fragPosWorld = positionWorld.xyz / positionWorld.w;
+  fragPosWorld = positionWorld.xyz;
   fragUv = uv;
   fmodifiers = modifiers;
 
