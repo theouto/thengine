@@ -209,6 +209,7 @@ float ShadowCalculation(vec3 lightDir, vec3 normal, vec3 pos, int image)
 
 vec3 surfaceLightingHelper(vec2 UVs, vec3 surfaceNormal, vec3 viewDirection, vec3 F0, vec3 intensity, vec3 directionToLight)
 {
+  if (dot(normalize(fragNormalWorld), directionToLight) < 0) return vec3(0.f);
   vec3 halfAngle = normalize(directionToLight + viewDirection);
 
   vec3 fres = fresnelSchlick(clamp(dot(halfAngle, viewDirection), 0.f, 1.f), F0);
@@ -301,8 +302,6 @@ void main()
   sun.direction = normalize(ubo.lightPos);
   sun.color = vec4(1.f, 1.f, 0.7f, 1.5f);
 
-  //surfaceNormal = perturb_normal(surfaceNormal, fragPosWorld, UVs);
-
   vec3 F0 = vec3(0.04);
   float halfView = dot(normalize(viewDirection + surfaceNormal), surfaceNormal); 
   F0 = mix(F0, texture(storageSampler[nonuniformEXT(fRIDone[0])], UVs).rgb, texture(storageSampler[nonuniformEXT(fRIDtwo[2])], UVs).r * fmodifiers[3]);
@@ -321,10 +320,9 @@ void main()
   vec4 fragPosViewSpace = ubo.view * vec4(fragPosWorld, 1.f);
   float depth = abs(fragPosViewSpace.z);
 
-  //for (int i = 0; i < 4; i++) {if (depth < ubo.depthValues[i]) {image = i; break;}}
-  //if (image < 0) image = 3;
+  for (int i = 0; i < 4; i++) {if (depth < ubo.depthValues[i]) {image = i; break;}}
+  if (image < 0) image = 3;
 
-  //vec3 diffuseLight = vec3(0.f);//vec3(0.02f, 0.01f, 0.08f);
   Lo += calculateSunLight(sun, surfaceNormal, UVs, viewDirection, F0, cameraPosWorld, image);
   Lo += calculateLights(surfaceNormal, UVs, viewDirection, F0);
 
