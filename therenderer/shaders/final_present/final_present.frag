@@ -49,9 +49,12 @@ vec4 fromLinear(vec4 linearRGB)
 
 void main()
 {
-  //ivec2 coords = ivec2(0, 0);
-  //outColor = vec4(imageLoad(images[nonuniformEXT(0)], coords).xyz, 1.f);
+  //ivec2 coords = ivec2(texCoords.x * ubo.width, texCoords.y * ubo.height);
+  //outColor = vec4(imageLoad(images[nonuniformEXT(1 - ubo.frameIndex)], coords).xyz, 1.f);
 
-  outColor = texture(imageBuffers[nonuniformEXT(0 + ubo.frameIndex)], texCoords);
-  outColor = fromLinear(outColor);
+  //one buffered frame
+  outColor = texture(imageBuffers[nonuniformEXT(1 - ubo.frameIndex)], texCoords);
+
+  //instant present
+  //outColor = texture(imageBuffers[nonuniformEXT(2 + ubo.frameIndex)], texCoords);
 }

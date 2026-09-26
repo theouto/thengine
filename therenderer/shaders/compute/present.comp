@@ -1,6 +1,7 @@
 #version 450
 #extension GL_EXT_shader_image_load_formatted : require
 #extension GL_EXT_nonuniform_qualifier : enable
+#extension GL_EXT_scalar_block_layout : enable
 
 //size of a workgroup for compute
 layout (local_size_x = 4, local_size_y = 4) in;
@@ -17,17 +18,28 @@ layout(push_constant) uniform Push
   int height;
 } push;
 
+// https://gamedev.stackexchange.com/questions/92015/optimized-linear-to-srgb-glsl
+// Converts a color from linear light gamma to sRGB gamma
+vec4 fromLinear(vec4 linearRGB)
+{
+  bvec3 cutoff = lessThan(linearRGB.rgb, vec3(0.0031308));
+  vec3 higher = vec3(1.055)*pow(linearRGB.rgb, vec3(1.0/2.4)) - vec3(0.055);
+  vec3 lower = linearRGB.rgb * vec3(12.92);
+
+  return vec4(mix(higher, lower, cutoff), linearRGB.a);
+}
 
 void main()
 {
   ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
-  vec2 uvCoord = gl_GlobalInvocationID.xy;
-  ivec2 size = imageSize(image[nonuniformEXT(2 + push.frameIndex)]);
+  //vec2 uvCoord = gl_GlobalInvocationID.xy;
+  //ivec2 size = imageSize(image[nonuniformEXT(2 + push.frameIndex)]);
 
-  vec2 uv = vec2(uvCoord.x/float(push.width), uvCoord.y/float(push.height));
+  //vec2 uv = vec2(uvCoord.x/float(push.width), uvCoord.y/float(push.height));
 
-  vec4 color = vec4(float(texelCoord.x)/size.x, float(texelCoord.y)/size.y, 1.0, 1.0);
-  color = texture(imageBuffers[nonuniformEXT(2 + push.frameIndex)], uv);
+  vec4 color = texelFetch(imageBuffers[nonuniformEXT(2 + push.frameIndex)], texelCoord, 0);
+  //vec4 color = texture(imageBuffers[nonuniformEXT(2 + push.frameIndex)], uv);
+  color = fromLinear(color);
 
   imageStore(image[nonuniformEXT(0 + push.frameIndex)], texelCoord, color);
 }
