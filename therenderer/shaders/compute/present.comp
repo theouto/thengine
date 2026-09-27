@@ -32,14 +32,10 @@ vec4 fromLinear(vec4 linearRGB)
 void main()
 {
   ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
-  //vec2 uvCoord = gl_GlobalInvocationID.xy;
-  //ivec2 size = imageSize(image[nonuniformEXT(2 + push.frameIndex)]);
-
-  //vec2 uv = vec2(uvCoord.x/float(push.width), uvCoord.y/float(push.height));
-
   vec4 color = texelFetch(imageBuffers[nonuniformEXT(2 + push.frameIndex)], texelCoord, 0);
-  //vec4 color = texture(imageBuffers[nonuniformEXT(2 + push.frameIndex)], uv);
   color = fromLinear(color);
+
+  //color /= 5;
 
   imageStore(image[nonuniformEXT(0 + push.frameIndex)], texelCoord, color);
 }

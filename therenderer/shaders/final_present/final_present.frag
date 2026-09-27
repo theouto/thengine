@@ -36,25 +36,8 @@ layout(set = 0, binding = 0) uniform GlobalUbo
   int frameIndex;
 } ubo;
 
-// https://gamedev.stackexchange.com/questions/92015/optimized-linear-to-srgb-glsl
-// Converts a color from linear light gamma to sRGB gamma
-vec4 fromLinear(vec4 linearRGB)
-{
-  bvec3 cutoff = lessThan(linearRGB.rgb, vec3(0.0031308));
-  vec3 higher = vec3(1.055)*pow(linearRGB.rgb, vec3(1.0/2.4)) - vec3(0.055);
-  vec3 lower = linearRGB.rgb * vec3(12.92);
-
-  return vec4(mix(higher, lower, cutoff), linearRGB.a);
-}
-
 void main()
 {
-  //ivec2 coords = ivec2(texCoords.x * ubo.width, texCoords.y * ubo.height);
-  //outColor = vec4(imageLoad(images[nonuniformEXT(1 - ubo.frameIndex)], coords).xyz, 1.f);
-
   //one buffered frame
   outColor = texture(imageBuffers[nonuniformEXT(1 - ubo.frameIndex)], texCoords);
-
-  //instant present
-  //outColor = texture(imageBuffers[nonuniformEXT(2 + ubo.frameIndex)], texCoords);
 }
