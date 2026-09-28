@@ -35,7 +35,5 @@ void main()
   vec4 color = texelFetch(imageBuffers[nonuniformEXT(2 + push.frameIndex)], texelCoord, 0);
   color = fromLinear(color);
 
-  //color /= 5;
-
   imageStore(image[nonuniformEXT(0 + push.frameIndex)], texelCoord, color);
 }

@@ -38,6 +38,5 @@ layout(set = 0, binding = 0) uniform GlobalUbo
 
 void main()
 {
-  //one buffered frame
-  outColor = texture(imageBuffers[nonuniformEXT(1 - ubo.frameIndex)], texCoords);
+  outColor = texture(imageBuffers[nonuniformEXT(0 + ubo.frameIndex)], texCoords);
 }

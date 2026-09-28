@@ -364,7 +364,7 @@ namespace the
     }
 
     VkAttachmentDescription colorAttachment = {};
-    colorAttachment.format = pass == COMP ? VK_FORMAT_R8G8B8A8_UNORM : swapChainImageFormat;
+    colorAttachment.format = pass == COMP ? VK_FORMAT_R16G16B16A16_SNORM : swapChainImageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT; //changed
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

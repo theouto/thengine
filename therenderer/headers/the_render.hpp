@@ -74,11 +74,15 @@ namespace the
           .build(theResources->sets[1]);
       }
 
+      VkImage getImage(uint32_t index) {return theSwapChain->getImage(index);}
+
       VkRenderPass getFramePass(uint32_t index) {return theSwapChain->getRenderPass(index);}
       VkDescriptorImageInfo getImageInfo(uint32_t index) {return TheResources::descriptorImageInfoHelper(theDevice, theSwapChain->getImageView(index));}
 
       std::shared_ptr<TheDescriptorSetLayout> getSetLayout(uint32_t index){return theResources->layouts[index];}
       VkDescriptorSet& getSet(uint32_t index){return theResources->sets[index];}
+
+      uint32_t getSwapChainImageCount() {return theSwapChain->swapChainImageCount();}
 
       std::unique_ptr<TheResources> theResources;
 

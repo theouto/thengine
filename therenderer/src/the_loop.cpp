@@ -55,7 +55,17 @@ namespace the
                           theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
                           theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
                           resources};
-    
+
+    VkImageMemoryBarrier barrier{};
+	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    barrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.layerCount = 1;
+	barrier.subresourceRange.levelCount = 1;
 
     auto viewerObject = TheGameObject::createGameObject();
     viewerObject.transform.translation.z = -1.5f;
@@ -84,6 +94,8 @@ namespace the
 
       if (auto commandBuffer = theRenderer.beginFrame())
 	  {
+        barrier.image = theRenderer.getImage(theRenderer.getFrameIndex() + theRenderer.getSwapChainImageCount());
+
         FrameInfo frameInfo
         {
           0,
@@ -93,7 +105,8 @@ namespace the
           commandBuffer,
           camera,
           gameObjects,
-          sceneManager.handler()
+          sceneManager.handler(),
+          barrier,
         };
 
         frameInfo.frameIndex = theRenderer.getFrameIndex();
@@ -125,7 +138,7 @@ namespace the
         theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
 
         compute.render(frameInfo);
-
+ 
         theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, present.getBufferIndex(), present.getRenderPassIndex());
         present.render(frameInfo);
         theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);

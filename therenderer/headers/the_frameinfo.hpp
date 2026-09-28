@@ -45,6 +45,7 @@ namespace the
 	TheCamera& camera;
 	TheGameObject::Map &gameObjects;
     TheMaterials materials;
+    VkImageMemoryBarrier barrier;
     std::vector<VkDescriptorSet> sets;
   };
 }

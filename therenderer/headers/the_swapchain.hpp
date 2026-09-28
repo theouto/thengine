@@ -64,6 +64,8 @@ namespace the
       VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
       int getImageViewCount(){return imageViewCount;}
 
+      VkImage getImage(uint32_t index){return images[index];}
+
       bool compareSwapFormats(const TheSwapChain& swapChain) const
       {
         return swapChain.swapChainDepthFormat == swapChainDepthFormat && swapChain.swapChainImageFormat == swapChainImageFormat;
