@@ -46,6 +46,8 @@ namespace the
 
       std::vector<std::shared_ptr<TheBuffer>> uboBuffers;
 
+      std::vector<std::vector<uint32_t>> resourced;
+
       TheCamera camera{};
       TheWindow theWindow{defWidth, defHeight, "thengine"};
       TheEvents theEvents{theWindow};

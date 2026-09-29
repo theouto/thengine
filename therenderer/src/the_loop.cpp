@@ -24,37 +24,50 @@ namespace the
     theRenderer.loadUboInfo(uboBuffers);
 
     //For anyone seeing this: I will not be repeating the errors of the past, this is a placeholder until I know that things work as they should
-    //Actually no, these are not the mistakes of the past, or at least I don't think they are
-    std::vector<uint32_t> resources = theRenderer.getNeededResources(TheSwapChain::COMP, TheSwapChain::SYNCED,
+    //Actually no, these are not the mistakes of the past, or at least I don't think they are    
+    resourced.push_back(theRenderer.getNeededResources(TheSwapChain::COMP, TheSwapChain::SYNCED,
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH,
-                                            theWindow.getExtent());
+                                            theWindow.getExtent()));
 
-    ComputeSystem compute{theDevice, theRenderer.getFramePass(resources[0]),
+    ComputeSystem compute{theDevice, theRenderer.getFramePass(resourced[resourced.size() - 1][0]),
                          defShaderPath + "present.comp.spv", 
                          {theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
-                         theRenderer.getSetLayout(2)->getDescriptorSetLayout()}, resources};
+                         theRenderer.getSetLayout(2)->getDescriptorSetLayout()}, resourced[resourced.size() - 1]};
 
-    resources = theRenderer.getNeededResources(TheSwapChain::PRESENT, TheSwapChain::SYNCED,
+    resourced.push_back(theRenderer.getNeededResources(TheSwapChain::PRESENT, TheSwapChain::SYNCED,
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH,
-                                            theWindow.getExtent());
+                                            theWindow.getExtent()));
 
-    PlaneSystem present{theDevice, theRenderer.getFramePass(resources[0]),
+    PlaneSystem present{theDevice, theRenderer.getFramePass(resourced[resourced.size() - 1][0]),
                         {defShaderPath + "final_present.vert.spv", defShaderPath + "final_present.frag.spv"},
                         {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
                         theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
-                        theRenderer.getSetLayout(2)->getDescriptorSetLayout()}, resources};
+                        theRenderer.getSetLayout(2)->getDescriptorSetLayout()}, resourced[resourced.size() - 1]};
 
-    
-    resources = theRenderer.getNeededResources(TheSwapChain::GEOM, TheSwapChain::SYNCED,
+
+    resourced.push_back(theRenderer.getNeededResources(TheSwapChain::GEOM, TheSwapChain::SYNCED,
                                                TheSwapChain::COLOR, TheSwapChain::ADDITIONAL_DEPTH,
-                                               theWindow.getExtent());
+                                               theWindow.getExtent()));
 
-    OpaqueGeometry render{theDevice, theRenderer.getFramePass(resources[0]),
+    OpaqueGeometry render{theDevice, theRenderer.getFramePass(resourced[resourced.size() - 1][0]),
                           {defShaderPath + "main_geom.vert.spv", defShaderPath + "main_geom.frag.spv"},
                           {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
                           theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
                           theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
-                          resources};
+                          resourced[resourced.size() - 1]};
+
+    /*
+    resourced.push_back(theRenderer.getNeededResources(TheSwapChain::GEOM, TheSwapChain::SYNCED,
+                                               TheSwapChain::COLOR, TheSwapChain::ADDITIONAL_DEPTH,
+                                               theWindow.getExtent()));
+
+    OpaqueGeometry normalSpec{theDevice, theRenderer.getFramePass(resourced[resourced.size() - 1][0]),
+                          {defShaderPath + "normal_spec.vert.spv", defShaderPath + "normal_spec.frag.spv"},
+                          {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
+                          theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
+                          theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
+                          resourced[resourced.size() - 1]};
+    */
 
     VkImageMemoryBarrier barrier{};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -70,7 +83,7 @@ namespace the
     auto viewerObject = TheGameObject::createGameObject();
     viewerObject.transform.translation.z = -1.5f;
 
-    sceneManager.load("scenes/light_test.ths", *(theRenderer.theResources->pools[1]));
+    sceneManager.load("scenes/test_scene.ths", *(theRenderer.theResources->pools[1]));
     auto currentTime = std::chrono::high_resolution_clock::now();
     std::cout << "rendering🙏: \n\n\n";
 
@@ -132,6 +145,12 @@ namespace the
 
         uboBuffers[frameInfo.frameIndex]->writeToBuffer(&ubo);
         uboBuffers[frameInfo.frameIndex]->flush();
+
+        /*
+        theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, normalSpec.getBufferIndex(), normalSpec.getRenderPassIndex());
+        normalSpec.renderGameObjects(frameInfo);
+        theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
+        */
 
         theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, render.getBufferIndex(), render.getRenderPassIndex());
         render.renderGameObjects(frameInfo);
