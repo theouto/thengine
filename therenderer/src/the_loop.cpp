@@ -56,18 +56,16 @@ namespace the
                           theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
                           resourced[resourced.size() - 1]};
 
-    /*
     resourced.push_back(theRenderer.getNeededResources(TheSwapChain::GEOM, TheSwapChain::SYNCED,
-                                               TheSwapChain::COLOR, TheSwapChain::ADDITIONAL_DEPTH,
+                                               TheSwapChain::DEPTH, TheSwapChain::NO_ADDITIONAL_DEPTH,
                                                theWindow.getExtent()));
 
-    OpaqueGeometry normalSpec{theDevice, theRenderer.getFramePass(resourced[resourced.size() - 1][0]),
-                          {defShaderPath + "normal_spec.vert.spv", defShaderPath + "normal_spec.frag.spv"},
+    OpaqueGeometry depth{theDevice, theRenderer.getFramePass(resourced[resourced.size() - 1][0]),
+                          {defShaderPath + "depth.vert.spv", defShaderPath + "depth.frag.spv"},
                           {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
                           theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
                           theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
                           resourced[resourced.size() - 1]};
-    */
 
     VkImageMemoryBarrier barrier{};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -146,11 +144,9 @@ namespace the
         uboBuffers[frameInfo.frameIndex]->writeToBuffer(&ubo);
         uboBuffers[frameInfo.frameIndex]->flush();
 
-        /*
-        theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, normalSpec.getBufferIndex(), normalSpec.getRenderPassIndex());
-        normalSpec.renderGameObjects(frameInfo);
+        theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, depth.getBufferIndex(), depth.getRenderPassIndex());
+        depth.renderGameObjects(frameInfo);
         theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
-        */
 
         theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, render.getBufferIndex(), render.getRenderPassIndex());
         render.renderGameObjects(frameInfo);

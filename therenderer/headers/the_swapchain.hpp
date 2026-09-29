@@ -91,7 +91,7 @@ namespace the
       */
       uint32_t createImage(PipelineSettings setting, PipelineSettings moresetting);
       uint32_t createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex, uint32_t renderPassIndex,  PipelineSettings pass);
-      uint32_t createRenderPass(PipelineSettings depth, PipelineSettings pass);
+      uint32_t createRenderPass(PipelineSettings depth, PipelineSettings pass, PipelineSettings color);
       void createImageView(uint32_t workingIndex, VkFormat format, PipelineSettings setting);
 
       VkFormat swapChainImageFormat;

@@ -66,7 +66,7 @@ namespace the
   void TheSwapChain::init()
   {
     createSwapChain();
-    createRenderPass(NO_ADDITIONAL_DEPTH, GEOM);
+    createRenderPass(NO_ADDITIONAL_DEPTH, GEOM, COLOR);
     addedDepth.emplace(0, false);
     synced.emplace(0, true);
     extents.emplace(0, windowExtent);
@@ -167,7 +167,7 @@ namespace the
 
     assert(!(color == DEPTH && depth == ADDITIONAL_DEPTH) && "Both pipeline settings set to depth! Likely not needed!\n");
 
-    if (pass != COMP) indices.push_back(createRenderPass(depth, pass));
+    if (pass != COMP) indices.push_back(createRenderPass(depth, pass, color));
     else indices.push_back(-1);
     extents.emplace(currentIndex, resolution);
 
@@ -326,12 +326,6 @@ namespace the
 
     if (pass == COMP)
     {
-      VkFramebufferAttachmentsCreateInfo createInfo{};
-      createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_ATTACHMENTS_CREATE_INFO;
-      createInfo.attachmentImageInfoCount = 0;
-      createInfo.pAttachmentImageInfos = nullptr;
-      createInfo.pNext = nullptr;
-
       framebufferInfo.flags = VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT;
       framebufferInfo.pNext = nullptr;
     }
@@ -348,7 +342,7 @@ namespace the
     return framebufferCount++;
   }
 
-  uint32_t TheSwapChain::createRenderPass(PipelineSettings depth, PipelineSettings pass)
+  uint32_t TheSwapChain::createRenderPass(PipelineSettings depth, PipelineSettings pass, PipelineSettings color)
   {
     VkAttachmentDescription depthAttachment{};
     VkAttachmentReference depthAttachmentRef{};
@@ -372,6 +366,7 @@ namespace the
 
     VkAttachmentDescription colorAttachment = {};
     colorAttachment.format = pass == COMP ? VK_FORMAT_R16G16B16A16_SNORM : swapChainImageFormat;
+    colorAttachment.format = color == DEPTH ? swapChainDepthFormat : colorAttachment.format;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT; //changed
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -382,12 +377,17 @@ namespace the
 
     VkAttachmentReference colorAttachmentRef = {};
     colorAttachmentRef.attachment = 0;
-    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorAttachmentRef.layout = color == DEPTH ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     VkSubpassDescription subpass = {};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorAttachmentRef;
+    if (color == DEPTH)
+    { 
+      subpass.pDepthStencilAttachment = &colorAttachmentRef;
+      subpass.colorAttachmentCount = 0;
+    }
+    else subpass.pColorAttachments = &colorAttachmentRef;
     if (useDepth) subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
     VkSubpassDependency dependency = {};
