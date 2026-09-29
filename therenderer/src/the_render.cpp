@@ -201,7 +201,10 @@ namespace the
     renderPassInfo.renderArea.extent = theSwapChain->getImageExtent(renderPassIndex);
 
     std::array<VkClearValue, 2> clearValues{};
-    clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
+
+    if (theSwapChain->colorBuffer[bufferIndex]) clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
+    else clearValues[0].depthStencil = {1.f, 0};
+
     clearValues[1].depthStencil = {1.0f, 0};
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();

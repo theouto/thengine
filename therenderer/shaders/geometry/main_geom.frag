@@ -240,12 +240,12 @@ float LinearizeDepth(float depth)
 
 void main()
 {
-  //vec2 projCoords = vec2(gl_FragCoord.x/ubo.width, gl_FragCoord.y/ubo.height);
+  ivec2 coords = ivec2(gl_FragCoord.x, gl_FragCoord.y);
   float currDepth = gl_FragCoord.z;
 
-  //float prePassDepth = texture(frameBuffers[nonuniformEXT(5)], projCoords).r;
+  float prePassDepth = texelFetch(frameBuffers[nonuniformEXT(4 + ubo.frameIndex)], coords, 0).r;
 
-  //if (prePassDepth < currDepth) discard;
+  if (prePassDepth + 0.0004f < currDepth) discard;
 
   vec3 cameraPosWorld = ubo.invView[3].xyz;
   vec3 viewDirection = normalize(cameraPosWorld - fragPosWorld);
@@ -299,7 +299,7 @@ void main()
 
   diffuse = vec4(lambda, 0.f) * diffuse + vec4((1 - lambda), 0.f) * vec4(0.1f, 0.1f, 0.1f, 0.f);
 
-  //outColor = vec4(vec3(depth), 0.f);
+  //outColor = vec4(vec3(truDepth)/ubo.far, 1.f);
   //outColor = vec4(fragPosWorld, 1.f);
   //outColor = diffuse + vec4(Lo, 0.f) + vec4(debugColours[image]/5.f, 0.f);
   outColor = diffuse + vec4(Lo, 0.f);

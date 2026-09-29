@@ -60,10 +60,8 @@ namespace the
   {
     thePipeline->bindCompute(frameInfo.commandBuffer);
 
-    std::vector<VkDescriptorSet> sacrifice = {frameInfo.sets[1], frameInfo.sets[2]};
-
     vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout,
-	  0, sacrifice.size(), sacrifice.data(), 0, nullptr);
+	  0, frameInfo.sets.size(), frameInfo.sets.data(), 0, nullptr);
 
     ComputeData data{frameInfo.frameIndex, frameInfo.width, frameInfo.height};
 

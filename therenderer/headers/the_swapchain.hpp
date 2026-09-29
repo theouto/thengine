@@ -71,6 +71,8 @@ namespace the
         return swapChain.swapChainDepthFormat == swapChainDepthFormat && swapChain.swapChainImageFormat == swapChainImageFormat;
       }
 
+      std::unordered_map<uint32_t, bool> colorBuffer;
+
     private:
 
       void init();

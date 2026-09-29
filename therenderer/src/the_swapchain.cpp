@@ -213,6 +213,9 @@ namespace the
       }
     }
 
+    if (color != DEPTH) colorBuffer[indices[1]] = true;
+    else colorBuffer[indices[1]] = false;
+
     currentIndex++;
     return indices;
   }
@@ -284,6 +287,7 @@ namespace the
     viewInfo.image = images[workingIndex];
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.format = format;
+    viewInfo.subresourceRange = {};
     if (format == swapChainDepthFormat) viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
     else viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     viewInfo.subresourceRange.baseMipLevel = 0;
@@ -373,7 +377,7 @@ namespace the
     colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    colorAttachment.finalLayout = color == DEPTH ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
     VkAttachmentReference colorAttachmentRef = {};
     colorAttachmentRef.attachment = 0;
@@ -381,26 +385,46 @@ namespace the
 
     VkSubpassDescription subpass = {};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
     if (color == DEPTH)
-    { 
+    {
       subpass.pDepthStencilAttachment = &colorAttachmentRef;
       subpass.colorAttachmentCount = 0;
     }
-    else subpass.pColorAttachments = &colorAttachmentRef;
+    else
+    {
+      subpass.pColorAttachments = &colorAttachmentRef;
+      subpass.colorAttachmentCount = 1;
+    }
+
     if (useDepth) subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
-    VkSubpassDependency dependency = {};
+    std::vector<VkSubpassDependency> dependencies;
+    VkSubpassDependency dependency;
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.srcAccessMask = 0;
-    dependency.srcStageMask =
+    dependency.srcAccessMask = color == DEPTH ? VK_ACCESS_SHADER_READ_BIT: 0;
+    dependency.srcStageMask = color == DEPTH ? VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT :
       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     dependency.dstSubpass = 0;
-    dependency.dstStageMask =
+    dependency.dstStageMask = color == DEPTH ? VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT : 
       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstAccessMask =
+    dependency.dstAccessMask = color == DEPTH ? VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT : 
       VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-  
+    dependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+    dependencies.push_back(dependency);
+
+    if (color == DEPTH)
+    {
+      VkSubpassDependency dependency2 = {};
+      dependencies.push_back(dependency2);
+      dependencies[1].srcSubpass = 0;
+      dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+      dependencies[1].srcStageMask = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+      dependencies[1].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+      dependencies[1].srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+      dependencies[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+      dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+    }
 
     std::vector<VkAttachmentDescription> attachments = {colorAttachment};
     if (useDepth) attachments.push_back(depthAttachment);
@@ -411,8 +435,8 @@ namespace the
     renderPassInfo.pAttachments = attachments.data();
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.dependencyCount = 1;
-    renderPassInfo.pDependencies = &dependency;
+    renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
+    renderPassInfo.pDependencies = dependencies.data();
 
     if (vkCreateRenderPass(device.device(), &renderPassInfo, nullptr, &renderPasses[renderPassCount]) != VK_SUCCESS) 
     {

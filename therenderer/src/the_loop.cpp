@@ -31,8 +31,9 @@ namespace the
 
     ComputeSystem compute{theDevice, theRenderer.getFramePass(resourced[resourced.size() - 1][0]),
                          defShaderPath + "present.comp.spv", 
-                         {theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
-                         theRenderer.getSetLayout(2)->getDescriptorSetLayout()}, resourced[resourced.size() - 1]};
+                         {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
+                        theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
+                        theRenderer.getSetLayout(2)->getDescriptorSetLayout()}, resourced[resourced.size() - 1]};
 
     resourced.push_back(theRenderer.getNeededResources(TheSwapChain::PRESENT, TheSwapChain::SYNCED,
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH,
@@ -137,6 +138,8 @@ namespace the
         ubo.width = theWindow.getExtent().width;
         ubo.height = theWindow.getExtent().height;
         ubo.frameIndex = frameInfo.frameIndex;
+        ubo.near = 0.1f;
+        ubo.far = 500.f;
 
         ubo.pointLights[0] = PointLight{glm::vec4(1.5f, -1.2f, 0.f, 1.f), glm::vec4(2.f, 0.f, 0.f, 1.f)};
         ubo.numLights = 1;

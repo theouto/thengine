@@ -6,9 +6,34 @@
 //size of a workgroup for compute
 layout (local_size_x = 32, local_size_y = 32) in;
 
-layout(set = 0, binding = 0) uniform sampler2D textures[];
-layout(set = 1, binding = 1) uniform sampler2D imageBuffers[];
-layout(rgba16f, set = 1, binding = 0) uniform image2D image[];
+layout(set = 1, binding = 0) uniform sampler2D textures[];
+layout(set = 2, binding = 1) uniform sampler2D imageBuffers[];
+layout(rgba16f, set = 2, binding = 0) uniform image2D image[];
+
+struct PointLight
+{
+  vec4 position;
+  vec4 color;
+};
+
+layout(set = 0, binding = 0) uniform GlobalUbo 
+{
+  mat4 projection;
+  mat4 view;
+  mat4 invView;
+  mat4 viewStat;
+  vec3 lightPos;
+  int numLights;
+  vec4 depthValues;
+  vec4 ambientLightColor; //RGB Intensity
+  PointLight pointLights[10];
+  int width;
+  int height;
+  float near;
+  float far;
+  mat4 lightSpaceMatrix[4];
+  int frameIndex;
+} ubo;
 
 layout(push_constant) uniform Push 
 {
@@ -28,14 +53,19 @@ vec4 fromLinear(vec4 linearRGB)
   return vec4(mix(higher, lower, cutoff), linearRGB.a);
 }
 
+float LinearizeDepth(float depth) 
+{
+  return ubo.near * ubo.far / (ubo.far + depth * (ubo.near - ubo.far));
+}
+
 void main()
 {
   ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
 
-  float depth = texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], texelCoord, 0).r;
+  //float depth = texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], texelCoord, 0).r;
 
   vec4 color = texelFetch(imageBuffers[nonuniformEXT(2 + push.frameIndex)], texelCoord, 0);
-  color = vec4(vec3(depth), 1.f);
+  //color = vec4(vec3(depth), 1.f);
   color = fromLinear(color);
 
   imageStore(image[nonuniformEXT(0 + push.frameIndex)], texelCoord, color);
