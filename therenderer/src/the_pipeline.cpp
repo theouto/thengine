@@ -121,8 +121,8 @@ namespace the
     {
         assert(configInfo.pipelineLayout != VK_NULL_HANDLE &&
 			"Cannot create graphics pipeline:: no pipelineLayout provided in configInfo");
-		assert(configInfo.renderPass != VK_NULL_HANDLE &&
-			"Cannot create graphics pipeline:: no renderPass provided in configInfo");
+		//assert(configInfo.renderPass != VK_NULL_HANDLE &&
+		//	"Cannot create graphics pipeline:: no renderPass provided in configInfo");
 		auto compCode = readFile(filePath);
 
         createShaderModule(compCode, &computeModule);

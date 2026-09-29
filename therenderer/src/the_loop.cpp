@@ -27,7 +27,7 @@ namespace the
     //Actually no, these are not the mistakes of the past, or at least I don't think they are
     std::vector<uint32_t> resources = theRenderer.getNeededResources(TheSwapChain::COMP, TheSwapChain::SYNCED,
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH,
-                                            VkExtent2D{defWidth, defHeight});
+                                            theWindow.getExtent());
 
     ComputeSystem compute{theDevice, theRenderer.getFramePass(resources[0]),
                          defShaderPath + "present.comp.spv", 
@@ -36,7 +36,7 @@ namespace the
 
     resources = theRenderer.getNeededResources(TheSwapChain::PRESENT, TheSwapChain::SYNCED,
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH,
-                                            VkExtent2D{defWidth, defHeight});
+                                            theWindow.getExtent());
 
     PlaneSystem present{theDevice, theRenderer.getFramePass(resources[0]),
                         {defShaderPath + "final_present.vert.spv", defShaderPath + "final_present.frag.spv"},
@@ -47,7 +47,7 @@ namespace the
     
     resources = theRenderer.getNeededResources(TheSwapChain::GEOM, TheSwapChain::SYNCED,
                                                TheSwapChain::COLOR, TheSwapChain::ADDITIONAL_DEPTH,
-                                               VkExtent2D{defWidth, defHeight});
+                                               theWindow.getExtent());
 
     OpaqueGeometry render{theDevice, theRenderer.getFramePass(resources[0]),
                           {defShaderPath + "main_geom.vert.spv", defShaderPath + "main_geom.frag.spv"},

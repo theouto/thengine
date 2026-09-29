@@ -18,6 +18,8 @@ namespace the
       {
         std::vector<TheSwapChain::PipelineSettings> settings;
         VkExtent2D resolution;
+        bool native;
+        uint32_t scale = 1;
         uint32_t frames;
       };
 

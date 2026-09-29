@@ -29,8 +29,9 @@ namespace the
     for (int i = 0; i < pipelines.size(); i++)
     {
       auto c = pipelines[i];
+      if (c.native == true) c.resolution = theWindow.getExtent();
       auto sacrifices = theSwapChain->createNeededResources(c.settings[0], c.settings[1], 
-                                              c.settings[2], c.settings[3],  theWindow.getExtent(), c.frames);
+                                              c.settings[2], c.settings[3],  c.resolution, c.frames);
 
       for (int j = 0; j < c.frames; j++)
       {
@@ -55,14 +56,21 @@ namespace the
                                                VkExtent2D resolution,
                                                uint32_t frames)
   {
-    auto returnee = theSwapChain->createNeededResources(pass, frameNumber, color, depth, theWindow.getExtent(), frames);
+    auto returnee = theSwapChain->createNeededResources(pass, frameNumber, color, depth, resolution, frames);
+
+    int offset = theSwapChain->swapChainImageCount();
 
     if (frameNumber == TheSwapChain::SYNCED) frames = TheSwapChain::MAX_FRAMES_IN_FLIGHT;
 
     if (pass != TheSwapChain::PRESENT)
     {
+      PipelineMap pipe{{pass, frameNumber, color, depth}, resolution, 0, 1, frames};
+      if (resolution.width == theWindow.getExtent().width && resolution.height == theWindow.getExtent().height)
+      {
+        pipe.native = true;
+      }
 
-      pipelines.push_back({{pass, frameNumber, color, depth}, theWindow.getExtent(), frames});
+      pipelines.push_back(pipe);
 
       for (int i = 0; i < frames; i++)
       {
@@ -71,9 +79,9 @@ namespace the
 
         if (pass == TheSwapChain::COMP)
         {
-          sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, returnee[0] + i - 1);
+          sacrifice->addImage(0, &imageInfo, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, returnee[2] + i - offset);
         }
-        sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, returnee[0] + i - 1)
+        sacrifice->addImage(1, &imageInfo, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, returnee[2] + i - offset)
           .overwrite(theResources->sets[3]);
       }
     }

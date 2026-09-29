@@ -49,7 +49,9 @@ namespace the
     PipelineConfigInfo pipelineConfig{};
 	ThePipeline::defaultPipelineConfigInfo(pipelineConfig);
 
-	pipelineConfig.renderPass = renderPass;
+    pipelineConfig.attributeDescriptions.clear();
+	pipelineConfig.bindingDescriptions.clear();
+	pipelineConfig.renderPass = VK_NULL_HANDLE;
 	pipelineConfig.pipelineLayout = pipelineLayout;
 	thePipeline = std::make_unique<ThePipeline>(theDevice, shaderPaths, pipelineConfig);  
   }
@@ -72,10 +74,9 @@ namespace the
                   std::ceil(frameInfo.height / 4.0), 1);
 
     vkCmdPipelineBarrier(frameInfo.commandBuffer,
-			VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
-			0, nullptr,
-			0, nullptr,
-			1, &frameInfo.barrier);
-
+	  VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+	  0, nullptr,
+	  0, nullptr,
+	  1, &frameInfo.barrier);
   }
 }

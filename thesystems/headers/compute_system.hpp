@@ -4,6 +4,7 @@
 #include "../../therenderer/headers/the_frameinfo.hpp"
 #include <cstdint>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 namespace the
 {

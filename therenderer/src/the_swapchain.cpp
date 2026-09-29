@@ -73,7 +73,7 @@ namespace the
     for (int i = 0; i < placeholderImages.size(); i++)
     {
       createImageView(i, swapChainImageFormat, NO_ADDITIONAL_DEPTH);
-      createFrameBuffer(i, 0, PRESENT);
+      createFrameBuffer(i, 0, 0,PRESENT);
     }
     createSyncObjects();
     currentIndex++;
@@ -167,7 +167,8 @@ namespace the
 
     assert(!(color == DEPTH && depth == ADDITIONAL_DEPTH) && "Both pipeline settings set to depth! Likely not needed!\n");
 
-    indices.push_back(createRenderPass(depth, pass));
+    if (pass != COMP) indices.push_back(createRenderPass(depth, pass));
+    else indices.push_back(-1);
     extents.emplace(currentIndex, resolution);
 
     uint32_t toRender;
@@ -198,7 +199,13 @@ namespace the
         createImage(depth, pass);
         addedDepth[currentIndex] = true;
       }
-      uint32_t index = createFrameBuffer(currentImage, currentIndex, pass);
+
+      uint32_t index = currentImage;
+      if (pass != COMP) 
+      {
+        index = createFrameBuffer(currentImage, currentIndex, indices[0], pass);
+      }
+
       if (i == 0)
       {
         indices.push_back(index);
@@ -301,7 +308,7 @@ namespace the
     imageViewCount++;
   }
 
-  uint32_t TheSwapChain::createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex, PipelineSettings pass)
+  uint32_t TheSwapChain::createFrameBuffer(uint32_t imageIndex, uint32_t pipelineIndex, uint32_t renderPassIndex, PipelineSettings pass)
   {
     std::vector<VkImageView> attachments;
     attachments = {imageViews[imageIndex]};
@@ -310,7 +317,7 @@ namespace the
     VkExtent2D swapChainExtent = getImageExtent(pipelineIndex);
     VkFramebufferCreateInfo framebufferInfo = {};
     framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferInfo.renderPass = renderPasses[pipelineIndex];
+    framebufferInfo.renderPass = renderPasses[renderPassIndex];
     framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
     framebufferInfo.pAttachments = attachments.data();
     framebufferInfo.width = extents[pipelineIndex].width;
