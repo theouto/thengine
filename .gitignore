@@ -28,6 +28,8 @@
 *.tres
 *.ini
 *.xmp
+*.glb
+*.gltf
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

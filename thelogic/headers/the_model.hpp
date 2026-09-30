@@ -55,6 +55,8 @@ namespace the
 			std::vector<uint32_t> indices{};
 
 			void loadModel(const std::string& filepath);
+            void loadObj(const std::string& filepath);
+            void loadGltf(const std::string& filepath);
 		};
 
 		TheModel(TheDevice & device, const TheModel::Builder &builder);

@@ -203,13 +203,15 @@ vec3 calculateSunLight(DirectionalLight sun, vec3 surfaceNormal, vec2 UVs, vec3 
 {
   vec3 directionToLight = sun.direction;
   directionToLight = normalize(-directionToLight);
-  float shadow = ShadowCalculation(directionToLight, surfaceNormal, cameraPosWorld, image);
+  //float shadow = ShadowCalculation(directionToLight, surfaceNormal, cameraPosWorld, image);
 
-  if (shadow <= 0) return vec3(0.f);
+  //if (shadow <= 0) return vec3(0.f);
 
   vec3 intensity = sun.color.xyz * sun.color.w;
 
-  return (shadow) * surfaceLightingHelper(UVs, surfaceNormal, viewDirection, F0, intensity, directionToLight);
+  return 
+    //(shadow) * 
+    surfaceLightingHelper(UVs, surfaceNormal, viewDirection, F0, intensity, directionToLight);
 }
 
 vec3 calculateLights(vec3 surfaceNormal, vec2 UVs, vec3 viewDirection, vec3 F0)
@@ -245,7 +247,8 @@ void main()
 
   float prePassDepth = texelFetch(frameBuffers[nonuniformEXT(4 + ubo.frameIndex)], coords, 0).r;
 
-  if (prePassDepth + 0.0004f < currDepth) discard;
+  //depth bias because for some reason it breaks
+  if (prePassDepth + 0.001f < currDepth) discard;
 
   vec3 cameraPosWorld = ubo.invView[3].xyz;
   vec3 viewDirection = normalize(cameraPosWorld - fragPosWorld);

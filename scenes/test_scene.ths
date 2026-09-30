@@ -44,7 +44,7 @@ materials/wet_rock.thmat
 -1
 and again!
 models/sponza.obj
-materials/brushed_metal.thmat
+materials/wet_rock.thmat
 0 -1.5 0
 0.005 -0.005 0.005
 0 0 0
