@@ -284,7 +284,11 @@ namespace the
 
   void TheModel::Builder::loadGltf(const std::string& filePath)
   {
-    
+    tinygltf3::Model glTFInput;
+    tinygltf3::conte gltfContext{};
+    std::string error, warning;
+
+    bool fileLoaded = gltfContext.LoadASCIIFromFile(&glTFInput, &error, &warning, filePath);
   }
 
 }
