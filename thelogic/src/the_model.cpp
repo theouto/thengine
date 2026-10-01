@@ -58,7 +58,7 @@ namespace the
 
   void TheModel::createFromGltf()
   {
-    vertexBuffer
+    //vertexBuffer
   }
 
   void TheModel::createVertexBuffers(const std::vector<Vertex>& vertices)

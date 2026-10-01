@@ -248,7 +248,7 @@ void main()
   float prePassDepth = texelFetch(frameBuffers[nonuniformEXT(4 + ubo.frameIndex)], coords, 0).r;
 
   //depth bias because for some reason it breaks
-  if (prePassDepth + 0.001f < currDepth) discard;
+  if (prePassDepth + 0.01f < currDepth) discard;
 
   vec3 cameraPosWorld = ubo.invView[3].xyz;
   vec3 viewDirection = normalize(cameraPosWorld - fragPosWorld);
