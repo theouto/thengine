@@ -4,6 +4,7 @@
 #include "../../therenderer/headers/the_buffer.hpp"
 #include "../../theloading/headers/the_textures.hpp"
 #include "../../thirdparty/xxHash/xxhash.h"
+#include "../../thirdparty/tinygltf/tiny_gltf_v3.h"
 #include <glm/ext/vector_float3.hpp>
 
 #define GLM_FORCE_RADIANS
@@ -51,12 +52,14 @@ namespace the
 
 		struct Builder
 		{
-			std::vector<Vertex> vertices{};
-			std::vector<uint32_t> indices{};
+		  std::vector<Vertex> vertices{};
+		  std::vector<uint32_t> indices{};
 
-			void loadModel(const std::string& filepath);
-            void loadObj(const std::string& filepath);
-            void loadGltf(const std::string& filepath);
+          std::shared_ptr<tinygltf3::Model> glTF = nullptr;
+
+		  void loadModel(const std::string& filepath);
+          void loadObj(const std::string& filepath);
+          void loadGltf(const std::string& filepath);
 		};
 
 		TheModel(TheDevice & device, const TheModel::Builder &builder);
@@ -100,6 +103,7 @@ namespace the
 	private:
 		void createVertexBuffers(const std::vector<Vertex> &vertices);
 		void createIndexBuffers(const std::vector<uint32_t>& indices);
+        void createFromGltf();
 		
         std::vector<std::unique_ptr<TheTextures>> textures;
         TheDevice &theDevice;
@@ -113,6 +117,8 @@ namespace the
 
         std::vector<InstanceData> instanceData;
         std::unique_ptr<TheBuffer> instanceBuffer = nullptr;
+
+        std::shared_ptr<tinygltf3::Model> glTF = nullptr;
 
 		bool hasIndexBuffer = false;
 		std::unique_ptr<TheBuffer> indexBuffer;

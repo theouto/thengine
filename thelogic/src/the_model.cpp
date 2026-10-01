@@ -1,13 +1,17 @@
 #include "../headers/the_model.hpp"
 #include "../headers/lve_utils.hpp"
+#include <cstddef>
+#include <memory>
+#include <stdexcept>
 #include <vulkan/vulkan_core.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
+
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "../../thirdparty/tinyobjloader/tiny_obj_loader.h"
 
-#include "../../thirdparty/tinygltf/tiny_gltf_v3.h"
+#define TINYGLTF_IMPLEMENTATION
 
 #include <cassert>
 #include <cstring>
@@ -32,8 +36,14 @@ namespace the
 {
   TheModel::TheModel(TheDevice& device, const TheModel::Builder &builder) : theDevice{device}
   {
-  	createVertexBuffers(builder.vertices);
-  	createIndexBuffers(builder.indices);
+    if (builder.glTF != nullptr) 
+    {
+      glTF = builder.glTF;
+      createFromGltf();
+    } else {
+  	  createVertexBuffers(builder.vertices);
+  	  createIndexBuffers(builder.indices);
+    }
   }
 	
   TheModel::~TheModel() {}
@@ -44,6 +54,11 @@ namespace the
   	builder.loadModel(filepath);
     auto lala = XXH32(filepath.c_str(), filepath.length(), 0);
 	return std::make_unique<TheModel>(device, builder);
+  }
+
+  void TheModel::createFromGltf()
+  {
+    vertexBuffer
   }
 
   void TheModel::createVertexBuffers(const std::vector<Vertex>& vertices)
@@ -284,11 +299,16 @@ namespace the
 
   void TheModel::Builder::loadGltf(const std::string& filePath)
   {
-    tinygltf3::Model glTFInput;
-    tinygltf3::conte gltfContext{};
-    std::string error, warning;
+    std::shared_ptr<tinygltf3::Model> glTFInput;
+    tinygltf3::ErrorStack errors;
 
-    bool fileLoaded = gltfContext.LoadASCIIFromFile(&glTFInput, &error, &warning, filePath);
+    if(!tinygltf3::parse_file(*glTFInput, errors, filePath.c_str()))
+    {
+      //I could just not finish the program, but...
+      std::runtime_error("failed to load glTF file!");
+    }
+
+    glTF = glTFInput;
   }
 
 }
