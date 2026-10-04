@@ -9,8 +9,6 @@
 #include <glm/gtx/hash.hpp>
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "../../thirdparty/tinyobjloader/tiny_obj_loader.h"
-
 #define TINYGLTF_IMPLEMENTATION
 
 #include <cassert>
@@ -46,7 +44,7 @@ namespace the
     }
   }
 	
-  TheModel::~TheModel() {}
+  TheModel::~TheModel() {removeglTF();}
 
   std::unique_ptr<TheModel> TheModel::createModelFromFile(TheDevice& device, const std::string& filepath)
   {
@@ -58,7 +56,13 @@ namespace the
 
   void TheModel::createFromGltf()
   {
-    //vertexBuffer
+    gltfImages.resize(glTF->get()->images_count);
+    for (int i = 0; i < gltfImages.size(); i++)
+    {
+      gltfImages[i] = glTF->get()->images[i];
+    }
+
+    std::vector<Vertex> vertexInputs(0);
   }
 
   void TheModel::createVertexBuffers(const std::vector<Vertex>& vertices)
@@ -259,6 +263,8 @@ namespace the
 
 	for (const auto& shape : shapes)
 	{
+      
+
 	  for (const auto& index : shape.mesh.indices)
 	  {
 	  	Vertex vertex{};

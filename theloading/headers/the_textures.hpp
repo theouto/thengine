@@ -50,7 +50,7 @@ namespace the
 	    descriptorInfo.imageView = textureImageView;
 	    descriptorInfo.sampler = textureSampler;
 
-	    return descriptorInfo; 
+	    return descriptorInfo;
 	  }
 
 	private:

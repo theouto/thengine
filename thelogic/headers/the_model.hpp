@@ -3,8 +3,11 @@
 #include "../../therenderer/headers/the_device.hpp"
 #include "../../therenderer/headers/the_buffer.hpp"
 #include "../../theloading/headers/the_textures.hpp"
+
 #include "../../thirdparty/xxHash/xxhash.h"
 #include "../../thirdparty/tinygltf/tiny_gltf_v3.h"
+#include "../../thirdparty/tinyobjloader/tiny_obj_loader.h"
+
 #include <glm/ext/vector_float3.hpp>
 
 #define GLM_FORCE_RADIANS
@@ -25,9 +28,8 @@ namespace the
 		struct Vertex
 		{
 			glm::vec3 position;
-			//glm::vec3 color;
 			glm::vec3 normal{};
-			alignas(16) glm::vec2 uv{};
+			glm::vec2 uv{};
 
 			static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
 			static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
@@ -38,13 +40,13 @@ namespace the
 
         struct InstanceData
         {
-          alignas(16) glm::vec3 translation;
-          alignas(16) glm::vec3 rotation;
-          alignas(16) glm::vec3 scale;
-          
-          alignas(16) glm::ivec3 RIDone;
-          alignas(16) glm::ivec3 RIDtwo;
-          glm::vec4 modifiers;
+          alignas(16) glm::vec3 translation{0.f};
+          alignas(16) glm::vec3 rotation{0.f};
+          alignas(16) glm::vec3 scale{1.f};
+
+          alignas(16) glm::ivec3 RIDone{1};
+          alignas(16) glm::ivec3 RIDtwo{1, 1, 0};
+          glm::vec4 modifiers{1.f, 1.f, 1.f, 0.f};
 
           static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
           static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
@@ -74,6 +76,7 @@ namespace the
 
 		static std::unique_ptr<TheModel> createModelFromFile(TheDevice& device, const std::string &filepath);
 
+        std::vector<tg3_image> getTextures();
         uint32_t addInstanceData(glm::vec3 scale, glm::vec3 translation, glm::vec3 rotation, std::vector<uint32_t> material, std::vector<float> materialModifiers);
 
         void createInstanceBuffer();
@@ -82,6 +85,8 @@ namespace the
         void setScale(uint32_t index, glm::vec3 scale) {instanceData[index].scale = scale;}
         void setTranslation(uint32_t index, glm::vec3 translation) {instanceData[index].translation = translation;}
         void setRotation(uint32_t index, glm::vec3 rotation) {instanceData[index].rotation = rotation;}
+
+        void removeglTF() {glTF = nullptr;}
 
         void setMaterial(uint32_t index, uint32_t* RID, float* modi)
         {
@@ -115,7 +120,9 @@ namespace the
         XXH32_hash_t model_name;
         XXH32_hash_t material_name;
 
+        std::vector<tinyobj::mesh_t> meshes;
         std::vector<InstanceData> instanceData;
+        std::vector<tg3_image> gltfImages;
         std::unique_ptr<TheBuffer> instanceBuffer = nullptr;
 
         std::shared_ptr<tinygltf3::Model> glTF = nullptr;

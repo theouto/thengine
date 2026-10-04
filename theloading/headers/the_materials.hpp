@@ -28,7 +28,8 @@ namespace the
     void writeBindless(std::vector<std::shared_ptr<TheTextures>> textures,
                                TheDescriptorSetLayout& descLayout,
                                TheDescriptorPool& descPool,
-                               VkDescriptorSet& bindlessSet);
+                               VkDescriptorSet& bindlessSet,
+                               bool foreign = false);
 
     void saveMaterial(uint32_t hash);
     void reloadMaterial(uint32_t hash,

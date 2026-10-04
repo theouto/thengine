@@ -126,8 +126,13 @@ namespace the
   void TheMaterials::writeBindless(std::vector<std::shared_ptr<TheTextures>> tex,
                                     TheDescriptorSetLayout& descLayout,
                                     TheDescriptorPool& descPool,
-                                    VkDescriptorSet& bindlessSet)
+                                    VkDescriptorSet& bindlessSet, bool foreign)
   {
+    if (foreign)
+    {
+      
+    }
+
     for (int i = 0; i < tex.size(); i++)
     {
       auto texInfo = tex[i]->getDescriptorInfo();
