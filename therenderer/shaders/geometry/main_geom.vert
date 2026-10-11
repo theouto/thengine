@@ -1,16 +1,18 @@
 #version 450
-#extension GL_EXT_scalar_block_layout : enable
+#extension GL_EXT_nonuniform_qualifier : enable
+#extension GL_GOOGLE_include_directive : require
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
-layout(location = 2) in vec2 uv;
+layout(location = 2) in vec3 uv;
 
 layout(location = 3) in vec3 scale;
 layout(location = 4) in vec3 rotation;
 layout(location = 5) in vec3 translation;
-layout(location = 6) in ivec3 RIDone;
-layout(location = 7) in ivec3 RIDtwo;
-layout(location = 8) in vec4 modifiers;
+
+layout(location = 6) in ivec3 meshIDs;
+layout(location = 7) in ivec3 meshIDIIs;
+layout(location = 8) in vec4 lala;
 
 layout(location = 0) out vec3 fragPosWorld;
 layout(location = 1) out vec3 fragNormalWorld;
@@ -19,17 +21,11 @@ layout(location = 3) out mat4 FragPosLightSpace;
 layout(location = 7) out ivec3 fRIDone;
 layout(location = 8) out ivec3 fRIDtwo;
 layout(location = 9) out vec4 fmodifiers;
+layout(location = 10) flat out int matIndex;
 
-const float PI = 3.1415926535897932384626433832795;
-const float rotator = PI / 180.f;
+#include "../include/common.glsl"
 
-struct PointLight
-{
-  vec4 position;
-  vec4 color;
-};
-
-layout(std430, set = 0, binding = 0) uniform GlobalUbo 
+layout(set = 0, binding = 0) uniform GlobalUbo 
 {
   mat4 projection;
   mat4 view;
@@ -48,11 +44,10 @@ layout(std430, set = 0, binding = 0) uniform GlobalUbo
   int frameIndex;
 } ubo;
 
-layout(push_constant) uniform Push 
+layout(set = 0, binding = 1) readonly buffer materialData
 {
-  mat4 modelMatrix;
-  mat4 normalMatrix;
-} push;
+  MaterialData meshMaterialData[];
+} matt;
 
 //https://shader-tutorial.dev/basics/vertex-shader/
 //and also
@@ -107,28 +102,32 @@ void main()
 
   mat4 rotationMatrix = rotateZ(rotation.z * rotator) * rotateY(rotation.y * rotator) * rotateX(rotation.x * rotator);
 
-  mat4 mat = {push.modelMatrix[0], push.modelMatrix[1], push.modelMatrix[2], vec4(vec3(0.f), 1.f)};
+  mat4 mat = {modelMatrix[0], modelMatrix[1], modelMatrix[2], vec4(vec3(0.f), 1.f)};
 
   mat4 instanceMatrix = scaleMatrix * mat;
   instanceMatrix = rotationMatrix * instanceMatrix;
 
   instanceMatrix[3] = vec4(translation.x, -translation.y, translation.z, 1.f);
 
-  //mat4 instanceMatrix = mat4(modelMatrixI, modelMatrixII, modelMatrixIII, modelMatrixIV);
-  //mat3 normalInstanceMatrix = mat3(normalMatrixI, normalMatrixII, normalMatrixIII);
-
   vec4 positionWorld = instanceMatrix * vec4(position, 1.f);
   gl_Position = ubo.projection * ubo.view * positionWorld;
 
   vec3 nuNormal = normal;
 
-  fragNormalWorld = normalize(mat3(rotationMatrix * invScaleMatrix * push.normalMatrix) * normal);
+  fragNormalWorld = normalize(mat3(rotationMatrix * invScaleMatrix * modelMatrix) * normal);
   fragPosWorld = positionWorld.xyz;
-  fragUv = uv;
-  fmodifiers = modifiers;
+  fragUv = uv.xy;
 
-  fRIDone = RIDone;
-  fRIDtwo = RIDtwo;
+  matIndex = int(uv.z);
+  //if (matIndex > 7) matIndex = 7;
+
+  //int toUse;
+  //if (matIndex > 3) toUse = meshIDs[matIndex];
+  //else toUse = meshIDIIs[matIndex%4];
+
+  fmodifiers = lala;//matt.meshMaterialData[toUse].modifiers;
+  fRIDone = meshIDs;//matt.meshMaterialData[toUse].RIDone;
+  fRIDtwo = meshIDIIs;//matt.meshMaterialData[toUse].RIDtwo;
 
   for (int i = 0; i < 4; i++)
   {

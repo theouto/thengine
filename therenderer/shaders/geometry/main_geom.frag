@@ -1,4 +1,5 @@
 #version 450
+#extension GL_GOOGLE_include_directive : require
 #extension GL_EXT_nonuniform_qualifier : enable
 
 layout(location = 0) in vec3 fragPosWorld;
@@ -14,23 +15,8 @@ layout(location = 0) out vec4 outColor;
 layout(set = 1, binding = 0) uniform sampler2D storageSampler[];
 layout(set = 2, binding = 1) uniform sampler2D frameBuffers[];
 
-layout(push_constant) uniform Push 
-{
-  mat4 modelMatrix;
-  mat4 normalMatrix;
-} push;
-
-struct PointLight
-{
-  vec4 position;
-  vec4 color;
-};
-
-struct DirectionalLight
-{
-  vec3 direction;
-  vec4 color;
-};
+#include "../include/common.glsl"
+#include "../include/frag.glsl"
 
 layout(set = 0, binding = 0) uniform GlobalUbo 
 {
@@ -51,10 +37,6 @@ layout(set = 0, binding = 0) uniform GlobalUbo
   int frameIndex;
 } ubo;
 
-const float M_PI = 3.1415926538;
-
-const vec2 invAtan = vec2(0.1591, 0.3183);
-
 //==============================================================================
 
 vec2 SampleSphericalMap(vec3 v)
@@ -63,23 +45,6 @@ vec2 SampleSphericalMap(vec3 v)
   uv *= invAtan;
   uv += 0.5;
   return uv;
-}
-
-//==============================================================================
-
-mat3 cotangent_frame( vec3 normal, vec3 worldPos, vec2 texCoord )
-{
-  vec3 Q1 = dFdx(worldPos);
-  vec3 Q2 = dFdy(worldPos);
-  vec2 st1 = dFdx(texCoord);
-  vec2 st2 = dFdy(texCoord);
-
-  vec3 N = normalize(normal);
-  vec3 T = normalize(Q1 * st2.t - Q2 * st1.t);
-  vec3 B = -normalize(cross(N, T));
-
-  mat3 TBN = mat3(T, B, N);
-  return TBN;
 }
 
 //==============================================================================
@@ -235,11 +200,6 @@ vec3 calculateLights(vec3 surfaceNormal, vec2 UVs, vec3 viewDirection, vec3 F0)
   return Lo;
 }
 
-float LinearizeDepth(float depth) 
-{
-  return ubo.near * ubo.far / (ubo.far + depth * (ubo.near - ubo.far));
-}
-
 void main()
 {
   ivec2 coords = ivec2(gl_FragCoord.x, gl_FragCoord.y);
@@ -248,7 +208,7 @@ void main()
   float prePassDepth = texelFetch(frameBuffers[nonuniformEXT(4 + ubo.frameIndex)], coords, 0).r;
 
   //depth bias because for some reason it breaks
-  if (prePassDepth + 0.01f < currDepth) discard;
+  //if (prePassDepth + 0.01f < currDepth) discard;
 
   vec3 cameraPosWorld = ubo.invView[3].xyz;
   vec3 viewDirection = normalize(cameraPosWorld - fragPosWorld);
@@ -304,6 +264,7 @@ void main()
 
   //outColor = vec4(vec3(truDepth)/ubo.far, 1.f);
   //outColor = vec4(fragPosWorld, 1.f);
+  //outColor = vec4(1.f);
   //outColor = diffuse + vec4(Lo, 0.f) + vec4(debugColours[image]/5.f, 0.f);
   outColor = diffuse + vec4(Lo, 0.f);
   //outColor = vec4(surfaceNormal, 1.f);

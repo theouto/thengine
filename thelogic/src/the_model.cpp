@@ -9,6 +9,7 @@
 #include <glm/gtx/hash.hpp>
 
 #define TINYOBJLOADER_IMPLEMENTATION
+#include "../../thirdparty/tinyobjloader/tiny_obj_loader.h"
 #define TINYGLTF_IMPLEMENTATION
 
 #include <cassert>

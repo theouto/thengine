@@ -25,7 +25,7 @@ cd ./therenderer/shaders/
 
 shaderfiles=()
 while IFS= read -r line; do
-  if [[ "${line:0:8}" != "compiled" ]]; then
+  if [[ "${line:0:8}" != "compiled" && "${line:0:7}" != "include" ]]; then
     shaderfiles+=("$line")
   fi
 done < <(rg --files)

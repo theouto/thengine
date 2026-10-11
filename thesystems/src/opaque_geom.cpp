@@ -34,17 +34,11 @@ namespace the
 
   void OpaqueGeometry::createPipeLineLayout(std::vector<VkDescriptorSetLayout> &globalSetLayout)
   {
-  	VkPushConstantRange pushConstantRange{};
-  	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-  	pushConstantRange.offset = 0;
-  	pushConstantRange.size = sizeof(ModelMatrices);
-
-  	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+    VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
   	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   	pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(globalSetLayout.size());
   	pipelineLayoutInfo.pSetLayouts = globalSetLayout.data();
-    pipelineLayoutInfo.pushConstantRangeCount = 1;
-	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+    pipelineLayoutInfo.pushConstantRangeCount = 0;
 
   	if (vkCreatePipelineLayout(theDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
   	{
@@ -79,13 +73,6 @@ namespace the
 	  if (obj.model == nullptr) continue;
       try {render.at(obj.instanceHash);} catch (std::out_of_range e)
       {
-        ModelMatrices data{};
-        data.modelMatrix = obj.transform.mat4();
-        data.normalMatrix = obj.transform.normalMatrix();
-
-        vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-				0, sizeof(ModelMatrices), &data);
-
 		obj.model->bind(frameInfo.commandBuffer);
 		obj.model->draw(frameInfo.commandBuffer);
 

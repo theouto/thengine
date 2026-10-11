@@ -6,7 +6,6 @@
 
 #include "../../thirdparty/xxHash/xxhash.h"
 #include "../../thirdparty/tinygltf/tiny_gltf_v3.h"
-#include "../../thirdparty/tinyobjloader/tiny_obj_loader.h"
 
 #include <glm/ext/vector_float3.hpp>
 
@@ -120,7 +119,8 @@ namespace the
         XXH32_hash_t model_name;
         XXH32_hash_t material_name;
 
-        std::vector<tinyobj::mesh_t> meshes;
+        //std::vector<tinyobj::mesh_t> meshes;
+        int meshes = 0;
         std::vector<InstanceData> instanceData;
         std::vector<tg3_image> gltfImages;
         std::unique_ptr<TheBuffer> instanceBuffer = nullptr;

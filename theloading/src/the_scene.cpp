@@ -22,12 +22,8 @@ namespace the
     std::ifstream scene(file.c_str());
     if (!scene.is_open()) {throw std::runtime_error("Failed to open scene file!");}
 
-    scene >> count;
-    getline(scene, line); //clear the line
-
-    for (int i = 0; i < count; i++)
+    while (scene >> type)
     {
-      scene >> type;
       getline(scene, line);
       //two ifs here as I do eventually plan on adding more types, such as area lights or spot lights, to name a few
       if (type == -1) createObjectHelper(scene, pool); //std::cout << "chosen!\n";}

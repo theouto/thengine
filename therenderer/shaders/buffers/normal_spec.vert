@@ -1,30 +1,27 @@
 #version 450
 #extension GL_EXT_scalar_block_layout : enable
+#extension GL_GOOGLE_include_directive : require
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
-layout(location = 2) in vec2 uv;
+layout(location = 2) in vec3 uv;
 
 layout(location = 3) in vec3 scale;
 layout(location = 4) in vec3 rotation;
 layout(location = 5) in vec3 translation;
-layout(location = 6) in ivec3 RIDone;
-layout(location = 7) in ivec3 RIDtwo;
-layout(location = 8) in vec4 modifiers;
+layout(location = 6) in int materialIDS[8];
 
 layout(location = 0) out vec3 fragPosWorld;
 layout(location = 1) out vec3 fragNormalWorld;
 layout(location = 2) out vec2 fragUv;
 layout(location = 3) flat out uint fRID[6];
 
-const float PI = 3.1415926535897932384626433832795;
-const float rotator = PI / 180.f;
+#include "../include/common.glsl"
 
-struct PointLight
+layout(set = 0, binding = 1) readonly buffer materialData
 {
-  vec4 position;
-  vec4 color;
-};
+  MaterialData meshMaterialData[];
+} matt;
 
 layout(std430, set = 0, binding = 0) uniform GlobalUbo 
 {
@@ -118,10 +115,13 @@ void main()
 
   fragNormalWorld = normalize(mat3(rotationMatrix * invScaleMatrix * push.normalMatrix) * normal);
   fragPosWorld = positionWorld.xyz;
-  fragUv = uv;
+  fragUv = uv.xy;
 
-  for (int i = 0; i < 6; i++)
+  int matIndex = int(uv.z);
+
+  for (int i = 0; i < 3; i++)
   {
-    if (i < 3) {fRID[i] = RIDone[i];} else {fRID[i] = RIDtwo[i - 3];}
+    fRID[i] = matt.meshMaterialData[materialIDS[matIndex]].RIDone[i];
+    fRID[i+3] = matt.meshMaterialData[materialIDS[matIndex]].RIDtwo[i];
   }
 }

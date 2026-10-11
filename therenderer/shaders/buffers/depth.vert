@@ -1,27 +1,22 @@
 #version 450
-#extension GL_EXT_scalar_block_layout : enable
+#extension GL_EXT_nonuniform_qualifier : enable
+#extension GL_GOOGLE_include_directive : require
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
-layout(location = 2) in vec2 uv;
+layout(location = 2) in vec3 uv;
 
 layout(location = 3) in vec3 scale;
 layout(location = 4) in vec3 rotation;
 layout(location = 5) in vec3 translation;
-layout(location = 6) in ivec3 RIDone;
-layout(location = 7) in ivec3 RIDtwo;
-layout(location = 8) in vec4 modifiers;
 
-const float PI = 3.1415926535897932384626433832795;
-const float rotator = PI / 180.f;
+layout(location = 6) in ivec4 meshIDs;
+layout(location = 7) in ivec4 meshIDIIs;
 
-struct PointLight
-{
-  vec4 position;
-  vec4 color;
-};
+#include "../include/common.glsl"
 
-layout(std430, set = 0, binding = 0) uniform GlobalUbo 
+
+layout(set = 0, binding = 0) uniform GlobalUbo 
 {
   mat4 projection;
   mat4 view;
@@ -39,12 +34,6 @@ layout(std430, set = 0, binding = 0) uniform GlobalUbo
   mat4 lightSpaceMatrix[4];
   int frameIndex;
 } ubo;
-
-layout(push_constant) uniform Push 
-{
-  mat4 modelMatrix;
-  mat4 normalMatrix;
-} push;
 
 //https://shader-tutorial.dev/basics/vertex-shader/
 //and also
@@ -91,7 +80,7 @@ void main()
 
   mat4 rotationMatrix = rotateZ(rotation.z * rotator) * rotateY(rotation.y * rotator) * rotateX(rotation.x * rotator);
 
-  mat4 mat = {push.modelMatrix[0], push.modelMatrix[1], push.modelMatrix[2], vec4(vec3(0.f), 1.f)};
+  mat4 mat = {modelMatrix[0], modelMatrix[1], modelMatrix[2], vec4(vec3(0.f), 1.f)};
 
   mat4 instanceMatrix = scaleMatrix * mat;
   instanceMatrix = rotationMatrix * instanceMatrix;
