@@ -20,6 +20,21 @@ namespace the
     textures.emplace(XXH32(path.c_str(), path.length(), 0), 1);
   }
 
+  void TheMaterials::createMaterialBuffer()
+  {
+    materialBuffer = std::make_shared<TheBuffer>(
+        theDevice,
+        sizeof(MaterialData) * matData.size(),
+        1,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+
+    assert(materialBuffer->map() == VK_SUCCESS && "unable to map material buffer!");
+
+    materialBuffer->writeToBuffer(matData.data());
+    materialBuffer->flush();
+  }
+
   std::vector<uint32_t> TheMaterials::retrieveBindless(const std::string path,
                                                        TheDescriptorSetLayout& descLayout,
                                                        TheDescriptorPool& descPool,

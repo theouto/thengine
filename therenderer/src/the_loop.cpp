@@ -82,7 +82,12 @@ namespace the
     auto viewerObject = TheGameObject::createGameObject();
     viewerObject.transform.translation.z = -1.5f;
 
-    sceneManager.load("scenes/light_test.ths", *(theRenderer.theResources->pools[1]));
+    sceneManager.load("scenes/test_scene.ths", *(theRenderer.theResources->pools[1]));
+
+    std::cout << "one\n";
+
+    //theRenderer.loadMaterialInfo(sceneManager.handler().matBuffer());
+
     auto currentTime = std::chrono::high_resolution_clock::now();
     std::cout << "rendering🙏: \n\n\n";
 

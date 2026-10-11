@@ -9,6 +9,7 @@ layout(location = 3) in mat4 FragPosLightSpace;
 layout(location = 7) flat in ivec3 fRIDone;
 layout(location = 8) flat in ivec3 fRIDtwo;
 layout(location = 9) in vec4 fmodifiers;
+layout(location = 10) flat in int matIndex;
 
 layout(location = 0) out vec4 outColor;
 
@@ -245,6 +246,8 @@ void main()
     {0.5, 0.5, 0.5}
   };
 
+  vec3 debug = debugColours[matIndex%4];
+
   vec4 fragPosViewSpace = ubo.view * vec4(fragPosWorld, 1.f);
   float depth = abs(fragPosViewSpace.z);
 
@@ -264,8 +267,8 @@ void main()
 
   //outColor = vec4(vec3(truDepth)/ubo.far, 1.f);
   //outColor = vec4(fragPosWorld, 1.f);
-  //outColor = vec4(1.f);
+  outColor = vec4(debug, 1.f);
   //outColor = diffuse + vec4(Lo, 0.f) + vec4(debugColours[image]/5.f, 0.f);
-  outColor = diffuse + vec4(Lo, 0.f);
+  //outColor = diffuse + vec4(Lo, 0.f);
   //outColor = vec4(surfaceNormal, 1.f);
 }

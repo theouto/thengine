@@ -112,7 +112,7 @@ class TheDevice {
   VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
   TheWindow &window;
   VkCommandPool commandPool;
-  
+
   VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
   VkDevice device_;
   VkSurfaceKHR surface_{VK_NULL_HANDLE};

@@ -5,6 +5,7 @@
 #include "../../therenderer/headers/the_device.hpp"
 
 #include <cstdint>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 #include <map>
@@ -14,6 +15,13 @@ namespace the
 {
   class TheMaterials
   {
+    struct MaterialData
+    {
+      glm::ivec3 RIDone{1};
+      glm::ivec3 RIDtwo{1, 1, 0};
+      glm::vec4 modi{1.f, 1.f, 1.f, 0.f};
+    };
+
     public:
 
     TheMaterials(TheDevice &device);
@@ -37,6 +45,11 @@ namespace the
                         TheDescriptorPool& descPool,
                         VkDescriptorSet& bindlessSet);
 
+    void createMaterialBuffer();
+    void updateMaterialBuffer();
+
+    std::shared_ptr<TheBuffer> matBuffer() {return materialBuffer;}
+
     void pushValues(uint* RID, float* modified, TheGameObject& object);
     std::vector<uint32_t>& keys() {return _keys;}
     std::vector<float>& modi(uint32_t hash) {return modifiers.at(hash);}
@@ -48,6 +61,8 @@ namespace the
     uint32_t currArr = 2;
 
     std::vector<uint32_t> _keys;
+    std::shared_ptr<TheBuffer> materialBuffer;
+    std::vector<MaterialData> matData;
     std::vector<std::shared_ptr<TheTextures>> totalTextures;
 
     TheDevice &theDevice;

@@ -15,6 +15,7 @@ namespace the
     pools[0] = TheDescriptorPool::Builder(theDevice)
             .setMaxSets(4)
             .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 5)
+            .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 5)
             .build();
 
     pools[1] = TheDescriptorPool::Builder(theDevice)

@@ -1,6 +1,7 @@
 #include "../headers/the_model.hpp"
 #include "../headers/lve_utils.hpp"
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <stdexcept>
 #include <vulkan/vulkan_core.h>
@@ -209,7 +210,7 @@ namespace the
 
     attributeDescriptions.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position)});
 	attributeDescriptions.push_back({ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal)});
-	attributeDescriptions.push_back({ 2, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv)});
+	attributeDescriptions.push_back({ 2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, uv)});
 
 	return attributeDescriptions;
   }
@@ -247,6 +248,8 @@ namespace the
 
   void TheModel::Builder::loadObj(const std::string& filepath)
   {
+    static uint32_t meshID = 0;
+
     tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
@@ -264,9 +267,8 @@ namespace the
 
 	for (const auto& shape : shapes)
 	{
-      
 
-	  for (const auto& index : shape.mesh.indices)
+      for (const auto& index : shape.mesh.indices)
 	  {
 	  	Vertex vertex{};
 
@@ -290,7 +292,7 @@ namespace the
 		  {
 		    vertex.uv = {
 			  attrib.texcoords[2 * index.texcoord_index + 0],
-			  1.f - attrib.texcoords[2 * index.texcoord_index + 1], };
+			  1.f - attrib.texcoords[2 * index.texcoord_index + 1], meshID};
 		  }
 
 		  if (uniqueVertices.count(vertex) == 0)
@@ -301,6 +303,8 @@ namespace the
 
 		  indices.push_back(uniqueVertices[vertex]);
 	  }
+
+      meshID++;
 	}
   }
 

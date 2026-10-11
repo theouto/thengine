@@ -2,7 +2,7 @@
 TARGET_EXEC := final_program
 
 BUILD_DIR := ./build
-SRC_DIRS := ./themain ./therenderer ./thelogic ./theloading ./thirdparty ./thesystems
+SRC_DIRS := ./themain ./therenderer/headers/ ./therenderer/src/ ./thelogic ./theloading ./thirdparty ./thesystems
 
 CFLAGS = -std=c23 -O3
 LDFLAGS = -lSDL3 -lSDL3_image -lvulkan 

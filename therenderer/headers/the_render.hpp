@@ -76,6 +76,19 @@ namespace the
           .build(theResources->sets[1]);
       }
 
+      void loadMaterialInfo(std::shared_ptr<TheBuffer> materialInfo)
+      {
+        auto info = materialInfo->descriptorInfo();
+
+        TheDescriptorWriter(*(theResources->layouts[0]), *(theResources->pools[0]))
+         .writeBuffer(1, &info)
+         .overwrite(theResources->sets[0]);
+
+        TheDescriptorWriter(*(theResources->layouts[0]), *(theResources->pools[0]))
+          .writeBuffer(1, &info)
+          .overwrite(theResources->sets[1]);
+      }
+
       VkImage getImage(uint32_t index) {return theSwapChain->getImage(index);}
 
       VkRenderPass getFramePass(uint32_t index) {return theSwapChain->getRenderPass(index);}

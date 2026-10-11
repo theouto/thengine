@@ -36,6 +36,8 @@ namespace the
     {
       kv.second->createInstanceBuffer();
     }
+
+    //materialHandler->createMaterialBuffer();
   }
 
   void TheScene::loadModel(TheGameObject& object, TheDescriptorPool& pool,
@@ -64,7 +66,6 @@ namespace the
     std::ofstream scene("./scenes/test_scene.ths");
     if (!scene.is_open()) {throw std::runtime_error("Failed to open scene file!");}
 
-    scene << gameObjects.size() << '\n';
     for (auto &kv : gameObjects)
     {
       scene << kv.second.type << '\n';
