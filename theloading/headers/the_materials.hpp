@@ -17,8 +17,8 @@ namespace the
   {
     struct MaterialData
     {
-      glm::ivec3 RIDone{1};
-      glm::ivec3 RIDtwo{1, 1, 0};
+      alignas(16) glm::ivec3 RIDone{0};
+      alignas(16) glm::ivec3 RIDtwo{0, 0, 1};
       glm::vec4 modi{1.f, 1.f, 1.f, 0.f};
     };
 
@@ -36,8 +36,7 @@ namespace the
     void writeBindless(std::vector<std::shared_ptr<TheTextures>> textures,
                                TheDescriptorSetLayout& descLayout,
                                TheDescriptorPool& descPool,
-                               VkDescriptorSet& bindlessSet,
-                               bool foreign = false);
+                               VkDescriptorSet& bindlessSet);
 
     void saveMaterial(uint32_t hash);
     void reloadMaterial(uint32_t hash,
@@ -69,6 +68,8 @@ namespace the
 
     std::unordered_map<unsigned int,
                        std::vector<uint32_t>> bindlessTextureSet;
+
+    std::unordered_map<uint32_t, uint32_t> hashToArr;
 
     //The point here is to trade memory for less writes
     std::unordered_map<unsigned int,

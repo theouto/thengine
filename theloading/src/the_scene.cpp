@@ -36,8 +36,6 @@ namespace the
     {
       kv.second->createInstanceBuffer();
     }
-
-    //materialHandler->createMaterialBuffer();
   }
 
   void TheScene::loadModel(TheGameObject& object, TheDescriptorPool& pool,

@@ -27,7 +27,7 @@ namespace the
       static constexpr int defWidth = 1920;
       static constexpr int defHeight = 1080;
       static constexpr float defFar = 500.f;
-      static constexpr float defNear = 0.1f;
+      static constexpr float defNear = 0.01f;
 
       std::string defShaderPath = "therenderer/shaders/compiled/";
 

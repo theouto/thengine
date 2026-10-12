@@ -42,6 +42,7 @@ namespace the
 
     layouts[0] = TheDescriptorSetLayout::Builder(theDevice)
             .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL, 1)
+            .addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_ALL, 1)
             .build();
 
     layouts[1] = TheDescriptorSetLayout::Builder(theDevice)

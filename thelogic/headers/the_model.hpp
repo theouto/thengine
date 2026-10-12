@@ -58,6 +58,8 @@ namespace the
 
           std::shared_ptr<tinygltf3::Model> glTF = nullptr;
 
+          uint32_t meshID;
+
 		  void loadModel(const std::string& filepath);
           void loadObj(const std::string& filepath);
           void loadGltf(const std::string& filepath);
@@ -120,10 +122,12 @@ namespace the
         XXH32_hash_t material_name;
 
         //std::vector<tinyobj::mesh_t> meshes;
-        int meshes = 0;
+        uint32_t meshes = 0;
         std::vector<InstanceData> instanceData;
         std::vector<tg3_image> gltfImages;
         std::unique_ptr<TheBuffer> instanceBuffer = nullptr;
+
+        std::vector<uint32_t> meshMaterials;
 
         std::shared_ptr<tinygltf3::Model> glTF = nullptr;
 

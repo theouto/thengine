@@ -36,11 +36,12 @@ namespace the
 {
   TheModel::TheModel(TheDevice& device, const TheModel::Builder &builder) : theDevice{device}
   {
-    if (builder.glTF != nullptr) 
+    if (builder.glTF != nullptr)
     {
       glTF = builder.glTF;
       createFromGltf();
     } else {
+      meshes = builder.meshID;
   	  createVertexBuffers(builder.vertices);
   	  createIndexBuffers(builder.indices);
     }
@@ -248,7 +249,7 @@ namespace the
 
   void TheModel::Builder::loadObj(const std::string& filepath)
   {
-    static uint32_t meshID = 0;
+    meshID = 0;
 
     tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;

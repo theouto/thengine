@@ -18,6 +18,7 @@ namespace the
     textures.emplace(XXH32(path.c_str(), path.length(), 0), 0);
     path = "textures/NAM.png";
     textures.emplace(XXH32(path.c_str(), path.length(), 0), 1);
+    matData.push_back(MaterialData{});
   }
 
   void TheMaterials::createMaterialBuffer()
@@ -33,6 +34,12 @@ namespace the
 
     materialBuffer->writeToBuffer(matData.data());
     materialBuffer->flush();
+  }
+
+  void TheMaterials::updateMaterialBuffer()
+  {
+    if (materialBuffer != nullptr) materialBuffer->unmap();
+    createMaterialBuffer();
   }
 
   std::vector<uint32_t> TheMaterials::retrieveBindless(const std::string path,
@@ -79,16 +86,31 @@ namespace the
       }
 
       writeBindless(toWrite, descLayout, descPool, bindlessSet);
-      for (int i = 0; i < 4; i++) {material >> loader[i];}
 
-      //std::cout << "emplacing bindless texture set...\n";
+      MaterialData toAdd{};
+
+      //I can do this without a loop, but I don't know
+      //if it's worthwhile, though it would've taken less
+      //time than writing this comment block
+      for (int i = 0; i < 6; i++)
+      {
+        if (i < 3) toAdd.RIDone[i] = load[i];
+        else toAdd.RIDtwo[i%3] = load[i];
+
+        if (i < 4)
+        {
+          material >> loader[i];
+          toAdd.modi[i] = loader[i];
+        }
+      }
 
       bindlessTextureSet.emplace(hash, load);
       modifiers.emplace(hash, loader);
       files.emplace(hash, filepaths);
 
-      //std::cout << "emplaced!\n";
-
+      hashToArr.emplace(hash, matData.size());
+      matData.push_back(toAdd);
+      updateMaterialBuffer();
     };
 
     for (int i = 0; i < 4; i++) {object.modifiers[i] = loader[i];}
@@ -102,28 +124,28 @@ namespace the
                                     TheDescriptorPool& descPool,
                                     VkDescriptorSet& bindlessSet)
   {
-      std::string dummy;
-      std::vector<std::shared_ptr<TheTextures>> toWrite;
-      for (int i = 0; i < 6; i++)
+    std::string dummy;
+    std::vector<std::shared_ptr<TheTextures>> toWrite;
+    for (int i = 0; i < 6; i++)
+    {
+      dummy = files.at(hash)[i];
+      XXH32_hash_t texHash = XXH32(dummy.c_str(), dummy.length(), 0);
+      try {bindlessTextureSet.at(hash)[i] = textures.at(texHash);} catch (std::out_of_range e)
       {
-        dummy = files.at(hash)[i];
-        XXH32_hash_t texHash = XXH32(dummy.c_str(), dummy.length(), 0);
-        try {bindlessTextureSet.at(hash)[i] = textures.at(texHash);} catch (std::out_of_range e)
-        {
-          TheTextures::texType format = TheTextures::SINGLE_UNORM;
-          if (i == 0) format = TheTextures::COLOR;
-          else if (i == 2) format = TheTextures::NORMAL;
+        TheTextures::texType format = TheTextures::SINGLE_UNORM;
+        if (i == 0) format = TheTextures::COLOR;
+        else if (i == 2) format = TheTextures::NORMAL;
 
-          auto tex = std::make_shared<TheTextures>(theDevice, dummy, format);
+        auto tex = std::make_shared<TheTextures>(theDevice, dummy, format);
 
-          toWrite.push_back(tex);
-          totalTextures.push_back(tex);
-          bindlessTextureSet.at(hash)[i] = ++currArr;
-          textures.emplace(texHash, currArr);
-        }
+        toWrite.push_back(tex);
+        totalTextures.push_back(tex);
+        bindlessTextureSet.at(hash)[i] = ++currArr;
+        textures.emplace(texHash, currArr);
       }
+    }
 
-      writeBindless(toWrite, descLayout, descPool, bindlessSet);
+    writeBindless(toWrite, descLayout, descPool, bindlessSet);
   }
 
   void TheMaterials::saveMaterial(uint32_t hash)
@@ -141,13 +163,8 @@ namespace the
   void TheMaterials::writeBindless(std::vector<std::shared_ptr<TheTextures>> tex,
                                     TheDescriptorSetLayout& descLayout,
                                     TheDescriptorPool& descPool,
-                                    VkDescriptorSet& bindlessSet, bool foreign)
+                                    VkDescriptorSet& bindlessSet)
   {
-    if (foreign)
-    {
-      
-    }
-
     for (int i = 0; i < tex.size(); i++)
     {
       auto texInfo = tex[i]->getDescriptorInfo();

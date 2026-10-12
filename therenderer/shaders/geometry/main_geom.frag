@@ -209,7 +209,7 @@ void main()
   float prePassDepth = texelFetch(frameBuffers[nonuniformEXT(4 + ubo.frameIndex)], coords, 0).r;
 
   //depth bias because for some reason it breaks
-  //if (prePassDepth + 0.01f < currDepth) discard;
+  if (prePassDepth + 0.01f < currDepth) discard;
 
   vec3 cameraPosWorld = ubo.invView[3].xyz;
   vec3 viewDirection = normalize(cameraPosWorld - fragPosWorld);
@@ -263,12 +263,12 @@ void main()
   vec4 diffuse = texture(storageSampler[nonuniformEXT(fRIDone[0])], UVs) * (vec4(diffuseLight, 0.0) * texture(storageSampler[nonuniformEXT(fRIDtwo[1])], UVs).r * fmodifiers[2] +
                     vec4(0.01f, 0.01f, 0.02f, 0.f));
 
-  diffuse = vec4(lambda, 0.f) * diffuse + vec4((1 - lambda), 0.f) * vec4(0.1f, 0.1f, 0.1f, 0.f);
+  diffuse = vec4(lambda, 0.f) * diffuse + vec4((1 - lambda), 0.f) * vec4(0.1f, 0.1f, 0.3f, 0.f);
 
   //outColor = vec4(vec3(truDepth)/ubo.far, 1.f);
   //outColor = vec4(fragPosWorld, 1.f);
-  outColor = vec4(debug, 1.f);
+  //outColor = vec4(debug, 1.f);
   //outColor = diffuse + vec4(Lo, 0.f) + vec4(debugColours[image]/5.f, 0.f);
-  //outColor = diffuse + vec4(Lo, 0.f);
+  outColor = diffuse + vec4(Lo, 0.f);
   //outColor = vec4(surfaceNormal, 1.f);
 }

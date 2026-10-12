@@ -125,9 +125,13 @@ void main()
   //if (matIndex > 3) toUse = meshIDs[matIndex];
   //else toUse = meshIDIIs[matIndex%4];
 
-  fmodifiers = lala;//matt.meshMaterialData[toUse].modifiers;
-  fRIDone = meshIDs;//matt.meshMaterialData[toUse].RIDone;
-  fRIDtwo = meshIDIIs;//matt.meshMaterialData[toUse].RIDtwo;
+  //fmodifiers = lala;
+  //fRIDone = meshIDs;
+  //fRIDtwo = meshIDIIs;
+
+  fmodifiers = matt.meshMaterialData[matIndex % 2].modifiers;
+  fRIDone = matt.meshMaterialData[matIndex % 2].RIDone;
+  fRIDtwo = matt.meshMaterialData[matIndex % 2].RIDtwo;
 
   for (int i = 0; i < 4; i++)
   {
