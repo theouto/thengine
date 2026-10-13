@@ -181,6 +181,7 @@ namespace the
   {
     if (materialBuffer != nullptr) materialBuffer->unmap();
     createMaterialBuffer();
+    updateDescriptor();
   }
 
   void TheModel::createDescriptor()
@@ -190,6 +191,15 @@ namespace the
     TheDescriptorWriter(*materialLayout, *materialPool)
           .writeBuffer(0, &meshInfo)
           .build(materialSet);
+  }
+
+  void TheModel::updateDescriptor()
+  {
+    auto meshInfo = materialBuffer->descriptorInfo();
+
+    TheDescriptorWriter(*materialLayout, *materialPool)
+          .writeBuffer(0, &meshInfo)
+          .overwrite(materialSet);
   }
 
   void TheModel::draw(VkCommandBuffer commandBuffer)

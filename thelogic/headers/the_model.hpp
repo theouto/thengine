@@ -130,6 +130,7 @@ namespace the
 		void createIndexBuffers(const std::vector<uint32_t>& indices);
         void createFromGltf();
         void createDescriptor();
+        void updateDescriptor();
 		
         std::vector<std::unique_ptr<TheTextures>> textures;
         TheDevice &theDevice;
