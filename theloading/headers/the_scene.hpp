@@ -24,7 +24,7 @@ namespace the
       void createObjectHelper(std::ifstream& scene, TheDescriptorPool& pool);
 
       void createObject(std::string name, std::string model,
-                              std::string material, glm::vec3 translation,
+                              std::vector<std::string> material, glm::vec3 translation,
                               glm::vec3 scale, glm::vec3 rotation,
                               TheDescriptorPool& pool);
 
@@ -47,7 +47,7 @@ namespace the
 
       TheDevice& theDevice;
 
-      std::string line, model, material, name;
+      std::string line, model, name;
       float intensity, radius;
       glm::vec3 rotation{}, scale{1.f, 1.f, 1.f}, translation{}, color{};
       int count, type;

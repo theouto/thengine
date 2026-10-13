@@ -9,7 +9,6 @@ layout(location = 2) in vec3 uv;
 layout(location = 3) in vec3 scale;
 layout(location = 4) in vec3 rotation;
 layout(location = 5) in vec3 translation;
-layout(location = 6) in int materialIDS[8];
 
 layout(location = 0) out vec3 fragPosWorld;
 layout(location = 1) out vec3 fragNormalWorld;
@@ -23,7 +22,7 @@ layout(set = 0, binding = 1) readonly buffer materialData
   MaterialData meshMaterialData[];
 } matt;
 
-layout(std430, set = 0, binding = 0) uniform GlobalUbo 
+layout(set = 0, binding = 0) uniform GlobalUbo 
 {
   mat4 projection;
   mat4 view;

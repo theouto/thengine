@@ -42,7 +42,7 @@ namespace the
     createMaterialBuffer();
   }
 
-  std::vector<uint32_t> TheMaterials::retrieveBindless(const std::string path,
+  uint32_t TheMaterials::retrieveBindless(const std::string path,
                                                        TheDescriptorSetLayout& descLayout,
                                                        TheDescriptorPool& descPool,
                                                        VkDescriptorSet& bindlessSet,
@@ -57,8 +57,8 @@ namespace the
     std::string dummy;
     std::vector<float> loader(4);
     std::vector<uint32_t> load(6, 0);
-    try {load = bindlessTextureSet.at(hash);
-         loader = modifiers.at(hash);} catch (std::out_of_range e)
+    uint32_t returned;
+    try {returned = hashToArr.at(hash);} catch (std::out_of_range e)
     {
       names.emplace(hash, path);
       _keys.push_back(hash);
@@ -104,8 +104,6 @@ namespace the
         }
       }
 
-      bindlessTextureSet.emplace(hash, load);
-      modifiers.emplace(hash, loader);
       files.emplace(hash, filepaths);
 
       hashToArr.emplace(hash, matData.size());
@@ -113,10 +111,8 @@ namespace the
       updateMaterialBuffer();
     };
 
-    for (int i = 0; i < 4; i++) {object.modifiers[i] = loader[i];}
-
     material.close();
-    return load;
+    return returned;
   }
 
   void TheMaterials::reloadMaterial(uint32_t hash,
@@ -130,7 +126,9 @@ namespace the
     {
       dummy = files.at(hash)[i];
       XXH32_hash_t texHash = XXH32(dummy.c_str(), dummy.length(), 0);
-      try {bindlessTextureSet.at(hash)[i] = textures.at(texHash);} catch (std::out_of_range e)
+      try {
+      if (i < 3) matData[hashToArr.at(hash)].RIDone[i] = textures.at(texHash);
+      else matData[hashToArr.at(hash)].RIDtwo[i%3] = textures.at(texHash);} catch (std::out_of_range e)
       {
         TheTextures::texType format = TheTextures::SINGLE_UNORM;
         if (i == 0) format = TheTextures::COLOR;
@@ -140,7 +138,10 @@ namespace the
 
         toWrite.push_back(tex);
         totalTextures.push_back(tex);
-        bindlessTextureSet.at(hash)[i] = ++currArr;
+
+        if (i < 3) matData[hashToArr.at(hash)].RIDone[i] = ++currArr;
+        else matData[hashToArr.at(hash)].RIDtwo[i%3] = ++currArr;
+
         textures.emplace(texHash, currArr);
       }
     }
@@ -175,6 +176,7 @@ namespace the
     }
   }
 
+  /*
   void TheMaterials::pushValues(uint* RID, float* modified, TheGameObject& object)
   {
     auto tex = bindlessTextureSet.at(object.materialHash);
@@ -186,4 +188,5 @@ namespace the
         if (i < 4) {modified[i] = mod[i];}
     }
   }
+  */
 }

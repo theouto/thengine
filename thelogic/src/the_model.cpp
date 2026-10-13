@@ -175,15 +175,15 @@ namespace the
 	}
   }
 
-  uint32_t TheModel::addInstanceData(glm::vec3 scale, glm::vec3 translation, glm::vec3 rotation, std::vector<uint32_t> material, std::vector<float> materialModifiers)
+  uint32_t TheModel::addInstanceData(glm::vec3 scale, glm::vec3 translation, glm::vec3 rotation, std::vector<uint32_t> material)
   {
     InstanceData toAdd{translation, rotation, scale};
 
-    for (int i = 0; i < 6; i++) 
-    {
-      if (i < 3) {toAdd.RIDone[i] = material[i];} else {toAdd.RIDtwo[i-3] = material[i];}
-      if (i < 4) {toAdd.modifiers[i] = materialModifiers[i];}
-    }
+    //for (int i = 0; i < 6; i++) 
+    //{
+    //  if (i < 3) {toAdd.RIDone[i] = material[i];} else {toAdd.RIDtwo[i-3] = material[i];}
+    //  if (i < 4) {toAdd.modifiers[i] = materialModifiers[i];}
+    //}
 
     uint32_t index = instanceData.size();
     instanceData.push_back(toAdd);
@@ -232,9 +232,9 @@ namespace the
   	attributeDescriptions.push_back({ 3, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(InstanceData, scale)});
   	attributeDescriptions.push_back({ 4, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(InstanceData, rotation)});
     attributeDescriptions.push_back({ 5, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(InstanceData, translation)});
-    attributeDescriptions.push_back({ 6, 1, VK_FORMAT_R32G32B32_SINT, offsetof(InstanceData, RIDone)});
-    attributeDescriptions.push_back({ 7, 1, VK_FORMAT_R32G32B32_SINT, offsetof(InstanceData, RIDtwo)});
-	attributeDescriptions.push_back({ 8, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(InstanceData, modifiers)});
+    //attributeDescriptions.push_back({ 6, 1, VK_FORMAT_R32G32B32_SINT, offsetof(InstanceData, RIDone)});
+    //attributeDescriptions.push_back({ 7, 1, VK_FORMAT_R32G32B32_SINT, offsetof(InstanceData, RIDtwo)});
+	//attributeDescriptions.push_back({ 8, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(InstanceData, modifiers)});
 
 	return attributeDescriptions;
   }

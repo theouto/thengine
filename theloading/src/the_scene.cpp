@@ -54,9 +54,9 @@ namespace the
                                 VkDescriptorSet& bindlessSet,
                                 const char* path)
   {
-    object.matName = path;
-    std::vector<uint32_t> arr = materialHandler->retrieveBindless(path, bindlessLayout, bindlessPool, bindlessSet, object);
-    for (int i = 0; i < arr.size(); i++) {object.textures[i] = arr[i];}
+    //object.matName = path;
+    //std::vector<uint32_t> arr = materialHandler->retrieveBindless(path, bindlessLayout, bindlessPool, bindlessSet, object);
+    //for (int i = 0; i < arr.size(); i++) {object.textures[i] = arr[i];}
   }
 
   void TheScene::saveScene()
@@ -72,7 +72,9 @@ namespace the
       if (kv.second.type == -1)
       {
         scene << kv.second.modelName << '\n'
-              << kv.second.matName << '\n';
+              << kv.second.materials.size() << '\n';
+
+        for (auto c : kv.second.materials) scene << c << '\n';
 
         scene << kv.second.transform.translation[0] << " "
               << kv.second.transform.translation[1] << " "
@@ -110,20 +112,29 @@ namespace the
     name = line;
     getline(scene, line);
     model = line;
+
+    int materialCount;
+    scene >> materialCount;
     getline(scene, line);
-    material = line;
+
+    std::vector<std::string> materials(materialCount);
+    for (int i = 0; i < materialCount; i++)
+    {
+      getline(scene, materials[i]);
+    }
+
 
     scene >> translation[0] >> translation[1] >> translation[2];
     scene >> scale[0] >> scale[1] >> scale[2];
     scene >> rotation[0] >> rotation[1] >> rotation[2];
  
-    createObject(name, model, material, translation, scale, rotation, pool);
+    createObject(name, model, materials, translation, scale, rotation, pool);
 
     getline(scene, line); //clear the line
   }
 
   void TheScene::createObject(std::string name, std::string model,
-                              std::string material, glm::vec3 translation,
+                              std::vector<std::string> material, glm::vec3 translation,
                               glm::vec3 scale, glm::vec3 rotation,
                               TheDescriptorPool& pool)
   {
@@ -132,23 +143,27 @@ namespace the
 
     TheGameObject object = TheGameObject::createGameObject();
     object.model = theModel;
-    object.matName = material;
+    object.matNames = material;
     object.modelName = model;
     object.instanceHash = hash;
     object.instanceIndex = instanceIndex;
 
-    std::vector<uint32_t> arr = materialHandler->retrieveBindless(material, *theRenderer.theResources->layouts[1],
-                                *theRenderer.theResources->pools[1], theRenderer.theResources->sets[2],
-                                object);
+    std::vector<uint32_t> arr;
 
-    for (int i = 0; i < arr.size(); i++) {object.textures[i] = arr[i];}
+    for (int i = 0; i < material.size(); i++)
+    {
+      arr.push_back(materialHandler->retrieveBindless(material[i], *theRenderer.theResources->layouts[1],
+                                *theRenderer.theResources->pools[1], theRenderer.theResources->sets[2],
+                                object));
+    }
+
+    //for (int i = 0; i < arr.size(); i++) {object.textures[i] = arr[i];}
     object.transform.translation = translation;
     object.transform.rotation = rotation;
     object.transform.scale = scale;
     object.name = name;
 
-    object.model->addInstanceData(scale, translation, rotation, arr,
-                                  materialHandler->modi(XXH32(material.c_str(), material.length(), 0)));
+    object.model->addInstanceData(scale, translation, rotation, arr);
 
     object.instanceIndex = retrieveModel(hash, model);
     object.model->updateBuffer();

@@ -10,9 +10,9 @@ layout(location = 3) in vec3 scale;
 layout(location = 4) in vec3 rotation;
 layout(location = 5) in vec3 translation;
 
-layout(location = 6) in ivec4 meshIDs;
-layout(location = 7) in ivec4 meshIDIIs;
-layout(location = 8) in vec4 lala;
+//layout(location = 6) in ivec4 meshIDs;
+//layout(location = 7) in ivec4 meshIDIIs;
+//layout(location = 8) in vec4 lala;
 
 #include "../include/common.glsl"
 

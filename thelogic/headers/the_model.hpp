@@ -43,9 +43,9 @@ namespace the
           alignas(16) glm::vec3 rotation{0.f};
           alignas(16) glm::vec3 scale{1.f};
 
-          alignas(16) glm::ivec3 RIDone{1};
-          alignas(16) glm::ivec3 RIDtwo{1, 1, 0};
-          glm::vec4 modifiers{1.f, 1.f, 1.f, 0.f};
+          //alignas(16) glm::ivec3 RIDone{1};
+          //alignas(16) glm::ivec3 RIDtwo{1, 1, 0};
+          //glm::vec4 modifiers{1.f, 1.f, 1.f, 0.f};
 
           static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
           static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
@@ -78,7 +78,7 @@ namespace the
 		static std::unique_ptr<TheModel> createModelFromFile(TheDevice& device, const std::string &filepath);
 
         std::vector<tg3_image> getTextures();
-        uint32_t addInstanceData(glm::vec3 scale, glm::vec3 translation, glm::vec3 rotation, std::vector<uint32_t> material, std::vector<float> materialModifiers);
+        uint32_t addInstanceData(glm::vec3 scale, glm::vec3 translation, glm::vec3 rotation, std::vector<uint32_t> material);
 
         void createInstanceBuffer();
         void updateBuffer();
@@ -89,11 +89,17 @@ namespace the
 
         void removeglTF() {glTF = nullptr;}
 
-        void setMaterial(uint32_t index, uint32_t* RID, float* modi)
+        void setMaterial(uint32_t instanceIndex, std::vector<uint32_t> materials)//uint32_t* RID, float* modi)
         {
-          instanceData[index].RIDone = glm::vec3{RID[0], RID[1], RID[2]};
-          instanceData[index].RIDtwo = glm::vec3{RID[3], RID[4], RID[5]};
-          instanceData[index].modifiers = glm::vec4{modi[0], modi[1], modi[2], modi[3]};
+
+          for (int i = 0; i < materials.size(); i++)
+          {
+            meshMaterials[instanceIndex + i] = materials[i];
+          }
+
+          //instanceData[index].RIDone = glm::vec3{RID[0], RID[1], RID[2]};
+          //instanceData[index].RIDtwo = glm::vec3{RID[3], RID[4], RID[5]};
+          //instanceData[index].modifiers = glm::vec4{modi[0], modi[1], modi[2], modi[3]};
         }
 
         void flush() {instanceBuffer->flush();}

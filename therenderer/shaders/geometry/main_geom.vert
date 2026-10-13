@@ -10,9 +10,9 @@ layout(location = 3) in vec3 scale;
 layout(location = 4) in vec3 rotation;
 layout(location = 5) in vec3 translation;
 
-layout(location = 6) in ivec3 meshIDs;
-layout(location = 7) in ivec3 meshIDIIs;
-layout(location = 8) in vec4 lala;
+//layout(location = 6) in ivec3 meshIDs;
+//layout(location = 7) in ivec3 meshIDIIs;
+//layout(location = 8) in vec4 lala;
 
 layout(location = 0) out vec3 fragPosWorld;
 layout(location = 1) out vec3 fragNormalWorld;
@@ -119,11 +119,6 @@ void main()
   fragUv = uv.xy;
 
   matIndex = int(uv.z);
-  //if (matIndex > 7) matIndex = 7;
-
-  //int toUse;
-  //if (matIndex > 3) toUse = meshIDs[matIndex];
-  //else toUse = meshIDIIs[matIndex%4];
 
   //fmodifiers = lala;
   //fRIDone = meshIDs;

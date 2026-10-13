@@ -62,7 +62,7 @@ namespace the {
         VkDescriptorSet descriptorSet{};
 
         std::string name = "";
-        std::string matName = "";
+        std::vector<std::string> matNames;
         std::string modelName = "";
   
         XXH32_hash_t materialHash;
@@ -71,8 +71,9 @@ namespace the {
 
         uint32_t instanceIndex;
 
-        uint32_t textures[6];
-        float modifiers[4];
+        std::vector<uint32_t> materials;
+        uint32_t meshCount;
+        //float modifiers[4];
         std::unique_ptr<PointLightComponent> pointLight = nullptr;
 
     private:

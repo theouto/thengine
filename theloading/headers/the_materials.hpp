@@ -27,7 +27,7 @@ namespace the
     TheMaterials(TheDevice &device);
     ~TheMaterials(){}
 
-    std::vector<uint32_t> retrieveBindless(const std::string path,
+    uint32_t retrieveBindless(const std::string path,
                                            TheDescriptorSetLayout& descLayout,
                                            TheDescriptorPool& descPool,
                                            VkDescriptorSet& bindlessSet,
@@ -67,7 +67,7 @@ namespace the
     TheDevice &theDevice;
 
     std::unordered_map<unsigned int,
-                       std::vector<uint32_t>> bindlessTextureSet;
+                       uint32_t> bindlessTextureSet;
 
     std::unordered_map<uint32_t, uint32_t> hashToArr;
 
