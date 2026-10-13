@@ -22,6 +22,11 @@ layout(set = 0, binding = 1) readonly buffer materialData
   MaterialData meshMaterialData[];
 } matt;
 
+layout(set = 3, binding = 0) readonly buffer meshData
+{
+  uint material[];
+} mesh;
+
 layout(set = 0, binding = 0) uniform GlobalUbo 
 {
   mat4 projection;
@@ -41,44 +46,10 @@ layout(set = 0, binding = 0) uniform GlobalUbo
   int frameIndex;
 } ubo;
 
-layout(push_constant) uniform Push 
+layout(push_constant) uniform Push
 {
-  mat4 modelMatrix;
-  mat4 normalMatrix;
+  uint meshCount;
 } push;
-
-//https://shader-tutorial.dev/basics/vertex-shader/
-//and also
-//https://www.geeksforgeeks.org/maths/rotation-matrix/
-mat4 rotateZ(float angle)
-{
-  mat4 rotationMatrix;
-  rotationMatrix[0] = vec4(cos(angle), sin(angle), 0, 0);
-  rotationMatrix[1] = vec4(-sin(angle), cos(angle), 0, 0);
-  rotationMatrix[2] = vec4(0, 0, 1, 0);
-  rotationMatrix[3] = vec4(0, 0, 0, 1);
-  return rotationMatrix;
-}
-
-mat4 rotateY(float angle)
-{
-  mat4 rotationMatrix;
-  rotationMatrix[0] = vec4(cos(angle), 0, sin(angle), 0);
-  rotationMatrix[1] = vec4(0, 1, 0, 0);
-  rotationMatrix[2] = vec4(-sin(angle), 0, cos(angle), 0);
-  rotationMatrix[3] = vec4(0, 0, 0, 1);
-  return rotationMatrix;
-}
-
-mat4 rotateX(float angle)
-{
-  mat4 rotationMatrix;
-  rotationMatrix[0] = vec4(1, 0, 0, 0);
-  rotationMatrix[1] = vec4(0, cos(angle), -sin(angle), 0);
-  rotationMatrix[2] = vec4(0, sin(angle), cos(angle), 0);
-  rotationMatrix[3] = vec4(0, 0, 0, 1);
-  return rotationMatrix;
-}
 
 void main()
 {
@@ -100,7 +71,7 @@ void main()
 
   mat4 rotationMatrix = rotateZ(rotation.z * rotator) * rotateY(rotation.y * rotator) * rotateX(rotation.x * rotator);
 
-  mat4 mat = {push.modelMatrix[0], push.modelMatrix[1], push.modelMatrix[2], vec4(vec3(0.f), 1.f)};
+  mat4 mat = {modelMatrix[0], modelMatrix[1], modelMatrix[2], vec4(vec3(0.f), 1.f)};
 
   mat4 instanceMatrix = scaleMatrix * mat;
   instanceMatrix = rotationMatrix * instanceMatrix;
@@ -112,15 +83,17 @@ void main()
 
   vec3 nuNormal = normal;
 
-  fragNormalWorld = normalize(mat3(rotationMatrix * invScaleMatrix * push.normalMatrix) * normal);
+  fragNormalWorld = normalize(mat3(rotationMatrix * invScaleMatrix * modelMatrix) * normal);
   fragPosWorld = positionWorld.xyz;
   fragUv = uv.xy;
 
-  int matIndex = int(uv.z);
+  int meshIndex = int(uv.z);
+
+  uint toUse = mesh.material[push.meshCount * gl_InstanceIndex + meshIndex + 1];
 
   for (int i = 0; i < 3; i++)
   {
-    fRID[i] = matt.meshMaterialData[materialIDS[matIndex]].RIDone[i];
-    fRID[i+3] = matt.meshMaterialData[materialIDS[matIndex]].RIDtwo[i];
+    fRID[i] = matt.meshMaterialData[toUse].RIDone[i];
+    fRID[i+3] = matt.meshMaterialData[toUse].RIDtwo[i];
   }
 }

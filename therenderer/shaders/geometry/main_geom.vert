@@ -10,10 +10,6 @@ layout(location = 3) in vec3 scale;
 layout(location = 4) in vec3 rotation;
 layout(location = 5) in vec3 translation;
 
-//layout(location = 6) in ivec3 meshIDs;
-//layout(location = 7) in ivec3 meshIDIIs;
-//layout(location = 8) in vec4 lala;
-
 layout(location = 0) out vec3 fragPosWorld;
 layout(location = 1) out vec3 fragNormalWorld;
 layout(location = 2) out vec2 fragUv;
@@ -21,7 +17,7 @@ layout(location = 3) out mat4 FragPosLightSpace;
 layout(location = 7) out ivec3 fRIDone;
 layout(location = 8) out ivec3 fRIDtwo;
 layout(location = 9) out vec4 fmodifiers;
-layout(location = 10) flat out int matIndex;
+layout(location = 10) flat out int meshIndex;
 
 #include "../include/common.glsl"
 
@@ -49,38 +45,15 @@ layout(set = 0, binding = 1) readonly buffer materialData
   MaterialData meshMaterialData[];
 } matt;
 
-//https://shader-tutorial.dev/basics/vertex-shader/
-//and also
-//https://www.geeksforgeeks.org/maths/rotation-matrix/
-mat4 rotateZ(float angle)
+layout(set = 3, binding = 0) readonly buffer meshData
 {
-  mat4 rotationMatrix;
-  rotationMatrix[0] = vec4(cos(angle), sin(angle), 0, 0);
-  rotationMatrix[1] = vec4(-sin(angle), cos(angle), 0, 0);
-  rotationMatrix[2] = vec4(0, 0, 1, 0);
-  rotationMatrix[3] = vec4(0, 0, 0, 1);
-  return rotationMatrix;
-}
+  uint material[];
+} mesh;
 
-mat4 rotateY(float angle)
+layout(push_constant) uniform Push
 {
-  mat4 rotationMatrix;
-  rotationMatrix[0] = vec4(cos(angle), 0, sin(angle), 0);
-  rotationMatrix[1] = vec4(0, 1, 0, 0);
-  rotationMatrix[2] = vec4(-sin(angle), 0, cos(angle), 0);
-  rotationMatrix[3] = vec4(0, 0, 0, 1);
-  return rotationMatrix;
-}
-
-mat4 rotateX(float angle)
-{
-  mat4 rotationMatrix;
-  rotationMatrix[0] = vec4(1, 0, 0, 0);
-  rotationMatrix[1] = vec4(0, cos(angle), -sin(angle), 0);
-  rotationMatrix[2] = vec4(0, sin(angle), cos(angle), 0);
-  rotationMatrix[3] = vec4(0, 0, 0, 1);
-  return rotationMatrix;
-}
+  uint meshCount;
+} push;
 
 void main()
 {
@@ -118,15 +91,17 @@ void main()
   fragPosWorld = positionWorld.xyz;
   fragUv = uv.xy;
 
-  matIndex = int(uv.z);
+  meshIndex = int(uv.z);
 
   //fmodifiers = lala;
   //fRIDone = meshIDs;
   //fRIDtwo = meshIDIIs;
 
-  fmodifiers = matt.meshMaterialData[matIndex % 2].modifiers;
-  fRIDone = matt.meshMaterialData[matIndex % 2].RIDone;
-  fRIDtwo = matt.meshMaterialData[matIndex % 2].RIDtwo;
+  uint toUse = mesh.material[push.meshCount * gl_InstanceIndex + meshIndex + 1];
+
+  fmodifiers = matt.meshMaterialData[toUse].modifiers;
+  fRIDone = matt.meshMaterialData[toUse].RIDone;
+  fRIDtwo = matt.meshMaterialData[toUse].RIDtwo;
 
   for (int i = 0; i < 4; i++)
   {

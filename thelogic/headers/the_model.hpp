@@ -65,7 +65,8 @@ namespace the
           void loadGltf(const std::string& filepath);
 		};
 
-		TheModel(TheDevice & device, const TheModel::Builder &builder);
+		TheModel(TheDevice & device, const TheModel::Builder &builder,
+          std::shared_ptr<TheDescriptorPool> pool, std::shared_ptr<TheDescriptorSetLayout> layout);
 		~TheModel();
 
 		TheModel(const TheModel&) = delete;
@@ -73,15 +74,27 @@ namespace the
 
       	VkDescriptorPool descriptorPool;
 
+        void updateBuffers()
+        {
+          updateInstanceBuffer();
+          updateMaterialBuffer();
+        }
+
 		std::vector<VkDescriptorSet> descriptorSets;
 
-		static std::unique_ptr<TheModel> createModelFromFile(TheDevice& device, const std::string &filepath);
+		static std::unique_ptr<TheModel> createModelFromFile(TheDevice& device, const std::string &filepath,
+          std::shared_ptr<TheDescriptorPool> pool, std::shared_ptr<TheDescriptorSetLayout> layout);
 
         std::vector<tg3_image> getTextures();
         uint32_t addInstanceData(glm::vec3 scale, glm::vec3 translation, glm::vec3 rotation, std::vector<uint32_t> material);
 
         void createInstanceBuffer();
-        void updateBuffer();
+        void updateInstanceBuffer();
+
+        void createMaterialBuffer();
+        void updateMaterialBuffer();
+
+        uint32_t getMeshCount() {return meshes;}
 
         void setScale(uint32_t index, glm::vec3 scale) {instanceData[index].scale = scale;}
         void setTranslation(uint32_t index, glm::vec3 translation) {instanceData[index].translation = translation;}
@@ -106,7 +119,7 @@ namespace the
 
         uint32_t getInstanceCount() {return instanceData.size();}
 
-		void bind(VkCommandBuffer);
+		void bind(VkCommandBuffer, VkPipelineLayout&);
 		void draw(VkCommandBuffer);
 
         void updateInstances();
@@ -116,6 +129,7 @@ namespace the
 		void createVertexBuffers(const std::vector<Vertex> &vertices);
 		void createIndexBuffers(const std::vector<uint32_t>& indices);
         void createFromGltf();
+        void createDescriptor();
 		
         std::vector<std::unique_ptr<TheTextures>> textures;
         TheDevice &theDevice;
@@ -133,7 +147,12 @@ namespace the
         std::vector<tg3_image> gltfImages;
         std::unique_ptr<TheBuffer> instanceBuffer = nullptr;
 
+        std::shared_ptr<TheDescriptorSetLayout> materialLayout;
+        std::shared_ptr<TheDescriptorPool> materialPool;
+
         std::vector<uint32_t> meshMaterials;
+        std::shared_ptr<TheBuffer> materialBuffer = nullptr;
+        VkDescriptorSet materialSet;
 
         std::shared_ptr<tinygltf3::Model> glTF = nullptr;
 

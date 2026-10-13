@@ -10,10 +10,6 @@ layout(location = 3) in vec3 scale;
 layout(location = 4) in vec3 rotation;
 layout(location = 5) in vec3 translation;
 
-//layout(location = 6) in ivec4 meshIDs;
-//layout(location = 7) in ivec4 meshIDIIs;
-//layout(location = 8) in vec4 lala;
-
 #include "../include/common.glsl"
 
 
@@ -35,39 +31,6 @@ layout(set = 0, binding = 0) uniform GlobalUbo
   mat4 lightSpaceMatrix[4];
   int frameIndex;
 } ubo;
-
-//https://shader-tutorial.dev/basics/vertex-shader/
-//and also
-//https://www.geeksforgeeks.org/maths/rotation-matrix/
-mat4 rotateZ(float angle)
-{
-  mat4 rotationMatrix;
-  rotationMatrix[0] = vec4(cos(angle), sin(angle), 0, 0);
-  rotationMatrix[1] = vec4(-sin(angle), cos(angle), 0, 0);
-  rotationMatrix[2] = vec4(0, 0, 1, 0);
-  rotationMatrix[3] = vec4(0, 0, 0, 1);
-  return rotationMatrix;
-}
-
-mat4 rotateY(float angle)
-{
-  mat4 rotationMatrix;
-  rotationMatrix[0] = vec4(cos(angle), 0, sin(angle), 0);
-  rotationMatrix[1] = vec4(0, 1, 0, 0);
-  rotationMatrix[2] = vec4(-sin(angle), 0, cos(angle), 0);
-  rotationMatrix[3] = vec4(0, 0, 0, 1);
-  return rotationMatrix;
-}
-
-mat4 rotateX(float angle)
-{
-  mat4 rotationMatrix;
-  rotationMatrix[0] = vec4(1, 0, 0, 0);
-  rotationMatrix[1] = vec4(0, cos(angle), -sin(angle), 0);
-  rotationMatrix[2] = vec4(0, sin(angle), cos(angle), 0);
-  rotationMatrix[3] = vec4(0, 0, 0, 1);
-  return rotationMatrix;
-}
 
 void main()
 {

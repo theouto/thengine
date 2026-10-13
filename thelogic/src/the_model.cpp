@@ -1,9 +1,12 @@
 #include "../headers/the_model.hpp"
 #include "../headers/lve_utils.hpp"
+
 #include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
+#include <algorithm>
+
 #include <vulkan/vulkan_core.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -34,7 +37,8 @@ namespace std
 
 namespace the
 {
-  TheModel::TheModel(TheDevice& device, const TheModel::Builder &builder) : theDevice{device}
+  TheModel::TheModel(TheDevice& device, const TheModel::Builder &builder, 
+                     std::shared_ptr<TheDescriptorPool> pool, std::shared_ptr<TheDescriptorSetLayout> layout) : theDevice{device}, materialPool{pool}, materialLayout{layout}
   {
     if (builder.glTF != nullptr)
     {
@@ -45,16 +49,22 @@ namespace the
   	  createVertexBuffers(builder.vertices);
   	  createIndexBuffers(builder.indices);
     }
+
+    meshMaterials.push_back(0);
+
+    createMaterialBuffer();
+    createDescriptor();
   }
 	
   TheModel::~TheModel() {removeglTF();}
 
-  std::unique_ptr<TheModel> TheModel::createModelFromFile(TheDevice& device, const std::string& filepath)
+  std::unique_ptr<TheModel> TheModel::createModelFromFile(TheDevice& device, const std::string& filepath,
+                            std::shared_ptr<TheDescriptorPool> pool, std::shared_ptr<TheDescriptorSetLayout> layout)
   {
   	Builder builder{};
   	builder.loadModel(filepath);
     auto lala = XXH32(filepath.c_str(), filepath.length(), 0);
-	return std::make_unique<TheModel>(device, builder);
+	return std::make_unique<TheModel>(device, builder, pool, layout);
   }
 
   void TheModel::createFromGltf()
@@ -146,10 +156,40 @@ namespace the
     assert(instanceBuffer->map() == VK_SUCCESS && "unable to map instanceBuffer");
   }
 
-  void TheModel::updateBuffer()
+  void TheModel::updateInstanceBuffer()
   {
     if (instanceBuffer != nullptr) instanceBuffer->unmap();
     createInstanceBuffer();
+  }
+
+  void TheModel::createMaterialBuffer()
+  {
+    materialBuffer = std::make_shared<TheBuffer>(
+        theDevice,
+        sizeof(uint32_t) * meshes * std::max((uint32_t)1, getInstanceCount()),
+        1,
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+
+    assert(materialBuffer->map() == VK_SUCCESS && "unable to map material buffer!");
+
+    materialBuffer->writeToBuffer(meshMaterials.data());
+    materialBuffer->flush();
+  }
+
+  void TheModel::updateMaterialBuffer()
+  {
+    if (materialBuffer != nullptr) materialBuffer->unmap();
+    createMaterialBuffer();
+  }
+
+  void TheModel::createDescriptor()
+  {
+    auto meshInfo = materialBuffer->descriptorInfo();
+
+    TheDescriptorWriter(*materialLayout, *materialPool)
+          .writeBuffer(0, &meshInfo)
+          .build(materialSet);
   }
 
   void TheModel::draw(VkCommandBuffer commandBuffer)
@@ -162,7 +202,7 @@ namespace the
 	}
   }
 
-  void TheModel::bind(VkCommandBuffer commandBuffer)
+  void TheModel::bind(VkCommandBuffer commandBuffer, VkPipelineLayout& layout)
   {
     VkBuffer buffers[] = { vertexBuffer->getBuffer()};
 	VkDeviceSize offsets[] = { 0};
@@ -173,6 +213,8 @@ namespace the
 	{
 	  vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
 	}
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, 
+      3, 1, &materialSet, 0, nullptr);
   }
 
   uint32_t TheModel::addInstanceData(glm::vec3 scale, glm::vec3 translation, glm::vec3 rotation, std::vector<uint32_t> material)
@@ -184,6 +226,10 @@ namespace the
     //  if (i < 3) {toAdd.RIDone[i] = material[i];} else {toAdd.RIDtwo[i-3] = material[i];}
     //  if (i < 4) {toAdd.modifiers[i] = materialModifiers[i];}
     //}
+
+    for (auto c : material) meshMaterials.push_back(c);
+
+    updateMaterialBuffer();
 
     uint32_t index = instanceData.size();
     instanceData.push_back(toAdd);

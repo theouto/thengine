@@ -13,10 +13,9 @@
 
 namespace the
 {
-  struct ModelMatrices
+  struct MeshCount
   {
-    glm::mat4 modelMatrix;
-    glm::mat4 normalMatrix;
+    uint meshCount;
   };
 
   OpaqueGeometry::OpaqueGeometry(TheDevice& device, VkRenderPass renderPass, std::vector<std::string> paths,
@@ -34,11 +33,17 @@ namespace the
 
   void OpaqueGeometry::createPipeLineLayout(std::vector<VkDescriptorSetLayout> &globalSetLayout)
   {
+    VkPushConstantRange pushConstantRange{};
+  	pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+  	pushConstantRange.offset = 0;
+  	pushConstantRange.size = sizeof(MeshCount);
+
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
   	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   	pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(globalSetLayout.size());
   	pipelineLayoutInfo.pSetLayouts = globalSetLayout.data();
-    pipelineLayoutInfo.pushConstantRangeCount = 0;
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
+    pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
   	if (vkCreatePipelineLayout(theDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
   	{
@@ -73,7 +78,12 @@ namespace the
 	  if (obj.model == nullptr) continue;
       try {render.at(obj.instanceHash);} catch (std::out_of_range e)
       {
-		obj.model->bind(frameInfo.commandBuffer);
+        MeshCount push{obj.model->getMeshCount()};
+
+        vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, 
+                           VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(MeshCount), &push);
+
+		obj.model->bind(frameInfo.commandBuffer, pipelineLayout);
 		obj.model->draw(frameInfo.commandBuffer);
 
         render.emplace(obj.instanceHash, true);

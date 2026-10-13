@@ -123,7 +123,6 @@ namespace the
       getline(scene, materials[i]);
     }
 
-
     scene >> translation[0] >> translation[1] >> translation[2];
     scene >> scale[0] >> scale[1] >> scale[2];
     scene >> rotation[0] >> rotation[1] >> rotation[2];
@@ -166,7 +165,6 @@ namespace the
     object.model->addInstanceData(scale, translation, rotation, arr);
 
     object.instanceIndex = retrieveModel(hash, model);
-    object.model->updateBuffer();
 
     gameObjects.emplace(object.getId(), std::move(object));
   }
@@ -192,7 +190,8 @@ namespace the
       theModel = models.at(hash);
       instanceCount = theModel->getInstanceCount();} catch (std::out_of_range e)
     {
-      theModel = TheModel::createModelFromFile(theDevice, model);
+      theModel = TheModel::createModelFromFile(theDevice, model, theRenderer.theResources->pools[0],
+                                               theRenderer.theResources->layouts[3]);
       models.emplace(hash, theModel);
       theModel = models.at(hash);
       instanceCount = 0;

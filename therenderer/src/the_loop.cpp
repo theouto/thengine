@@ -54,7 +54,8 @@ namespace the
                           {defShaderPath + "main_geom.vert.spv", defShaderPath + "main_geom.frag.spv"},
                           {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
                           theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
-                          theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
+                          theRenderer.getSetLayout(2)->getDescriptorSetLayout(),
+                          theRenderer.getSetLayout(3)->getDescriptorSetLayout()},
                           resourced[resourced.size() - 1]};
 
     resourced.push_back(theRenderer.getNeededResources(TheSwapChain::GEOM, TheSwapChain::SYNCED,
@@ -65,7 +66,8 @@ namespace the
                           {defShaderPath + "depth.vert.spv", defShaderPath + "depth.frag.spv"},
                           {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
                           theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
-                          theRenderer.getSetLayout(2)->getDescriptorSetLayout()},
+                          theRenderer.getSetLayout(2)->getDescriptorSetLayout(),
+                          theRenderer.getSetLayout(3)->getDescriptorSetLayout()},
                           resourced[resourced.size() - 1]};
 
     VkImageMemoryBarrier barrier{};
@@ -83,6 +85,8 @@ namespace the
     viewerObject.transform.translation.z = -1.5f;
 
     sceneManager.load("scenes/light_test.ths", *(theRenderer.theResources->pools[1]));
+
+    std::cout << "midway\n";
 
     theRenderer.loadMaterialInfo(sceneManager.handler().matBuffer());
 

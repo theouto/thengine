@@ -9,13 +9,13 @@ namespace the
   TheResources::TheResources(TheDevice& device) : theDevice{device}
   {
     pools.resize(4);
-    layouts.resize(4);
+    layouts.resize(5);
     sets.resize(4);
 
     pools[0] = TheDescriptorPool::Builder(theDevice)
             .setMaxSets(4)
             .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 5)
-            .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 5)
+            .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 128)
             .build();
 
     pools[1] = TheDescriptorPool::Builder(theDevice)
@@ -57,6 +57,10 @@ namespace the
             .addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT, 100,
                         VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT)
             .addDescriptorFlags(VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT)
+            .build();
+
+    layouts[3] = TheDescriptorSetLayout::Builder(theDevice)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_ALL, 1)
             .build();
 
     initBaseTextures();
