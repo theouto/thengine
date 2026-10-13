@@ -233,7 +233,6 @@ namespace the
 
     for (auto c : material) 
     {
-      //std::cout << c << '\n';
       meshMaterials.push_back(c);
     }
 
