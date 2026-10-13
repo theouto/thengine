@@ -229,7 +229,7 @@ void main()
 
   DirectionalLight sun;
   sun.direction = normalize(ubo.lightPos);
-  sun.color = vec4(1.f, 1.f, 0.7f, 1.5f);
+  sun.color = vec4(1.f, 1.f, 0.9f, 1.5f);
 
   vec3 F0 = vec3(0.04);
   float halfView = dot(normalize(viewDirection + surfaceNormal), surfaceNormal); 

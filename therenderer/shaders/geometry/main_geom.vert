@@ -45,7 +45,7 @@ layout(set = 0, binding = 1) readonly buffer materialData
   MaterialData meshMaterialData[];
 } matt;
 
-layout(std430, set = 3, binding = 0) readonly buffer meshData
+layout(set = 3, binding = 0) readonly buffer meshData
 {
   uint material[];
 } mesh;
@@ -95,7 +95,7 @@ void main()
 
   uint toUse = mesh.material[push.meshCount * gl_InstanceIndex + meshIndex + 1];
 
-  fmodifiers = matt.meshMaterialData[toUse].modifiers;
+  fmodifiers = matt.meshMaterialData[2].modifiers;
   fRIDone = matt.meshMaterialData[toUse].RIDone;
   fRIDtwo = matt.meshMaterialData[toUse].RIDtwo;
 
