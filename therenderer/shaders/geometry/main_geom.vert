@@ -45,7 +45,7 @@ layout(set = 0, binding = 1) readonly buffer materialData
   MaterialData meshMaterialData[];
 } matt;
 
-layout(set = 3, binding = 0) readonly buffer meshData
+layout(std430, set = 3, binding = 0) readonly buffer meshData
 {
   uint material[];
 } mesh;
@@ -92,10 +92,6 @@ void main()
   fragUv = uv.xy;
 
   meshIndex = int(uv.z);
-
-  //fmodifiers = lala;
-  //fRIDone = meshIDs;
-  //fRIDtwo = meshIDIIs;
 
   uint toUse = mesh.material[push.meshCount * gl_InstanceIndex + meshIndex + 1];
 

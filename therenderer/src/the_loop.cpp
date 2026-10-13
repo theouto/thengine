@@ -86,8 +86,6 @@ namespace the
 
     sceneManager.load("scenes/light_test.ths", *(theRenderer.theResources->pools[1]));
 
-    std::cout << "midway\n";
-
     theRenderer.loadMaterialInfo(sceneManager.handler().matBuffer());
 
     auto currentTime = std::chrono::high_resolution_clock::now();

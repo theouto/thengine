@@ -166,7 +166,7 @@ namespace the
   {
     materialBuffer = std::make_shared<TheBuffer>(
         theDevice,
-        sizeof(uint32_t) * meshes * std::max((uint32_t)1, getInstanceCount()),
+        sizeof(uint32_t) * meshMaterials.size(),
         1,
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
@@ -231,18 +231,18 @@ namespace the
   {
     InstanceData toAdd{translation, rotation, scale};
 
-    //for (int i = 0; i < 6; i++) 
-    //{
-    //  if (i < 3) {toAdd.RIDone[i] = material[i];} else {toAdd.RIDtwo[i-3] = material[i];}
-    //  if (i < 4) {toAdd.modifiers[i] = materialModifiers[i];}
-    //}
-
-    for (auto c : material) meshMaterials.push_back(c);
+    for (auto c : material) 
+    {
+      //std::cout << c << '\n';
+      meshMaterials.push_back(c);
+    }
 
     updateMaterialBuffer();
 
     uint32_t index = instanceData.size();
     instanceData.push_back(toAdd);
+
+    updateInstanceBuffer();
     return index; //just in case
   }
 
@@ -288,9 +288,6 @@ namespace the
   	attributeDescriptions.push_back({ 3, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(InstanceData, scale)});
   	attributeDescriptions.push_back({ 4, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(InstanceData, rotation)});
     attributeDescriptions.push_back({ 5, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(InstanceData, translation)});
-    //attributeDescriptions.push_back({ 6, 1, VK_FORMAT_R32G32B32_SINT, offsetof(InstanceData, RIDone)});
-    //attributeDescriptions.push_back({ 7, 1, VK_FORMAT_R32G32B32_SINT, offsetof(InstanceData, RIDtwo)});
-	//attributeDescriptions.push_back({ 8, 1, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(InstanceData, modifiers)});
 
 	return attributeDescriptions;
   }

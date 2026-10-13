@@ -154,6 +154,8 @@ namespace the
       arr.push_back(materialHandler->retrieveBindless(material[i], *theRenderer.theResources->layouts[1],
                                 *theRenderer.theResources->pools[1], theRenderer.theResources->sets[2],
                                 object));
+
+      //std::cout << arr[i] << '\n';
     }
 
     //for (int i = 0; i < arr.size(); i++) {object.textures[i] = arr[i];}

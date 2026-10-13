@@ -106,6 +106,7 @@ namespace the
 
       files.emplace(hash, filepaths);
 
+      returned = matData.size();
       hashToArr.emplace(hash, matData.size());
       matData.push_back(toAdd);
       updateMaterialBuffer();
