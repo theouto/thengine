@@ -51,11 +51,7 @@ void main()
       vec3 frontSample = vec3(position.xy, texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], texelCoord + ivec2(j + stepSize), 0).r);
       vec3 backSample = frontSample - position/length(position) * thickness;
 
-      //float frontAngle = atan(frontSample.x/frontSample.y);
-      //float backAngle = atan(backSample.x/backSample.y);
-
-      //float minAng = min(frontAngle, backAngle);
-      //float maxAng = max(frontAngle, backAngle);
+      //min and max angles
 
       float a = ((minAng + M_PI/2)/M_PI)*bitmaskSize;
       float b = ((maxAng - minAng  + M_PI/2)/M_PI)*bitmaskSize;
