@@ -35,6 +35,19 @@ float LinearizeDepth(float depth, float near, float far)
   return near * far / (far + depth * (near - far));
 }
 
+//https://blog.selfshadow.com/publications/s2016-shading-course/activision/s2016_pbs_activision_occlusion.pdf
+float fastSqrt(float x) 
+{
+  return float(0x1FBD1DF5 + (int(x) >> 1));
+}
+
+float fastacos(float x)
+{
+  float res = -0.156583 * abs(x) + M_PI / 2.f;
+  res *= fastSqrt(1.f - abs(x));
+  return x >= 0? res : M_PI - res;
+}
+
 //https://shader-tutorial.dev/basics/vertex-shader/
 //and also
 //https://www.geeksforgeeks.org/maths/rotation-matrix/

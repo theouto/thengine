@@ -70,6 +70,28 @@ namespace the
                           theRenderer.getSetLayout(3)->getDescriptorSetLayout()},
                           resourced[resourced.size() - 1]};
 
+    resourced.push_back(theRenderer.getNeededResources(TheSwapChain::GEOM, TheSwapChain::SYNCED,
+                                               TheSwapChain::COLOR, TheSwapChain::ADDITIONAL_DEPTH,
+                                               theWindow.getExtent()));
+
+    OpaqueGeometry normals{theDevice, theRenderer.getFramePass(resourced[resourced.size() - 1][0]),
+                          {defShaderPath + "normal_spec.vert.spv", defShaderPath + "normal_spec.frag.spv"},
+                          {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
+                          theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
+                          theRenderer.getSetLayout(2)->getDescriptorSetLayout(),
+                          theRenderer.getSetLayout(3)->getDescriptorSetLayout()},
+                          resourced[resourced.size() - 1]};
+
+    resourced.push_back(theRenderer.getNeededResources(TheSwapChain::COMP, TheSwapChain::SYNCED,
+                                            TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH,
+                                            theWindow.getExtent()));
+
+    ComputeSystem AO{theDevice, theRenderer.getFramePass(resourced[resourced.size() - 1][0]),
+                         defShaderPath + "AO.comp.spv", 
+                         {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
+                        theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
+                        theRenderer.getSetLayout(2)->getDescriptorSetLayout()}, resourced[resourced.size() - 1]};
+
     VkImageMemoryBarrier barrier{};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -111,7 +133,7 @@ namespace the
 
       if (auto commandBuffer = theRenderer.beginFrame())
 	  {
-        barrier.image = theRenderer.getImage(theRenderer.getFrameIndex() + theRenderer.getSwapChainImageCount());
+        barrier.image = theRenderer.getImage(AO.getBufferIndex() + theRenderer.getFrameIndex());
 
         FrameInfo frameInfo
         {
@@ -156,9 +178,19 @@ namespace the
         depth.renderGameObjects(frameInfo);
         theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
 
+        theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, normals.getBufferIndex(), normals.getRenderPassIndex());
+        normals.renderGameObjects(frameInfo);
+        theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
+
+        AO.render(frameInfo);
+
         theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, render.getBufferIndex(), render.getRenderPassIndex());
         render.renderGameObjects(frameInfo);
         theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
+
+        uboBuffers[frameInfo.frameIndex]->writeToBuffer(&ubo);
+        uboBuffers[frameInfo.frameIndex]->flush();
+        barrier.image = theRenderer.getImage(theRenderer.getFrameIndex() + theRenderer.getSwapChainImageCount());
 
         compute.render(frameInfo);
  

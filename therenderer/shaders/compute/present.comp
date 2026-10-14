@@ -64,7 +64,7 @@ void main()
 
   float depth = texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], texelCoord, 0).r;
 
-  vec4 color = texelFetch(imageBuffers[nonuniformEXT(2 + push.frameIndex)], texelCoord, 0);
+  vec4 color = texelFetch(imageBuffers[nonuniformEXT(8 + push.frameIndex)], texelCoord, 0);
   //color = vec4(vec3(LinearizeDepth(depth) / ubo.far), 1.f);
   color = fromLinear(color);
 

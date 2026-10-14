@@ -236,11 +236,15 @@ namespace the
       meshMaterials.push_back(c);
     }
 
-    updateMaterialBuffer();
-
     uint32_t index = instanceData.size();
     instanceData.push_back(toAdd);
 
+    while (meshMaterials.size() < meshes * instanceData.size())
+    {
+      meshMaterials.push_back(0);
+    }
+
+    updateMaterialBuffer();
     updateInstanceBuffer();
     return index; //just in case
   }
