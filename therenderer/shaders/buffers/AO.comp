@@ -31,10 +31,10 @@ layout(set = 0, binding = 0) uniform GlobalUbo
   int frameIndex;
 } ubo;
 
-#define radius = 1.f;
-#define thickness = 0.5f;
-#define slices = 4;
-#define steps = 8;
+const float radius = 1.f;
+const float thickness = 0.5f;
+const uint slices = 4;
+const uint steps = 8;
 
 layout(push_constant) uniform Push 
 {
@@ -74,16 +74,16 @@ float GetDepthSample(ivec2 pos, bool lowerRes)
   return texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], pos, 0).r;
 }
 
-float horizonLoop(vec3 positionVS, vec3 V, vec2 rayStart, vec2 rayDir, float rayOffset, float rayStep, out uint globalOccludedBitfield, vec3 N, int samplingDirection, int mipModifier)
+float horizonLoop(vec3 positionVS, vec3 V, vec2 rayStart, vec2 rayDir, float rayOffset, float rayStep, out uint globalOccludedBitfield, float N, int samplingDirection, int mipModifier)
 {
   float maxHorizon = -1.0f;  // cos(pi)
   float t = rayOffset * rayStep + rayStep;
 
-  const uint startWithLowerRes = 0;//min(max(0, steps / 2 - 2), 3);
+  uint startWithLowerRes = min(max(0, steps / 2 - 2), 3);
 
   for (int i = 0; i < steps; i++)
   {
-    vec2 samplePos = max(2, min(rayStart + t * rayDir, vec2(push.width, push.height) - 2));
+    vec2 samplePos = max(vec2(2), min(rayStart + t * rayDir, vec2(push.width, push.height) - vec2(2)));
 
     // Find horizons at these steps:
     float sampleDepth = GetDepthSample(ivec2(samplePos), i > startWithLowerRes);
@@ -96,10 +96,11 @@ float horizonLoop(vec3 positionVS, vec3 V, vec2 rayStart, vec2 rayDir, float ray
 
     // Project sample onto the unit circle and compute the angle relative to V
     frontBackHorizon = vec2(dot(normalize(deltaPos), V), dot(normalize(deltaPosBackface), V));
-    frontBackHorizon = fastacos(frontBackHorizon);
+    frontBackHorizon.x = fastacos(frontBackHorizon.x);
+    frontBackHorizon.y = fastacos(frontBackHorizon.y);
 
     // Shift sample from V to normal, clamp in [0..1]
-    frontBackHorizon = saturate(((samplingDirection * -frontBackHorizon) - N + M_PI/2) / M_PI);
+    frontBackHorizon = clamp(((samplingDirection * -frontBackHorizon) - vec2(N) + M_PI/2) / M_PI, 0.f, 1.f);
 
     // Sampling direction inverts min/max angles
     frontBackHorizon = samplingDirection >= 0 ? frontBackHorizon.yx : frontBackHorizon.xy;
@@ -135,18 +136,20 @@ void main()
 
     vec3 dir = normalize(-vec3(vec2(position), i));
     vec3 sliceN = normalize(cross(vec3(dir.xy, 0.f), V));
-    vec3 projN = normal - sliceN * dot(normalVS, sliceN);
+    vec3 projN = normalVS - sliceN * dot(normalVS, sliceN);
     float projNLen = length(projN);
     float cosN = dot(projN / projNLen, V);
 
-    vec3 T = cross(V, sliceN)
+    vec2 rayStart = vec2(0.f);
+
+    vec3 T = cross(V, sliceN);
     float N = -sign(dot(projN, T)) * fastacos(cosN);
 
     vec2 maxHorizon;
 
     uint bitmask = 0u;
-    maxHorizon.x = horizonLoop(positionVS, V, rayStart, dir, 0, i, bitmask, N, 1, 0);
-    maxHorizon.y = HorizonLoop(positionVS, V, rayStart, -dir, 0, i, bitmask, N, -1, 0);
+    maxHorizon.x = horizonLoop(position, V, rayStart, vec2(dir), 0, i, bitmask, N, 1, 0);
+    maxHorizon.y = horizonLoop(position, V, rayStart, vec2(-dir), 0, i, bitmask, N, -1, 0);
 
     maxHorizon.x = -fastacos(maxHorizon.x);
     maxHorizon.y = fastacos(maxHorizon.y);
