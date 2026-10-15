@@ -12,6 +12,25 @@ layout(rgba16f, set = 2, binding = 0) uniform image2D image[];
 
 #include "../include/common.glsl"
 
+layout(set = 0, binding = 0) uniform GlobalUbo 
+{
+  mat4 projection;
+  mat4 view;
+  mat4 invView;
+  mat4 viewStat;
+  vec3 lightPos;
+  int numLights;
+  vec4 depthValues;
+  vec4 ambientLightColor; //RGB Intensity
+  PointLight pointLights[10];
+  int width;
+  int height;
+  float near;
+  float far;
+  mat4 lightSpaceMatrix[4];
+  int frameIndex;
+} ubo;
+
 layout(push_constant) uniform Push 
 {
   int frameIndex;
@@ -19,52 +38,98 @@ layout(push_constant) uniform Push
   int height;
 } push;
 
+// https://cybereality.com/screen-space-indirect-lighting-with-visibility-bitmask-improvement-to-gtao-ssao-real-time-ambient-occlusion-algorithm-glsl-shader-implementation/
+// https://cdrinmatane.github.io/posts/ssaovb-code/
+const uint sectorCount = 32u;
+uint updateSectors(float minHorizon, float maxHorizon, uint outBitfield) {
+    uint startBit = uint(minHorizon * float(sectorCount));
+    uint horizonAngle = uint(ceil((maxHorizon - minHorizon) * float(sectorCount)));
+    uint angleBit = horizonAngle > 0u ? uint(0xFFFFFFFFu >> (sectorCount - horizonAngle)) : 0u;
+    uint currentBitfield = angleBit << startBit;
+    return outBitfield | currentBitfield;
+}
+
+float vectorAngleXY(vec3 angled)
+{
+  vec3 xyPlane = vec3(1.f, 1.f, 0.f);
+
+  float num = dot(angled, xyPlane);
+  float dom = length(angled) * length(xyPlane);
+
+  return fastacos(num/dom);
+}
+
+// https://blog.demofox.org/2022/01/01/interleaved-gradient-noise-a-different-kind-of-low-discrepancy-sequence/
+float randf(int x, int y) {
+    return mod(52.9829189 * mod(0.06711056 * float(x) + 0.00583715 * float(y), 1.0), 1.0);
+}
+
 void main()
 {
   ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
-  vec3 normal = texelFetch(imageBuffers[nonuniformEXT(6 + push.frameIndex)], texelCoord, 0).rgb;
+  vec2 res = vec2(push.width, push.height);
+  vec3 normal = normalize(texelFetch(imageBuffers[nonuniformEXT(6 + push.frameIndex)], texelCoord, 0).rgb);
   float depth = texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], texelCoord, 0).r;
-  vec3 position = vec3(gl_GlobalInvocationID.xy, depth);
+  vec3 position = vec3(gl_GlobalInvocationID.xy/res, depth);
+  vec3 viewv = normalize(-position);
 
   float radius = 1.f;
 
   float thickness = 0.5f;
-  int bitmaskSize = 32;
-  int slices = 16;
-  int steps = 4;
+  int slices = 0;
+  int steps = 0;
 
   float stepSize = radius/(steps + 1);
   float occlusion = 0;
+
+  float sampleScale = (-radius * ubo.projection[0][0]) / position.z;
+  float sampleOffset = 0.01f;
+  vec2 aspect = vec2(push.height, push.width)/push.width;
+
+  float jitter = randf(texelCoord.x, texelCoord.y) - 0.5;
 
   for (int i = 0; i < slices; i++)
   {
     float sliceAngle = i * M_PI/slices;
 
     vec3 sliceDirection = vec3(cos(sliceAngle), sin(sliceAngle), 0.0);
-    float tangentAngle = atan(sliceDirection.x/sliceDirection.y);
+    float tangentAngle = vectorAngleXY(sliceDirection);
 
     uint bitmask = 0u;
+    float sliceProgress = 0;
     for (int j = 0; j < steps; j++)
     {
       uint localBitmask = 0u;
 
-      vec3 frontSample = vec3(position.xy, texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], texelCoord + ivec2(j + stepSize), 0).r);
+      float sStep = (j * stepSize + jitter);
+
+      ivec2 sampleCoords = ivec2(texelCoord - sStep * sampleScale * aspect);
+      vec3 samplePosition = vec3(sampleCoords/res, texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], sampleCoords, 0).r);
+
+      vec3 frontSample = samplePosition;
       vec3 backSample = frontSample - position/length(position) * thickness;
 
-      //min and max angles
+      float ang1 = vectorAngleXY(frontSample);
+      float ang2 = vectorAngleXY(backSample);
 
-      float a = ((minAng + M_PI/2)/M_PI)*bitmaskSize;
-      float b = ((maxAng - minAng  + M_PI/2)/M_PI)*bitmaskSize;
+      //vec2 frontBack = clamp((vec2(frontSample, backSample) + n + M_PI/2) / M_PI, 0.0, 1.0);
+      //min and max angles
+      float minAng = min(ang1, ang2);
+      float maxAng = max(ang1, ang2);
+
+      float a = floor(((minAng + M_PI/2)/M_PI)*sectorCount);
+      float b = ceil(((maxAng - minAng  + M_PI/2)/M_PI)*sectorCount);
 
       localBitmask = int(pow(2, int(b))) - 1 << int(a);
 
+      //sliceProgress += stepSize;
       bitmask |= localBitmask;
     }
 
-    occlusion += 1 - bitCount(bitmask)/bitmaskSize;
+    occlusion += 1 - bitCount(bitmask)/sectorCount;
   }
 
-  vec4 color = vec4(vec3(occlusion/slices), 1.f);
+  vec4 color = vec4(vec2(occlusion/slices), 0.f, 1.f);
 
   imageStore(image[nonuniformEXT(8 + push.frameIndex)], texelCoord, color);
 }
