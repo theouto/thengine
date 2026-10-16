@@ -46,6 +46,7 @@ namespace the
       createFromGltf();
     } else {
       meshes = builder.meshID;
+      std::cout << meshes << '\n';
   	  createVertexBuffers(builder.vertices);
   	  createIndexBuffers(builder.indices);
     }

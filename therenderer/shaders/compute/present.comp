@@ -62,7 +62,7 @@ void main()
 {
   ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
 
-  float depth = texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], texelCoord, 0).r;
+  //float depth = texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], texelCoord, 0).r;
 
   vec4 color = texelFetch(imageBuffers[nonuniformEXT(8 + push.frameIndex)], texelCoord, 0);
   //color = vec4(vec3(LinearizeDepth(depth) / ubo.far), 1.f);

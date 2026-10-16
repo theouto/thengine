@@ -260,8 +260,8 @@ void main()
   //https://www.youtube.com/watch?v=BFld4EBO2RE great video!
   vec3 lambda = exp(-0.0005f * currDepth * vec3(.5f, 1.f, 4.f));
 
-  vec4 diffuse = texture(storageSampler[nonuniformEXT(fRIDone[0])], UVs) * (vec4(diffuseLight, 0.0) * texture(storageSampler[nonuniformEXT(fRIDtwo[1])], UVs).r * fmodifiers[2] +
-                    vec4(0.01f, 0.01f, 0.02f, 0.f));
+  vec4 diffuse = texture(storageSampler[nonuniformEXT(fRIDone[0])], UVs) * (vec4(diffuseLight, 0.0) * texture(storageSampler[nonuniformEXT(fRIDtwo[1])], UVs).r * fmodifiers[2] *
+                 texelFetch(frameBuffers[nonuniformEXT(8 + ubo.frameIndex)], coords, 0).r + vec4(0.01f, 0.01f, 0.02f, 0.f));
 
   diffuse = vec4(lambda, 0.f) * diffuse + vec4((1 - lambda), 0.f) * vec4(0.1f, 0.1f, 0.3f, 0.f);
 

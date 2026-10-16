@@ -153,7 +153,7 @@ namespace the
 
         std::vector<uint32_t> meshMaterials;
         std::shared_ptr<TheBuffer> materialBuffer = nullptr;
-        VkDescriptorSet materialSet;
+        VkDescriptorSet materialSet{};
 
         std::shared_ptr<tinygltf3::Model> glTF = nullptr;
 
