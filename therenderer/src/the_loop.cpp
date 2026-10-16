@@ -82,13 +82,13 @@ namespace the
                           theRenderer.getSetLayout(3)->getDescriptorSetLayout()},
                           resourced[resourced.size() - 1]};
 
-    resourced.push_back(theRenderer.getNeededResources(TheSwapChain::COMP, TheSwapChain::SYNCED,
+    resourced.push_back(theRenderer.getNeededResources(TheSwapChain::GEOM, TheSwapChain::SYNCED,
                                             TheSwapChain::COLOR, TheSwapChain::NO_ADDITIONAL_DEPTH,
                                             theWindow.getExtent()));
 
-    ComputeSystem AO{theDevice, theRenderer.getFramePass(resourced[resourced.size() - 1][0]),
-                         defShaderPath + "AO.comp.spv", 
-                         {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
+    PlaneSystem AO{theDevice, theRenderer.getFramePass(resourced[resourced.size() - 1][0]),
+                        {defShaderPath + "AO.vert.spv", defShaderPath + "AO.frag.spv"},
+                        {theRenderer.getSetLayout(0)->getDescriptorSetLayout(),
                         theRenderer.getSetLayout(1)->getDescriptorSetLayout(),
                         theRenderer.getSetLayout(2)->getDescriptorSetLayout()}, resourced[resourced.size() - 1]};
 
@@ -182,7 +182,9 @@ namespace the
         normals.renderGameObjects(frameInfo);
         theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
 
+        theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, AO.getBufferIndex(), AO.getRenderPassIndex());
         AO.render(frameInfo);
+        theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
 
         theRenderer.beginSwapChainRenderPass(frameInfo.commandBuffer, render.getBufferIndex(), render.getRenderPassIndex());
         render.renderGameObjects(frameInfo);
