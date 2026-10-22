@@ -73,8 +73,8 @@ float randf(int x, int y) {
 
 float getDepthSample(ivec2 pos)
 {
-  return LinearizeDepth(texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], pos, 0).r, ubo.near, ubo.far);
-  //return texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], pos, 0).r;
+  //return LinearizeDepth(texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], pos, 0).r, ubo.near, ubo.far) / ubo.far;
+  return texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], pos, 0).r;
 }
 
 float getDepthSample(vec2 pos)
@@ -128,9 +128,7 @@ vec3 VSPositionFromDepth(ivec2 vTexCoord)
 
 vec3 posFromCoord(vec2 texCoord)
 {
-  vec3 position = vec3(texCoord, getDepthSample(texCoord));
-  //position.x = (position.x - 0.5);
-  //position.y = (0.5 - position.y);
+  vec3 position = vec3(texCoord * 2.0 - 1.0, getDepthSample(texCoord) * 2.0 - 1.0);
   return position;
 }
 
@@ -142,9 +140,24 @@ vec3 posFromCoord(ivec2 texCoord)
   return position;
 }
 
+//I fucking beg man
+//https://stackoverflow.com/a/32246825
+vec3 viewSpacePos(vec2 texUV)
+{
+    float z = getDepthSample(texUV) * 2.0 - 1.0;
+
+    vec4 clipSpacePosition = vec4(texUV * 2.0 - 1.0, z, 1.0);
+    vec4 viewSpacePosition = inverse(ubo.projection) * clipSpacePosition;
+
+    // Perspective division
+    viewSpacePosition /= viewSpacePosition.w;
+
+    return viewSpacePosition.xyz;
+}
+
 const float sampleRadius = 3.f;
-const float hitThickness = 0.25f;
-const uint sliceCount = 4;
+const float hitThickness = 1.f;
+const uint sliceCount = 8;
 const uint sampleCount = 4;
 
 //I give up
@@ -165,7 +178,7 @@ void main()
   vec2 frontBackHorizon = vec2(0.0);
   vec2 aspect = vec2(push.height, push.width) / push.width;
 
-  vec3 position = posFromCoord(texUV);
+  vec3 position = viewSpacePos(texUV);//posFromCoord(texUV);
 
   vec3 camera = normalize(-position);
   vec3 normal = getNormalSample(texUV);
@@ -194,10 +207,10 @@ void main()
     {
       float sampleStep = (currentSample + jitter) / sampleCount + sampleOffset;
 
-      ivec2 sampleCoord = ivec2(texelCoord - sampleStep * sampleScale * omega * aspect);
+      //ivec2 sampleCoord = ivec2(texelCoord - sampleStep * sampleScale * omega * aspect);
       vec2 sampleSpot = texUV - sampleStep * sampleScale * omega * aspect;
 
-      vec3 samplePosition = posFromCoord(sampleSpot);
+      vec3 samplePosition = viewSpacePos(sampleSpot);//posFromCoord(sampleSpot);
 
       //vec3 sampleNormal = getNormalSample(sampleSpot);
       //vec3 sampleLight = texture(screenLight, sampleUV).rgb;
