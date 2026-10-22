@@ -144,6 +144,7 @@ vec3 posFromCoord(ivec2 texCoord)
 //https://stackoverflow.com/a/32246825
 vec3 viewSpacePos(vec2 texUV)
 {
+    //TODO: modify so that I pass along the ivec2 with the texelCoords, and transform into texUV as needed
     float z = getDepthSample(texUV) * 2.0 - 1.0;
 
     vec4 clipSpacePosition = vec4(texUV * 2.0 - 1.0, z, 1.0);
@@ -180,6 +181,12 @@ void main()
 
   vec3 position = viewSpacePos(texUV);//posFromCoord(texUV);
 
+  if (position.z >= ubo.far - 4)
+  {
+    imageStore(image[nonuniformEXT(8 + push.frameIndex)], ivec2(texelCoord), vec4(1.f));
+    return;
+  }
+
   vec3 camera = normalize(-position);
   vec3 normal = getNormalSample(texUV);
 
@@ -188,7 +195,6 @@ void main()
   float sampleOffset = 0.01;
   float jitter = randf(int(texelCoord.x), int(texelCoord.y)) - 0.5;
 
-  
   for (float slice = 0.0; slice < sliceCount + 0.5; slice += 1.0) 
   {
     float phi = sliceRotation * (slice + jitter) + pi;
