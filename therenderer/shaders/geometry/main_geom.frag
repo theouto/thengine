@@ -254,8 +254,8 @@ void main()
   for (int i = 0; i < 4; i++) {if (depth < ubo.depthValues[i]) {image = i; break;}}
   if (image < 0) image = 3;
 
-  Lo += calculateSunLight(sun, surfaceNormal, UVs, viewDirection, F0, cameraPosWorld, image);
-  Lo += calculateLights(surfaceNormal, UVs, viewDirection, F0);
+  //Lo += calculateSunLight(sun, surfaceNormal, UVs, viewDirection, F0, cameraPosWorld, image);
+  //Lo += calculateLights(surfaceNormal, UVs, viewDirection, F0);
 
   //https://www.youtube.com/watch?v=BFld4EBO2RE great video!
   vec3 lambda = exp(-0.0005f * currDepth * vec3(.5f, 1.f, 4.f));
