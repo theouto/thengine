@@ -62,7 +62,7 @@ vec3 VSPositionFromDepth(vec2 vTexCoord)
     vec4 vProjectedPos = vec4(x, y, z, 1.0f);
 
     // Transform by the inverse projection matrix
-    vec4 vPositionVS = vProjectedPos * inverse(ubo.projection);
+    vec4 vPositionVS = vProjectedPos * (ubo.projection);
 
     // Divide by w to get the view-space position
     return vPositionVS.xyz / vPositionVS.w;
