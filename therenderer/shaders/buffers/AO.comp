@@ -70,7 +70,6 @@ float randf(int x, int y) {
 //I am aware that this does mean a subtle precision loss when sampling
 //the image buffer, but this is an acceptable tradeoff for an ambient occlusion buffer,
 //I just care about speed, and texelFetch is a LOT faster than sampling the texture
-
 float getDepthSample(ivec2 pos)
 {
   //return LinearizeDepth(texelFetch(imageBuffers[nonuniformEXT(4 + push.frameIndex)], pos, 0).r, ubo.near, ubo.far) / ubo.far;
@@ -93,58 +92,11 @@ vec3 getNormalSample(vec2 pos)
   return getNormalSample(ivec2(pos.x * ubo.width, pos.y * ubo.height));
 }
 
-//https://therealmjp.github.io/posts/reconstructing-position-from-depth/
-vec3 VSPositionFromDepth(vec2 vTexCoord)
-{
-    // Get the depth value for this pixel
-    float z = getDepthSample(vTexCoord);
-    // Get x/w and y/w from the viewport position
-    float x = vTexCoord.x * 2 - 1;
-    float y = (1 - vTexCoord.y) * 2 - 1;
-    vec4 vProjectedPos = vec4(x, y, z, 1.0f);
-
-    // Transform by the inverse projection matrix
-    vec4 vPositionVS = vProjectedPos * inverse(ubo.projection);
-
-    // Divide by w to get the view-space position
-    return vPositionVS.xyz / vPositionVS.w;
-}
-
-vec3 VSPositionFromDepth(ivec2 vTexCoord)
-{
-    // Get the depth value for this pixel
-    float z = getDepthSample(vTexCoord);
-    // Get x/w and y/w from the viewport position
-    float x = vTexCoord.x * 2 - 1;
-    float y = (1 - vTexCoord.y) * 2 - 1;
-    vec4 vProjectedPos = vec4(x, y, z, 1.0f);
-
-    // Transform by the inverse projection matrix
-    vec4 vPositionVS = vProjectedPos * inverse(ubo.projection);
-
-    // Divide by w to get the view-space position
-    return vPositionVS.xyz / vPositionVS.w;
-}
-
-vec3 posFromCoord(vec2 texCoord)
-{
-  vec3 position = vec3(texCoord * 2.0 - 1.0, getDepthSample(texCoord) * 2.0 - 1.0);
-  return position;
-}
-
-vec3 posFromCoord(ivec2 texCoord)
-{
-  vec3 position = vec3(texCoord, getDepthSample(texCoord));
-  position.x = (position.x - ubo.width/2);
-  position.y = (ubo.height/2 - position.y);
-  return position;
-}
 
 //I fucking beg man
 //https://stackoverflow.com/a/32246825
 vec3 viewSpacePos(vec2 texUV)
 {
-    //TODO: modify so that I pass along the ivec2 with the texelCoords, and transform into texUV as needed
     float z = getDepthSample(texUV) * 2.0 - 1.0;
 
     vec4 clipSpacePosition = vec4(texUV * 2.0 - 1.0, z, 1.0);
@@ -156,10 +108,25 @@ vec3 viewSpacePos(vec2 texUV)
     return viewSpacePosition.xyz;
 }
 
-const float sampleRadius = 3.f;
-const float hitThickness = 1.f;
-const uint sliceCount = 8;
-const uint sampleCount = 4;
+vec3 viewSpacePos(ivec2 texUV)
+{
+    float z = getDepthSample(texUV) * 2.0 - 1.0;
+
+    vec2 trutexUV = texUV/vec2(ubo.width, ubo.height);
+
+    vec4 clipSpacePosition = vec4(trutexUV * 2.0 - 1.0, z, 1.0);
+    vec4 viewSpacePosition = inverse(ubo.projection) * clipSpacePosition;
+
+    // Perspective division
+    viewSpacePosition /= viewSpacePosition.w;
+
+    return viewSpacePosition.xyz;
+}
+
+const float sampleRadius = 1.5f;
+const float hitThickness = 0.5f;
+const uint sliceCount = 4;
+const uint sampleCount = 8;
 
 //I give up
 //for now
@@ -179,7 +146,7 @@ void main()
   vec2 frontBackHorizon = vec2(0.0);
   vec2 aspect = vec2(push.height, push.width) / push.width;
 
-  vec3 position = viewSpacePos(texUV);//posFromCoord(texUV);
+  vec3 position = viewSpacePos(texelCoord);//posFromCoord(texUV);
 
   if (position.z >= ubo.far - 4)
   {
@@ -191,9 +158,9 @@ void main()
   vec3 normal = getNormalSample(texUV);
 
   float sliceRotation = twoPi / (sliceCount - 1.0);
-  float sampleScale = (-sampleRadius * ubo.projection[0][0]) / position.z;
+  float sampleScale = sampleRadius;//(-sampleRadius * ubo.projection[0][0]) / position.z;
   float sampleOffset = 0.01;
-  float jitter = randf(int(texelCoord.x), int(texelCoord.y)) - 0.5;
+  float jitter = randf(int(texelCoord.x), int(texelCoord.y));
 
   for (float slice = 0.0; slice < sliceCount + 0.5; slice += 1.0) 
   {
@@ -216,7 +183,9 @@ void main()
       //ivec2 sampleCoord = ivec2(texelCoord - sampleStep * sampleScale * omega * aspect);
       vec2 sampleSpot = texUV - sampleStep * sampleScale * omega * aspect;
 
-      vec3 samplePosition = viewSpacePos(sampleSpot);//posFromCoord(sampleSpot);
+      vec3 samplePosition = viewSpacePos(sampleSpot);
+      if (samplePosition.z >= ubo.far - 4) continue;
+
 
       //vec3 sampleNormal = getNormalSample(sampleSpot);
       //vec3 sampleLight = texture(screenLight, sampleUV).rgb;
@@ -242,7 +211,7 @@ void main()
 
   visibility /= sliceCount;
   //lighting /= sliceCount;
- 
+
   //visibility = 1 - visibility;
 
   vec4 color = vec4(vec3(visibility), 1.f);
