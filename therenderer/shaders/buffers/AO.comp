@@ -145,7 +145,7 @@ void main()
   vec3 normal = getNormalSample(texUV);
 
   float sliceRotation = twoPi / (sliceCount - 1.0);
-  float sampleScale = sampleRadius;//(sampleRadius * ubo.projection[0][0]) / position.z;
+  float sampleScale = (sampleRadius * ubo.projection[0][0]) / position.z;
   float sampleOffset = 0.01;
   float jitter = randIGN(int(texelCoord.x), int(texelCoord.y));
 
