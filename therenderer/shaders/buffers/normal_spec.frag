@@ -55,7 +55,7 @@ void main()
   vec3 cameraPosWorld = ubo.invView[3].xyz;
   vec3 viewDirection = normalize(cameraPosWorld - fragPosWorld);
 
-  surfaceNormal = perturb_normal(surfaceNormal, fragPosWorld, UVs);
+  if (fRID[2] != 0) surfaceNormal = perturb_normal(surfaceNormal, fragPosWorld, UVs);
 
   float spec = texture(textures[fRID[nonuniformEXT(1)]], UVs).r;
 
