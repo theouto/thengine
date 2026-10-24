@@ -80,3 +80,14 @@ mat4 rotateX(float angle)
   rotationMatrix[3] = vec4(0, 0, 0, 1);
   return rotationMatrix;
 }
+
+//https://blog.demofox.org/2022/01/01/interleaved-gradient-noise-a-different-kind-of-low-discrepancy-sequence/
+float randIGN(int x, int y)
+{
+    return mod(52.9829189 * mod(0.06711056 * float(x) + 0.00583715 * float(y), 1.0), 1.0);
+}
+
+float rand(vec2 co)
+{
+  return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}

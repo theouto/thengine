@@ -52,21 +52,6 @@ uint updateSectors(float minHorizon, float maxHorizon, uint outBitfield)
     return outBitfield | currentBitfield;
 }
 
-float vectorAngleXY(vec3 angled)
-{
-  vec3 xyPlane = vec3(1.f, 1.f, 0.f);
-
-  float num = dot(angled, xyPlane);
-  float dom = length(angled) * length(xyPlane);
-
-  return fastacos(num/dom);
-}
-
-// https://blog.demofox.org/2022/01/01/interleaved-gradient-noise-a-different-kind-of-low-discrepancy-sequence/
-float randf(int x, int y) {
-    return mod(52.9829189 * mod(0.06711056 * float(x) + 0.00583715 * float(y), 1.0), 1.0);
-}
-
 //I am aware that this does mean a subtle precision loss when sampling
 //the image buffer, but this is an acceptable tradeoff for an ambient occlusion buffer,
 //I just care about speed, and texelFetch is a LOT faster than sampling the texture
@@ -102,6 +87,8 @@ vec3 viewSpacePos(vec2 texUV)
     vec4 clipSpacePosition = vec4(texUV * 2.0 - 1.0, z, 1.0);
     vec4 viewSpacePosition = inverse(ubo.projection) * clipSpacePosition;
 
+    viewSpacePosition.y = -viewSpacePosition.y;
+
     // Perspective division
     viewSpacePosition /= viewSpacePosition.w;
 
@@ -116,6 +103,8 @@ vec3 viewSpacePos(ivec2 texUV)
 
     vec4 clipSpacePosition = vec4(trutexUV * 2.0 - 1.0, z, 1.0);
     vec4 viewSpacePosition = inverse(ubo.projection) * clipSpacePosition;
+
+    viewSpacePosition.y = -viewSpacePosition.y;
 
     // Perspective division
     viewSpacePosition /= viewSpacePosition.w;
@@ -158,7 +147,7 @@ void main()
   float sliceRotation = twoPi / (sliceCount - 1.0);
   float sampleScale = sampleRadius;//(sampleRadius * ubo.projection[0][0]) / position.z;
   float sampleOffset = 0.01;
-  float jitter = randf(int(texelCoord.x), int(texelCoord.y));
+  float jitter = randIGN(int(texelCoord.x), int(texelCoord.y));
 
   for (int slice = 0; slice < sliceCount; slice++) 
   {
@@ -178,9 +167,8 @@ void main()
     {
       float sampleStep = (currentSample + jitter) / sampleCount + sampleOffset;
 
-      //ivec2 sampleCoord = ivec2(texelCoord - sampleStep * sampleScale * omega * aspect);
       vec2 sampleSpot = texUV - sampleStep * sampleScale * omega * aspect;
-      sampleSpot.x += 0.12;//otherwise the ao looks offset
+      //sampleSpot.x += 0.12;//otherwise the ao looks offset
       sampleSpot = clamp(sampleSpot, vec2(0.001), vec2(0.999));
       vec3 samplePosition = viewSpacePos(sampleSpot);
 

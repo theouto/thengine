@@ -96,10 +96,6 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0, vec3 F90)
 
 //==============================================================================
 
-float rand(vec2 co) {
-  return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
-}
-
 float calculateRandPCF(float currentDepth, vec2 uv, int image)
 {
   float shadow = 0.f;
