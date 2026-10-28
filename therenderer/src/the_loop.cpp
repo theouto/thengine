@@ -203,6 +203,7 @@ namespace the
         theRenderer.endFrame();
       }
     }
-    vkDeviceWaitIdle(theDevice.device());
+    return;
+    //vkDeviceWaitIdle(theDevice.device());
   }
 };
