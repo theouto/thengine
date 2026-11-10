@@ -25,7 +25,7 @@ namespace the
     glm::vec3 lightPos{3.f, 2.f, 0.f};
     int numLights;
     glm::vec4 depthValues;
-	glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f }; //RGB Intensity
+	glm::vec4 ambientLightColor{ .5f, 0.5f, 1.f, .2f }; //RGB Intensity
 	PointLight pointLights[MAX_LIGHTS];
     int width;
     int height;

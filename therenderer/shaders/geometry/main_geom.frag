@@ -251,7 +251,7 @@ void main()
   if (image < 0) image = 3;
 
   //Lo += calculateSunLight(sun, surfaceNormal, UVs, viewDirection, F0, cameraPosWorld, image);
-  //Lo += calculateLights(surfaceNormal, UVs, viewDirection, F0);
+  Lo += calculateLights(surfaceNormal, UVs, viewDirection, F0);
 
   //https://www.youtube.com/watch?v=BFld4EBO2RE great video!
   vec3 lambda = exp(-0.0005f * currDepth * vec3(.5f, 1.f, 4.f));
@@ -260,7 +260,8 @@ void main()
 
   float ao = texelFetch(frameBuffers[nonuniformEXT(8 + ubo.frameIndex)], coords, 0).r;
 
-  diffuse = vec4(lambda, 0.f) * diffuse * ao + vec4((1 - lambda), 0.f) * vec4(0.1f, 0.1f, 0.3f, 0.f);
+  Lo *= ao;
+  diffuse = vec4(lambda, 0.f) * diffuse * pow(ao, 5) + vec4((1 - lambda), 0.f) * vec4(0.1f, 0.1f, 0.3f, 0.f);
 
   //outColor = vec4(vec3(truDepth)/ubo.far, 1.f);
   //outColor = vec4(fragPosWorld, 1.f);
