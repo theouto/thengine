@@ -18,7 +18,7 @@ materials/nerd.thmat
 teapotted
 models/utah_teapot.obj
 1
-materials/wet_rock.thmat
+materials/nerd.thmat
 0 1 3
 0.2 -0.5 0.3
 0 90 75
@@ -28,13 +28,13 @@ models/utah_teapot.obj
 1
 materials/wet_rock.thmat
 0 -1 3
-0.4 -0.4 0.4
+0.3 -0.3 0.3
 0 0 0
 -1
 teapotty
-models/utah_teapot.obj
+models/cube.obj
 1
-materials/wet_rock.thmat
+materials/nerd.thmat
 0 -0.8 -3
-0.4 -0.4 0.4
+1 -1 1
 0 0 0

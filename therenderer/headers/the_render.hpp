@@ -6,7 +6,10 @@
 #include "the_camera.hpp"
 #include "the_device.hpp"
 #include "the_swapchain.hpp"
+
 #include <vulkan/vulkan_core.h>
+
+#include <iostream>
 
 namespace the
 {

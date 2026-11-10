@@ -13,9 +13,9 @@ namespace the
     sets.resize(4);
 
     pools[0] = TheDescriptorPool::Builder(theDevice)
-            .setMaxSets(4)
+            .setMaxSets(400) //Big pool, need to improve resource management to not need a big pool
             .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10)
-            .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 256)
+            .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 4192)
             .build();
 
     pools[1] = TheDescriptorPool::Builder(theDevice)

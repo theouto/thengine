@@ -107,7 +107,6 @@ namespace the
     viewerObject.transform.translation.z = -1.5f;
 
     sceneManager.load("scenes/light_test.ths", *(theRenderer.theResources->pools[1]));
-
     theRenderer.loadMaterialInfo(sceneManager.handler().matBuffer());
 
     auto currentTime = std::chrono::high_resolution_clock::now();

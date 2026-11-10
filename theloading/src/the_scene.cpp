@@ -158,7 +158,6 @@ namespace the
       //std::cout << arr[i] << '\n';
     }
 
-    //for (int i = 0; i < arr.size(); i++) {object.textures[i] = arr[i];}
     object.transform.translation = translation;
     object.transform.rotation = rotation;
     object.transform.scale = scale;
