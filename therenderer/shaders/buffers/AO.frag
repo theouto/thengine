@@ -54,18 +54,19 @@ float getDepthSample(vec2 pos)
 
 vec3 VSPositionFromDepth(vec2 vTexCoord)
 {
-    // Get the depth value for this pixel
-    float z = getDepthSample(vTexCoord);
-    // Get x/w and y/w from the viewport position
-    float x = vTexCoord.x * 2 - 1;
-    float y = (1 - vTexCoord.y) * 2 - 1;
-    vec4 vProjectedPos = vec4(x, y, z, 1.0f);
+    float z = getDepthSample(vTexCoord) * 2.0 - 1.0;
 
-    // Transform by the inverse projection matrix
-    vec4 vPositionVS = vProjectedPos * (ubo.projection);
+    vec2 trutexUV = vTexCoord;
 
-    // Divide by w to get the view-space position
-    return vPositionVS.xyz / vPositionVS.w;
+    vec4 clipSpacePosition = vec4(trutexUV * 2.0 - 1.0, z, 1.0);
+    vec4 viewSpacePosition = inverse(ubo.projection) * clipSpacePosition;
+
+    viewSpacePosition.y = -viewSpacePosition.y;
+
+    // Perspective division
+    viewSpacePosition /= viewSpacePosition.w;
+
+    return viewSpacePosition.xyz;
 }
 
 // https://blog.demofox.org/2022/01/01/interleaved-gradient-noise-a-different-kind-of-low-discrepancy-sequence/
@@ -99,7 +100,7 @@ void main()
   vec3 normal = normalize(texture(imageBuffers[nonuniformEXT(6 + ubo.frameIndex)], texCoords).rgb);
 
   float sliceRotation = twoPi / (sliceCount - 1.0);
-  float sampleScale = (-sampleRadius * ubo.projection[0][0]) / position.z;
+  float sampleScale = (sampleRadius * ubo.projection[0][0]) / position.z;
   float sampleOffset = 0.01;
   float jitter = randf(int(texelCoord.x), int(texelCoord.y)) - 0.5;
 
