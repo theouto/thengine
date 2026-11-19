@@ -189,9 +189,7 @@ namespace the
         render.renderGameObjects(frameInfo);
         theRenderer.endSwapChainRenderPass(frameInfo.commandBuffer);
 
-        uboBuffers[frameInfo.frameIndex]->writeToBuffer(&ubo);
-        uboBuffers[frameInfo.frameIndex]->flush();
-        barrier.image = theRenderer.getImage(theRenderer.getFrameIndex() + theRenderer.getSwapChainImageCount());
+        frameInfo.barrier.image = theRenderer.getImage(compute.getBufferIndex() + theRenderer.getFrameIndex());
 
         compute.render(frameInfo);
  
